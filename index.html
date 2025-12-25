@@ -4,20 +4,85 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LIFF 測試</title>
+
+  <!-- LIFF SDK（一定要有） -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
-    body { font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; padding: 24px; }
-    .card { max-width: 520px; margin: 0 auto; border: 1px solid #ddd; border-radius: 14px; padding: 18px; }
-    .ok { font-size: 22px; font-weight: 700; }
-    .hint { color: #666; margin-top: 8px; line-height: 1.6; }
+    body {
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      padding: 24px;
+      background: #f6f6f6;
+    }
+    .card {
+      max-width: 520px;
+      margin: 0 auto;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 20px;
+      background: #fff;
+    }
+    .ok {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .hint {
+      color: #555;
+      line-height: 1.6;
+    }
+    .status {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #999;
+    }
   </style>
 </head>
+
 <body>
   <div class="card">
     <div class="ok">✅ LIFF 畫面成功打開</div>
     <div class="hint">
-      你看到這個畫面，就代表 Endpoint URL 正確、LINE 能載入你的頁面。<br>
-      下一步我們再加「月曆」跟「回傳日期到 Make」。
+      如果你是從 LINE 裡打開並看到這個畫面，代表：<br>
+      ✔ Endpoint URL 正確<br>
+      ✔ GitHub Pages 正常<br>
+      ✔ LIFF SDK 載入成功<br><br>
+      下一步我們會加上「月曆」與「回傳日期到 Make」。
     </div>
+    <div id="status" class="status">初始化中…</div>
   </div>
+
+  <script>
+    /*********************************************************
+     * ✨ 請把下面這一行換成你自己的 LIFF ID
+     *********************************************************/
+    const LIFF_ID = "2008631386-AEejMove";
+
+    async function initLIFF() {
+      const statusEl = document.getElementById("status");
+
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn()) {
+          statusEl.textContent = "尚未登入，導向 LINE 登入中…";
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+
+        statusEl.textContent =
+          "LIFF 初始化成功｜使用者：" + profile.displayName;
+        console.log("LIFF init success", profile);
+
+      } catch (err) {
+        statusEl.textContent = "❌ LIFF 初始化失敗，請檢查 LIFF ID";
+        console.error("LIFF init failed", err);
+      }
+    }
+
+    initLIFF();
+  </script>
 </body>
 </html>
