@@ -9,59 +9,17 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
-    body {
-      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-      padding: 24px;
-      background: #f4f6f8;
-    }
-    .card {
-      max-width: 520px;
-      margin: 0 auto;
-      border-radius: 14px;
-      padding: 20px;
-      background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .hint {
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: 600;
-    }
-    input[type="date"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-    .status {
-      margin-top: 16px;
-      font-size: 14px;
-      color: #333;
-      background: #f1f3f5;
-      padding: 10px;
-      border-radius: 10px;
-    }
-    .ok {
-      color: #1e7e34;
-      font-weight: 600;
-    }
-    hr {
-      margin: 20px 0;
-      border: none;
-      border-top: 1px solid #eee;
-    }
+    body { font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; padding:24px; background:#f4f6f8; }
+    .card { max-width:520px; margin:0 auto; background:#fff; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+    .title { font-size:22px; font-weight:700; margin-bottom:8px; }
+    .hint { color:#555; line-height:1.6; margin-bottom:16px; }
+    label { display:block; margin-top:12px; font-weight:600; }
+    input[type="date"] { width:100%; padding:10px; margin-top:8px; font-size:16px; border-radius:10px; border:1px solid #ccc; }
+    .status { margin-top:16px; font-size:14px; color:#333; background:#f1f3f5; padding:10px; border-radius:10px; }
+    .ok { color:#1e7e34; font-weight:600; }
+    button { width:100%; margin-top:16px; padding:12px; font-size:16px; border-radius:10px; border:none; background:#111; color:#fff; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    hr { margin:20px 0; border:none; border-top:1px solid #eee; }
   </style>
 </head>
 
@@ -82,52 +40,74 @@
 
     <label for="datePicker">選擇日期</label>
     <input id="datePicker" type="date">
-
     <div id="dateResult" class="status">尚未選擇日期</div>
+
+    <button id="sendBtn" disabled>送出日期到系統</button>
+    <div id="sendStatus" class="status"></div>
   </div>
 
   <script>
-    /*********************************************************
-     * 🔴 只需要改這一行
-     *********************************************************/
+    /************ 只改這兩行 ************/
     const LIFF_ID = "2008631386-AEejMove";
+    const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/kuwkwyhu9axcj37nj4yl2j4v52rlm726";
+    /***********************************/
 
     let userProfile = null;
+    let selectedDate = "";
 
     async function initLIFF() {
       const statusEl = document.getElementById("liffStatus");
-
       try {
         await liff.init({ liffId: LIFF_ID });
-
-        if (!liff.isLoggedIn()) {
-          statusEl.textContent = "尚未登入，導向 LINE 登入中…";
-          liff.login();
-          return;
-        }
-
+        if (!liff.isLoggedIn()) { liff.login(); return; }
         userProfile = await liff.getProfile();
-
-        statusEl.innerHTML =
-          `<span class="ok">LIFF 初始化成功</span><br>使用者：${userProfile.displayName}`;
-
+        statusEl.innerHTML = `<span class="ok">LIFF 初始化成功</span><br>使用者：${userProfile.displayName}`;
       } catch (err) {
         statusEl.textContent = "❌ LIFF 初始化失敗，請檢查 LIFF ID";
         console.error(err);
       }
     }
-
     initLIFF();
 
-    // 日期選擇事件
     const datePicker = document.getElementById("datePicker");
     const dateResult = document.getElementById("dateResult");
+    const sendBtn = document.getElementById("sendBtn");
+    const sendStatus = document.getElementById("sendStatus");
 
     datePicker.addEventListener("change", () => {
-      const date = datePicker.value;
-      if (!date) return;
+      selectedDate = datePicker.value;
+      if (!selectedDate) return;
+      dateResult.textContent = `你選擇的日期是：${selectedDate}`;
+      sendBtn.disabled = false;
+    });
 
-      dateResult.textContent = `你選擇的日期是：${date}`;
+    sendBtn.addEventListener("click", async () => {
+      if (!selectedDate || !userProfile) return;
+      sendBtn.disabled = true;
+      sendStatus.textContent = "送出中…";
+
+      try {
+        const payload = {
+          source: "liff",
+          date: selectedDate,
+          userId: userProfile.userId,
+          displayName: userProfile.displayName
+        };
+
+        const res = await fetch(MAKE_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Webhook failed");
+
+        sendStatus.innerHTML = `<span class="ok">已送出</span>（${selectedDate}）`;
+      } catch (e) {
+        console.error(e);
+        sendStatus.textContent = "❌ 送出失敗，請稍後再試";
+      } finally {
+        sendBtn.disabled = false;
+      }
     });
   </script>
 </body>
