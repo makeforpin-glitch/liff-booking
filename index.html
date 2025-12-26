@@ -19,6 +19,9 @@
       --danger:#b23a2b;
       --safeB: env(safe-area-inset-bottom, 0px);
       --safeT: env(safe-area-inset-top, 0px);
+      --warnBg:#fff7e6;
+      --warnBorder:rgba(192,122,0,.18);
+      --warnText:#7a4a00;
     }
 
     *{ box-sizing:border-box; }
@@ -49,14 +52,8 @@
       flex:0 0 auto;
     }
 
-    /* ✅ header title */
-    .title{
-      font-weight:900;
-      font-size:18px;
-      letter-spacing:.2px;
-      padding:2px 2px 8px;
-      text-align:left;
-    }
+    /* ✅ 1) 所有步驟 title 移除：保留 header title 也移除（若你要保留可把 display:none 拿掉） */
+    .title{ display:none; }
 
     .steps{
       display:flex;
@@ -114,15 +111,6 @@
       box-shadow:var(--shadow);
       padding:14px;
       overflow:hidden;
-    }
-
-    /* ✅ 2) 移除 step1/2/3 大標題：我們保留 class 但不使用 */
-    .h{
-      margin:0 0 8px;
-      font-weight:950;
-      font-size:26px;
-      letter-spacing:.2px;
-      line-height:1.12;
     }
 
     .sub{
@@ -187,7 +175,6 @@
       gap:6px;
       flex-wrap:wrap;
     }
-    /* ✅ 3) TAG 字型放大一點點 (10 -> 11) */
     .tag{
       padding:6px 9px;
       border-radius:999px;
@@ -199,7 +186,7 @@
       line-height:1;
     }
 
-    /* Step2 */
+    /* Step2 calendar */
     .step2Box{
       display:flex;
       flex-direction:column;
@@ -215,16 +202,15 @@
       background:#fff;
       flex:0 0 auto;
     }
-    /* ✅ 1) 壓縮月曆頭部，縮小月份字樣 */
     .calHead{
       display:grid;
-      grid-template-columns:42px 1fr 42px; /* 46 -> 42 */
+      grid-template-columns:42px 1fr 42px;
       gap:10px;
       align-items:center;
-      margin-bottom:6px; /* 8 -> 6 */
+      margin-bottom:6px;
     }
     .calBtn{
-      width:42px; height:42px;            /* 46 -> 42 */
+      width:42px; height:42px;
       border-radius:14px;
       border:1px solid rgba(0,0,0,.08);
       background:#fff;
@@ -234,19 +220,18 @@
       justify-content:center;
       cursor:pointer;
       user-select:none;
-      font-size:22px;                      /* 24 -> 22 */
+      font-size:22px;
       font-weight:950;
       color:#0d7a55;
     }
     .monthTitle{
       text-align:center;
       font-weight:950;
-      font-size:16px;                      /* ✅ 18 -> 16 */
+      font-size:16px;
       letter-spacing:.2px;
       line-height:1;
     }
 
-    /* 一排週日期 */
     .weekStrip{
       display:grid;
       grid-template-columns:repeat(7, minmax(0, 1fr));
@@ -298,7 +283,7 @@
       box-shadow:0 0 0 5px rgba(27,181,122,.14);
     }
 
-    /* slots area */
+    /* slots */
     .slotsArea{
       flex:1 1 auto;
       min-height:0;
@@ -333,7 +318,6 @@
       border-radius:999px;
     }
 
-    /* ✅ slotGrid 可在卡片內滾動，避免時段「消失」 */
     .slotGrid{
       flex:1 1 auto;
       min-height:0;
@@ -341,7 +325,7 @@
       grid-template-columns:repeat(4, 1fr);
       gap:10px;
       align-content:start;
-      overflow:auto;                 /* ✅ 關鍵：時段太多就捲這裡 */
+      overflow:auto;
       padding-right:2px;
       -webkit-overflow-scrolling:touch;
     }
@@ -374,12 +358,62 @@
       font-weight:900;
       font-size:12px;
       line-height:1.35;
-      background:#fff7e6;
-      border:1px solid rgba(192,122,0,.18);
+      background:var(--warnBg);
+      border:1px solid var(--warnBorder);
       border-radius:14px;
       padding:10px;
     }
     .warn .icon{ font-size:16px; line-height:1; }
+
+    /* Step3 confirm UI */
+    .confirmWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:4px 0 2px;
+      min-height:0;
+    }
+
+    .confirmTitle{
+      font-size:16px;
+      font-weight:950;
+      margin:2px 0 6px;
+      text-align:center;
+      color:#111;
+    }
+
+    .infoBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#f3f8f6;
+      padding:12px;
+      font-size:12px;
+      line-height:1.6;
+      font-weight:800;
+      color:#1f3b2f;
+    }
+    .infoLine b{ font-weight:950; }
+
+    .remindTitle{
+      width:100%;
+      font-weight:950;
+      font-size:12px;
+      color:#c07a00;
+      margin-top:2px;
+    }
+
+    .remindBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--warnBorder);
+      background:var(--warnBg);
+      padding:12px;
+      font-size:12px;
+      line-height:1.6;
+      font-weight:900;
+      color:var(--warnText);
+    }
 
     /* footer */
     .footer{
@@ -418,80 +452,9 @@
       min-height:18px;
     }
 
-    .statusError{
-      color:#b23a2b;
-      font-weight:950;
-    }
-
     .hide{ display:none !important; }
 
-    /* Step3 success page */
-    .successWrap{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:12px;
-      padding:8px 0 2px;
-    }
-    .successIcon{
-      width:56px; height:56px;
-      border-radius:999px;
-      background:#eaf8f2;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid rgba(27,181,122,.25);
-    }
-    .successIcon svg{ width:28px; height:28px; }
-    .successTitle{
-      font-size:16px;
-      font-weight:950;
-      margin:0;
-    }
-
-    .infoBox{
-      width:100%;
-      border-radius:16px;
-      border:1px solid rgba(0,0,0,.08);
-      background:#f3f8f6;
-      padding:12px;
-      font-size:12px;
-      line-height:1.6;
-      font-weight:800;
-      color:#1f3b2f;
-    }
-    .infoLine b{ font-weight:950; }
-
-    .remindTitle{
-      width:100%;
-      font-weight:950;
-      font-size:12px;
-      color:#c07a00;
-      margin-top:2px;
-    }
-
-    .remindBox{
-      width:100%;
-      border-radius:16px;
-      border:1px solid rgba(192,122,0,.18);
-      background:#fff7e6;
-      padding:12px;
-      font-size:12px;
-      line-height:1.6;
-      font-weight:800;
-      color:#7a4a00;
-    }
-
-    .miniNote{
-      font-size:11px;
-      color:#7a7a7a;
-      font-weight:800;
-      word-break:break-all;
-      margin-top:6px;
-    }
-
     @media (max-height:720px){
-      .title{ font-size:17px; }
       .chip{ font-size:17px; padding:13px 14px; }
       .dayCell{ min-height:60px; }
       .btn{ font-size:15px; padding:13px 10px; }
@@ -524,7 +487,7 @@
   <div class="main">
     <!-- Step 1 -->
     <div id="card1" class="card">
-      <!-- ✅ 2) 移除標題：不放 Step 1 大標 -->
+      <!-- ✅ 1) step title 已移除 -->
       <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
       <div id="coachRow" class="row"></div>
     </div>
@@ -532,7 +495,7 @@
     <!-- Step 2 -->
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
-        <!-- ✅ 2) 移除標題：不放 Step 2 大標 -->
+        <!-- ✅ 1) step title 已移除 -->
 
         <div class="coachIntro">
           <div class="avatar"><img id="coachAvatar2" alt="" /></div>
@@ -569,25 +532,20 @@
       </div>
     </div>
 
-    <!-- Step 3：成功頁 -->
+    <!-- Step 3：確認預約訊息 -->
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
-      <div class="successWrap">
-        <div class="successIcon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M20 6L9 17l-5-5" stroke="var(--primary)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <p class="successTitle">您已預約成功</p>
+      <div class="confirmWrap">
+        <!-- ✅ 3) 移除成功字樣/打勾，改成確認介面 -->
+        <div class="confirmTitle">請確認以下預約資訊</div>
 
-        <div class="infoBox" id="successInfo"></div>
+        <div class="infoBox" id="confirmInfo"></div>
 
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
-          1. 請提前 5 分鐘到場準備。<br/>
-          2. 若需取消/改期，請於開課前 1 小時完成。<br/>
-          3. 如有任何問題，請直接在 LINE 聊天室詢問我們。
-          <div class="miniNote" id="bookPayloadNote"></div>
+          1. 若需取消或改期，請於開課前 1 小時完成。<br/>
+          2. 如有任何問題，請於「支點運動空間官方line」聊天室聯繫我們。
         </div>
+        <!-- ✅ 4) 系統訊息已移除（不顯示灰字 payload） -->
       </div>
     </div>
   </div>
@@ -620,8 +578,6 @@
   ];
 
   const ROOM = { id:'room1', name:'場地' };
-
-  // 可自行改成你的收費邏輯
   const PRICE_TWD = 0;
 
   const state = {
@@ -632,8 +588,7 @@
     weekStart: null, // Monday
     dateKey: null,
     tab: 'am',
-    slot: null,
-    lastPayload: ''
+    slot: null
   };
 
   const $ = s => document.querySelector(s);
@@ -656,8 +611,7 @@
   const weekStrip=$('#weekStrip');
   const slotGrid2=$('#slotGrid2');
 
-  const successInfo=$('#successInfo');
-  const bookPayloadNote=$('#bookPayloadNote');
+  const confirmInfo=$('#confirmInfo');
 
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
@@ -672,9 +626,7 @@
   function monthYearLabel(ws){
     return `${ws.getMonth()+1}月 ${ws.getFullYear()}`;
   }
-  function dowLabel(idx){ // Monday=0
-    return ['一','二','三','四','五','六','日'][idx] || '';
-  }
+  function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
   function canBookNow(dateKey, timeStr){
     if(!dateKey || !timeStr) return false;
@@ -683,6 +635,10 @@
     const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
     const nowPlus1h = new Date(Date.now()+60*60*1000);
     return dt >= nowPlus1h;
+  }
+
+  function buildBookPayload(){
+    return `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot || ''} dur=60`;
   }
 
   function setStep(n){
@@ -697,46 +653,33 @@
 
     if(n===1){
       btnBack.classList.add('hide');
-      btnNext.classList.remove('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !state.coach;
-      status.classList.remove('statusError');
-      status.textContent = state.coach
-        ? `已選擇教練：${state.coach.name}`
-        : `${state.name || '您好'}，第一步請先選擇教練`;
+      status.textContent = state.coach ? `已選擇教練：${state.coach.name}` : `${state.name || '您好'}，請先選擇教練`;
     }
 
     if(n===2){
       btnBack.classList.remove('hide');
-      btnNext.classList.remove('hide');
-      btnNext.textContent='立即預約';
+      /* ✅ 2) step2 按鈕：立即預約 → 下一步 */
+      btnNext.textContent='下一步';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
-      status.classList.remove('statusError');
-      status.textContent = state.dateKey
-        ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}`
-        : '';
+      status.textContent = state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '';
     }
 
     if(n===3){
-      btnBack.classList.add('hide');
-      btnNext.classList.remove('hide');
-      btnNext.textContent='好的，前往聊天室';
-      btnNext.disabled = false;
-      status.classList.remove('statusError');
-      status.textContent = '✅ 已完成';
+      btnBack.classList.remove('hide');
+      /* ✅ 5) step3 下方按鈕：確認預約（送出關鍵字並關閉） */
+      btnNext.textContent='確認預約';
+      btnNext.disabled = !(state.coach && state.dateKey && state.slot);
 
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
         <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
         <div class="infoLine"><b>預約費用：</b>NT$${PRICE_TWD}</div>
       `;
-      successInfo.innerHTML = infoHTML;
+      confirmInfo.innerHTML = infoHTML;
 
-      if(state.lastPayload){
-        bookPayloadNote.textContent = `（系統訊息：${state.lastPayload}）`;
-      }else{
-        bookPayloadNote.textContent = '';
-      }
+      status.textContent = '';
     }
   }
 
@@ -750,7 +693,6 @@
         state.coach=c;
         renderCoaches();
         btnNext.disabled=false;
-        status.classList.remove('statusError');
         status.textContent = `已選擇教練：${c.name}`;
       };
       coachRow.appendChild(div);
@@ -805,7 +747,6 @@
         state.slot=null;
         renderWeekStrip();
         renderSlotsStep2();
-        status.classList.remove('statusError');
         status.textContent = `已選日期：${state.dateKey}`;
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
@@ -849,7 +790,6 @@
         if(disabled) return;
         state.slot=t;
         renderSlotsStep2();
-        status.classList.remove('statusError');
         status.textContent = `已選日期：${state.dateKey}｜已選時段：${state.slot}`;
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
@@ -871,10 +811,6 @@
     });
   }
 
-  function buildBookPayload(){
-    return `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot || ''} dur=60`;
-  }
-
   async function init(){
     await liff.init({ liffId: LIFF_ID });
     if(!liff.isLoggedIn()) liff.login();
@@ -892,54 +828,52 @@
 
     btnBack.onclick=()=>{
       if(state.step===2) setStep(1);
+      else if(state.step===3) setStep(2);
     };
 
     btnNext.onclick=async ()=>{
+      // Step1 -> Step2
       if(state.step===1){
         if(!state.coach) return;
         setStep(2);
         renderCoachIntro();
-        status.classList.remove('statusError');
         status.textContent = '';
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
         return;
       }
 
+      // Step2 -> Step3（只進確認頁，不送出）
       if(state.step===2){
+        if(!(state.coach && state.dateKey && state.slot)) return;
+        setStep(3);
+        return;
+      }
+
+      // Step3：確認預約 → 發送關鍵字並關閉 LIFF
+      if(state.step===3){
         if(!(state.coach && state.dateKey && state.slot)) return;
 
         const payload = buildBookPayload();
-        state.lastPayload = payload;
 
         btnNext.disabled = true;
-        status.classList.remove('statusError');
         status.textContent = '送出中…';
 
-        // ✅ 4) 不在 LINE 內：直接顯示 Step3（版面如圖2）
+        // 必須在 LINE 內才能 sendMessages
         if(!liff.isInClient()){
-          status.textContent = '（目前非 LINE 內開啟：已進入確認畫面）';
-          setStep(3);
+          status.textContent = '❌ 請在 LINE 內開啟後再確認預約';
+          btnNext.disabled = false;
           return;
         }
 
         try{
           await liff.sendMessages([{ type:'text', text: payload }]);
-          setStep(3);
-        }catch(e){
-          // ✅ 就算失敗，也進 Step3（版面仍是成功頁）
-          setStep(3);
-          status.classList.add('statusError');
-          status.textContent = '⚠️ 送出失敗（請確認在 LINE 內開啟）';
-        }
-        return;
-      }
-
-      if(state.step===3){
-        try{
+          // ✅ 送出後關閉
           liff.closeWindow();
         }catch(e){
-          // no-op
+          status.textContent = '❌ 送出失敗，請重試';
+          btnNext.disabled = false;
         }
+        return;
       }
     };
 
