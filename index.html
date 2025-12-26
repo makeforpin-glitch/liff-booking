@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>支點運動_私課預約</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
     :root{
       --bg:#f6f7f8;
@@ -12,9 +13,12 @@
       --text:#111;
       --muted:#7a7a7a;
       --primary:#1bb57a;
+      --primary2:#17a46f;
       --border:rgba(0,0,0,.08);
       --shadow:0 8px 22px rgba(0,0,0,.07);
       --radius:16px;
+      --soft:#f1f1f1;
+      --soft2:#eef7f3;
     }
     *{ box-sizing:border-box; }
     body{
@@ -31,6 +35,8 @@
       display:flex;
       flex-direction:column;
     }
+
+    /* Top */
     .top{
       position:sticky; top:0;
       background:linear-gradient(180deg, rgba(246,247,248,1) 70%, rgba(246,247,248,.0));
@@ -39,9 +45,10 @@
     }
     .title{
       font-weight:900;
-      font-size:18px;
+      font-size:20px;
       padding:2px 2px 10px;
-      text-align:center;
+      text-align:center; /* ✅ 置中 */
+      letter-spacing:.5px;
     }
     .steps{
       display:flex;
@@ -51,7 +58,7 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:999px;
-      padding:14px 16px; /* 放大 */
+      padding:10px 12px;
       box-shadow:var(--shadow);
     }
     .step{
@@ -61,68 +68,75 @@
       min-width:0;
     }
     .dot{
-      width:32px; height:32px; /* 放大 */
+      width:28px; height:28px;
       border-radius:999px;
       background:#e9f7f0;
       color:var(--primary);
       font-weight:900;
       display:flex; align-items:center; justify-content:center;
       flex:0 0 auto;
-      font-size:16px; /* 放大 */
     }
     .dot.active{
       background:var(--primary);
       color:#fff;
     }
     .label{
-      font-size:16px; /* 放大 */
+      font-size:14px;                 /* ✅ 放大 */
       color:var(--muted);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      font-weight:800;
     }
     .label.active{
       color:var(--text);
-      font-weight:800;
+      font-weight:950;
     }
 
+    /* Cards */
     .card{
       background:var(--card);
       margin:12px 14px 0;
       border-radius:var(--radius);
       border:1px solid var(--border);
       box-shadow:var(--shadow);
-      padding:14px;
+      padding:16px;
     }
     .h{
-      margin:0 0 12px;
-      font-weight:900;
-      font-size:18px; /* 放大 */
+      margin:0 0 10px;
+      font-weight:950;
+      font-size:22px;     /* ✅ Step 標題維持大 */
+      letter-spacing:.2px;
     }
     .sub{
-      margin:0 0 14px;
+      margin:0 0 12px;
       color:var(--muted);
-      font-size:16px; /* 放大 */
-      line-height:1.6; /* 放大 */
+      font-size:16px;     /* ✅ 其他 step 說明放大 */
+      line-height:1.7;
     }
+    /* ✅ 只有 Step1 那句說明稍微小一點 */
     #card1 .sub{
-  font-size:14px;   /* Step 1 說明：稍微小一點 */
-}
+      font-size:15px;
+      line-height:1.65;
+    }
 
+    /* Chips (coach) */
     .row{
       display:flex;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
     }
     .chip{
-      padding:12px 14px; /* 放大 */
-      border-radius:14px;
-      background:#f1f1f1;
-      font-weight:800;
-      font-size:16px; /* 放大 */
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--soft);
+      font-weight:950;
+      font-size:18px;     /* ✅ 放大 */
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
+      min-width:120px;
+      text-align:center;
     }
     .chip.sel{
       background:#dff4ea;
@@ -130,21 +144,141 @@
       outline:2px solid rgba(27,181,122,.35);
     }
 
-    .grid{
+    /* Calendar (Step2) */
+    .calHeader{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin:6px 0 12px;
+    }
+    .iconBtn{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--card);
+      font-weight:950;
+      font-size:20px;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .calTitle{
+      font-weight:950;
+      font-size:18px;
+      letter-spacing:.4px;
+      min-width:140px;
+      text-align:center;
+    }
+
+    .weekRow{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:10px;
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+      font-weight:900;
+      margin:0 2px 10px;
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:10px;
+      padding:2px;
+    }
+    .day{
+      height:46px;
+      border-radius:16px;
+      background:var(--soft);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:950;
+      cursor:pointer;
+      border:1px solid transparent;
+      position:relative;
+      font-size:16px;
+    }
+    .day.empty{
+      background:transparent;
+      cursor:default;
+      border:0;
+    }
+    .day.disabled{
+      opacity:.30;
+      pointer-events:none;
+    }
+
+    /* ✅ 選中的日期：大圓形突出（像醫療預約那種） */
+    .day.sel{
+      background:transparent;
+      border-color:transparent;
+    }
+    .day.sel::before{
+      content:"";
+      position:absolute;
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      background:var(--primary);
+      box-shadow:0 10px 22px rgba(27,181,122,.25);
+      z-index:0;
+    }
+    .day.sel span{
+      position:relative;
+      z-index:1;
+      color:#fff;
+    }
+
+    /* Step2: Tabs + Slots */
+    .tabs{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+      background:var(--soft2);
+      border:1px solid rgba(27,181,122,.18);
+      padding:8px;
+      border-radius:18px;
+    }
+    .tab{
+      flex:1;
+      padding:10px 10px;
+      border-radius:14px;
+      font-weight:950;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      color:var(--muted);
+      background:transparent;
+      border:1px solid transparent;
+      font-size:16px;
+    }
+    .tab.active{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 10px 20px rgba(27,181,122,.18);
+    }
+
+    .slotGrid{
       display:grid;
       grid-template-columns:repeat(3, 1fr);
       gap:10px;
+      margin-top:12px;
     }
     .slot{
-      padding:14px 10px; /* 放大 */
-      border-radius:14px;
-      background:#f1f1f1;
-      font-weight:900;
+      padding:14px 10px;
+      border-radius:16px;
+      background:var(--soft);
+      font-weight:950;
       text-align:center;
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
-      font-size:16px; /* 放大 */
+      font-size:16px;
     }
     .slot.sel{
       background:#dff4ea;
@@ -156,6 +290,7 @@
       pointer-events:none;
     }
 
+    /* Footer */
     .footer{
       margin-top:auto;
       position:sticky;
@@ -166,9 +301,9 @@
     .btn{
       width:100%;
       border:0;
-      border-radius:16px;
-      padding:16px; /* 放大 */
-      font-size:18px; /* 放大 */
+      border-radius:18px;
+      padding:16px;
+      font-size:18px;       /* ✅ 放大 */
       font-weight:950;
       background:var(--primary);
       color:#fff;
@@ -178,13 +313,21 @@
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
     .status{
       margin-top:10px;
-      font-size:14px; /* 放大 */
+      font-size:14px;       /* ✅ 放大 */
       color:var(--muted);
       text-align:center;
+      line-height:1.5;
     }
     .hide{ display:none; }
+    .note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
   </style>
 </head>
+
 <body>
 <div class="wrap">
   <div class="top">
@@ -205,23 +348,46 @@
     </div>
   </div>
 
+  <!-- Step 1 -->
   <div id="card1" class="card">
     <p class="h">Step 1｜選擇教練</p>
     <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
     <div id="coachRow" class="row"></div>
   </div>
 
+  <!-- Step 2 -->
   <div id="card2" class="card hide">
     <p class="h">Step 2｜選擇日期</p>
-    <p class="sub">顯示未來 7 天。今天只顯示「一小時後」的可預約時段。</p>
-    <div id="dateRow" class="row"></div>
+    <p class="sub">請先在月曆選日期；下方會立即顯示該日可預約時段（上午/下午/晚上）。</p>
+
+    <div class="calHeader">
+      <button id="prevM" class="iconBtn" aria-label="prev month">‹</button>
+      <div id="calTitle" class="calTitle">—</div>
+      <button id="nextM" class="iconBtn" aria-label="next month">›</button>
+    </div>
+
+    <div class="weekRow">
+      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+
+    <div id="calGrid" class="calGrid"></div>
+
+    <div class="tabs" style="margin-top:16px;">
+      <div id="tabAM" class="tab active">上午</div>
+      <div id="tabPM" class="tab">下午</div>
+      <div id="tabEV" class="tab">晚上</div>
+    </div>
+
+    <div id="slotGrid2" class="slotGrid"></div>
+
+    <div class="note">⚠️ 預約/取消需在開課前 1 小時完成。</div>
   </div>
 
+  <!-- Step 3 -->
   <div id="card3" class="card hide">
-    <p class="h">Step 3｜選擇時段</p>
-    <p class="sub">10:00–21:00（每小時一格）。</p>
-    <div id="slotGrid" class="grid"></div>
-    <p class="sub" style="margin-top:10px;">⚠️ 預約/取消需在開課前 1 小時完成。</p>
+    <p class="h">Step 3｜確認送出</p>
+    <p class="sub">確認資訊後按下「確認預約」，系統會把指令送回聊天室，由 Make 進行後續預約。</p>
+    <div class="note" id="confirmText">—</div>
   </div>
 
   <div class="footer">
@@ -234,21 +400,25 @@
   // ✅ 改成你的 LIFF ID
   const LIFF_ID = '2008631386-AEejMove';
 
-  // 先做 demo 教練（之後你要再換成你的教練名單）
+  // Demo 教練（之後換成你的教練名單）
   const COACHES = [
     { id:'coachA', name:'偉銘' },
     { id:'coachB', name:'教練 B' },
   ];
 
-  // 先做 demo 場地（你之後要多場地再擴充）
+  // Demo 場地
   const ROOM = { id:'room1', name:'場地' };
 
   const state = {
     step: 1,
     uid: '',
+    name: '',
     coach: null,
-    dateKey: null, // YYYY-MM-DD
-    slot: null     // HH:mm
+    dateKey: null,   // YYYY-MM-DD
+    slot: null,      // HH:mm
+    tab: 'AM',       // AM/PM/EV
+    calYear: new Date().getFullYear(),
+    calMonth: new Date().getMonth() // 0-11
   };
 
   const $ = s => document.querySelector(s);
@@ -256,26 +426,38 @@
   const dot1=$('#dot1'), dot2=$('#dot2'), dot3=$('#dot3');
   const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
   const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
-  const coachRow=$('#coachRow'), dateRow=$('#dateRow'), slotGrid=$('#slotGrid');
+  const coachRow=$('#coachRow');
+  const calGrid=$('#calGrid'), calTitle=$('#calTitle');
+  const slotGrid2=$('#slotGrid2');
+  const tabAM=$('#tabAM'), tabPM=$('#tabPM'), tabEV=$('#tabEV');
   const btn=$('#btn'), status=$('#status');
+  const confirmText=$('#confirmText');
 
   function setStep(n){
     state.step = n;
+
+    // dots
     [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
     [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
+
+    // cards
     card1.classList.toggle('hide', n!==1);
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
 
+    // button text + enable rules
     if(n===1){
       btn.textContent='下一步';
       btn.disabled = !state.coach;
+      status.textContent = `${state.name || '用戶'} 您好，第一步請先選擇教練`;
     }else if(n===2){
       btn.textContent='下一步';
-      btn.disabled = !state.dateKey;
+      btn.disabled = !(state.dateKey && state.slot);
+      status.textContent = '第二步請選日期，並在下方選擇時段（上午/下午/晚上）';
     }else{
       btn.textContent='確認預約';
-      btn.disabled = !state.slot;
+      btn.disabled = !(state.coach && state.dateKey && state.slot);
+      status.textContent = '第三步確認送出：按下「確認預約」即可回到聊天室';
     }
   }
 
@@ -290,6 +472,24 @@
     const dt=new Date(y,m-1,d);
     const wk='日一二三四五六'[dt.getDay()];
     return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}（${wk}）`;
+  }
+  function ymdFromParts(y, m0, d){
+    const mm = String(m0+1).padStart(2,'0');
+    const dd = String(d).padStart(2,'0');
+    return `${y}-${mm}-${dd}`;
+  }
+
+  // ✅ 只允許：未來7天內（含今天），且今天要符合「一小時後」才會在時段上顯示
+  function withinNext7Days(ymd){
+    const start = new Date();
+    start.setHours(0,0,0,0);
+    const end = new Date(start);
+    end.setDate(end.getDate()+6);
+
+    const [y,m,d]=ymd.split('-').map(Number);
+    const dt=new Date(y,m-1,d);
+    dt.setHours(0,0,0,0);
+    return dt >= start && dt <= end;
   }
 
   function renderCoaches(){
@@ -307,79 +507,174 @@
     });
   }
 
-  function renderDates(){
-    dateRow.innerHTML='';
-    const now=new Date();
-    for(let i=0;i<7;i++){
-      const d=new Date(now);
-      d.setDate(now.getDate()+i);
-      const ymd=fmtYMD(d);
+  function renderCalendar(){
+    const y = state.calYear;
+    const m0 = state.calMonth;
+
+    calTitle.textContent = `${y}年 ${String(m0+1).padStart(2,'0')}月`;
+
+    const first = new Date(y, m0, 1);
+    const firstDow = first.getDay(); // 0-6
+    const daysInMonth = new Date(y, m0+1, 0).getDate();
+
+    calGrid.innerHTML = '';
+
+    // leading empty
+    for(let i=0;i<firstDow;i++){
       const div=document.createElement('div');
-      div.className='chip'+(state.dateKey===ymd?' sel':'');
-      div.textContent=fmtLabel(ymd);
-      div.onclick=()=>{
-        state.dateKey=ymd;
-        state.slot=null;
-        renderDates();
-        renderSlots();
-        btn.disabled=false;
+      div.className='day empty';
+      calGrid.appendChild(div);
+    }
+
+    // days
+    for(let d=1; d<=daysInMonth; d++){
+      const ymd = ymdFromParts(y, m0, d);
+      const div=document.createElement('div');
+      div.className='day';
+
+      const ok = withinNext7Days(ymd);
+      if(!ok) div.classList.add('disabled');
+
+      // selected
+      if(state.dateKey===ymd) div.classList.add('sel');
+
+      const span=document.createElement('span');
+      span.textContent = d;
+      div.appendChild(span);
+
+      div.onclick = ()=>{
+        state.dateKey = ymd;
+        state.slot = null;      // 重新選時段
+        // 進入日期後：立即刷新時段
+        renderCalendar();
+        renderSlotsForSelectedDate();
+        // step2 的下一步需要 date+slot
+        btn.disabled = !(state.dateKey && state.slot);
       };
-      dateRow.appendChild(div);
+
+      calGrid.appendChild(div);
     }
   }
 
-  function genSlotsForDate(ymd){
-    const out=[];
-    for(let h=10; h<=21; h++){
-      out.push(String(h).padStart(2,'0')+':00');
-    }
-    const nowPlus1h=new Date(Date.now()+60*60*1000);
+  // Tabs
+  function setTab(t){
+    state.tab = t;
+    tabAM.classList.toggle('active', t==='AM');
+    tabPM.classList.toggle('active', t==='PM');
+    tabEV.classList.toggle('active', t==='EV');
+    renderSlotsForSelectedDate();
+  }
+
+  // 你可以把時段改成你實際要的（這裡先用 demo）
+  const SLOT_DEFS = {
+    AM: ['09:00','10:00','11:00'],
+    PM: ['13:00','14:00','15:00','16:00','17:00'],
+    EV: ['18:00','19:00','20:00','21:00']
+  };
+
+  // 一小時後規則：只對「今天」生效
+  function disabledByNowPlus1h(ymd, timeStr){
+    const nowPlus1h = new Date(Date.now()+60*60*1000);
     const [y,m,d]=ymd.split('-').map(Number);
-    return out.map(t=>{
-      const [hh,mm]=t.split(':').map(Number);
-      const dt=new Date(y,m-1,d,hh,mm,0);
-      return { t, disabled: dt < nowPlus1h };
-    });
+    const [hh,mm]=timeStr.split(':').map(Number);
+    const dt=new Date(y,m-1,d,hh,mm,0);
+    return dt < nowPlus1h;
   }
 
-  function renderSlots(){
-    slotGrid.innerHTML='';
+  function renderSlotsForSelectedDate(){
+    slotGrid2.innerHTML='';
+
     if(!state.dateKey){
-      slotGrid.innerHTML='<div style="grid-column:1/-1;color:#777;">請先選日期</div>';
+      slotGrid2.innerHTML = `<div style="grid-column:1/-1;color:#777;font-weight:800;">請先在月曆選擇日期</div>`;
       return;
     }
-    const slots=genSlotsForDate(state.dateKey);
-    slots.forEach(s=>{
+
+    const times = SLOT_DEFS[state.tab] || [];
+    if(times.length===0){
+      slotGrid2.innerHTML = `<div style="grid-column:1/-1;color:#777;font-weight:800;">此區段暫無可選時段</div>`;
+      return;
+    }
+
+    times.forEach(t=>{
       const div=document.createElement('div');
-      div.className='slot'+(s.disabled?' disabled':'')+(state.slot===s.t?' sel':'');
-      div.textContent=s.t;
-      div.onclick=()=>{
-        state.slot=s.t;
-        renderSlots();
-        btn.disabled=false;
+      const disabled = disabledByNowPlus1h(state.dateKey, t);
+
+      div.className = 'slot' + (disabled ? ' disabled':'') + (state.slot===t ? ' sel':'' );
+      div.textContent = t;
+
+      div.onclick = ()=>{
+        if(disabled) return;
+        state.slot = t;
+        renderSlotsForSelectedDate();
+        btn.disabled = !(state.dateKey && state.slot);
       };
-      slotGrid.appendChild(div);
+
+      slotGrid2.appendChild(div);
     });
+  }
+
+  // Calendar nav buttons
+  $('#prevM').onclick = ()=>{
+    const dt = new Date(state.calYear, state.calMonth-1, 1);
+    state.calYear = dt.getFullYear();
+    state.calMonth = dt.getMonth();
+    renderCalendar();
+  };
+  $('#nextM').onclick = ()=>{
+    const dt = new Date(state.calYear, state.calMonth+1, 1);
+    state.calYear = dt.getFullYear();
+    state.calMonth = dt.getMonth();
+    renderCalendar();
+  };
+
+  tabAM.onclick = ()=>setTab('AM');
+  tabPM.onclick = ()=>setTab('PM');
+  tabEV.onclick = ()=>setTab('EV');
+
+  function updateConfirm(){
+    const coachName = state.coach?.name ?? '-';
+    const dateLabel = state.dateKey ? fmtLabel(state.dateKey) : '-';
+    const timeLabel = state.slot ?? '-';
+    confirmText.textContent = `教練：${coachName}\n日期：${dateLabel}\n時段：${timeLabel}`;
+    confirmText.style.whiteSpace = 'pre-line';
+    confirmText.style.fontWeight = '900';
+    confirmText.style.fontSize = '16px';
+    confirmText.style.color = '#111';
   }
 
   async function init(){
+    // 讓網址列的標題更接近你要的（在 WebView / Safari 會吃 title）
+    document.title = '支點運動_私課預約';
+
     await liff.init({ liffId: LIFF_ID });
     if(!liff.isLoggedIn()) liff.login();
 
     const profile=await liff.getProfile();
     state.uid=profile.userId;
-    state.name = profile.displayName;
+    state.name=profile.displayName;
 
     renderCoaches();
-    renderDates();
-    renderSlots();
+    renderCalendar();
+    setTab('AM');
+    renderSlotsForSelectedDate();
 
-    status.textContent='請依序選擇教練 → 日期 → 時段';
+    // button flow
+    btn.onclick = async ()=>{
+      if(state.step===1){
+        setStep(2);
+        // 進到 step2 立即提示
+        return;
+      }
 
-    btn.onclick=async ()=>{
-      if(state.step===1){ setStep(2); return; }
-      if(state.step===2){ setStep(3); return; }
+      if(state.step===2){
+        // 需要日期+時段
+        if(!(state.dateKey && state.slot)) return;
+        updateConfirm();
+        setStep(3);
+        return;
+      }
 
+      // Step3：送回聊天室給 Make
       const text =
         `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot} dur=60`;
 
@@ -396,13 +691,11 @@
       }
     };
 
+    // 初始 step1 status
     setStep(1);
-    status.textContent = `${state.name} 您好，第一步請先選擇教練`;
   }
 
   init();
 </script>
 </body>
 </html>
-
-
