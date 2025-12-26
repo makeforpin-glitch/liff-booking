@@ -50,7 +50,7 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:999px;
-      padding:10px 12px;
+      padding:14px 16px; /* 放大 */
       box-shadow:var(--shadow);
     }
     .step{
@@ -60,20 +60,21 @@
       min-width:0;
     }
     .dot{
-      width:26px; height:26px;
+      width:32px; height:32px; /* 放大 */
       border-radius:999px;
       background:#e9f7f0;
       color:var(--primary);
       font-weight:900;
       display:flex; align-items:center; justify-content:center;
       flex:0 0 auto;
+      font-size:16px; /* 放大 */
     }
     .dot.active{
       background:var(--primary);
       color:#fff;
     }
     .label{
-      font-size:12px;
+      font-size:16px; /* 放大 */
       color:var(--muted);
       white-space:nowrap;
       overflow:hidden;
@@ -93,15 +94,15 @@
       padding:14px;
     }
     .h{
-      margin:0 0 10px;
+      margin:0 0 12px;
       font-weight:900;
-      font-size:15px;
+      font-size:18px; /* 放大 */
     }
     .sub{
-      margin:0 0 12px;
+      margin:0 0 14px;
       color:var(--muted);
-      font-size:12px;
-      line-height:1.4;
+      font-size:16px; /* 放大 */
+      line-height:1.6; /* 放大 */
     }
 
     .row{
@@ -110,11 +111,11 @@
       flex-wrap:wrap;
     }
     .chip{
-      padding:10px 12px;
+      padding:12px 14px; /* 放大 */
       border-radius:14px;
       background:#f1f1f1;
       font-weight:800;
-      font-size:13px;
+      font-size:16px; /* 放大 */
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
@@ -131,7 +132,7 @@
       gap:10px;
     }
     .slot{
-      padding:12px 10px;
+      padding:14px 10px; /* 放大 */
       border-radius:14px;
       background:#f1f1f1;
       font-weight:900;
@@ -139,6 +140,7 @@
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
+      font-size:16px; /* 放大 */
     }
     .slot.sel{
       background:#dff4ea;
@@ -161,8 +163,8 @@
       width:100%;
       border:0;
       border-radius:16px;
-      padding:14px;
-      font-size:16px;
+      padding:16px; /* 放大 */
+      font-size:18px; /* 放大 */
       font-weight:950;
       background:var(--primary);
       color:#fff;
@@ -172,7 +174,7 @@
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
     .status{
       margin-top:10px;
-      font-size:12px;
+      font-size:14px; /* 放大 */
       color:var(--muted);
       text-align:center;
     }
@@ -255,14 +257,12 @@
 
   function setStep(n){
     state.step = n;
-    // dots
     [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
     [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
-    // cards
     card1.classList.toggle('hide', n!==1);
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
-    // button label + enable rules
+
     if(n===1){
       btn.textContent='下一步';
       btn.disabled = !state.coach;
@@ -329,8 +329,6 @@
     for(let h=10; h<=21; h++){
       out.push(String(h).padStart(2,'0')+':00');
     }
-
-    // 一小時後規則：選今天就禁用太近的
     const nowPlus1h=new Date(Date.now()+60*60*1000);
     const [y,m,d]=ymd.split('-').map(Number);
     return out.map(t=>{
@@ -375,16 +373,9 @@
     status.textContent='請依序選擇教練 → 日期 → 時段';
 
     btn.onclick=async ()=>{
-      if(state.step===1){
-        setStep(2);
-        return;
-      }
-      if(state.step===2){
-        setStep(3);
-        return;
-      }
+      if(state.step===1){ setStep(2); return; }
+      if(state.step===2){ setStep(3); return; }
 
-      // Step 3：確認 → 送關鍵字到聊天室（後端你之後用同一個 LINE webhook scenario 處理）
       const text =
         `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot} dur=60`;
 
@@ -409,4 +400,3 @@
 </script>
 </body>
 </html>
-
