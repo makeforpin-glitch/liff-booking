@@ -25,10 +25,7 @@
     }
 
     *{ box-sizing:border-box; }
-    html, body{
-      height:100%;
-      overflow:hidden;
-    }
+    html, body{ height:100%; overflow:hidden; }
     body{
       margin:0;
       font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
@@ -52,7 +49,7 @@
       flex:0 0 auto;
     }
 
-    /* ✅ 不要最上方的「支點運動_私課預約」 */
+    /* 不要最上方「支點運動_私課預約」 */
     .title{ display:none; }
 
     .steps{
@@ -113,27 +110,15 @@
       overflow:hidden;
     }
 
-    /* ✅ 恢復每步驟標題 */
+    /* 2) Step 標題：縮小一點 + 統一靠左 */
     .h{
       margin:0 0 10px;
       font-weight:950;
-      font-size:34px;
+      font-size:22px;      /* 比之前再小一點 */
       letter-spacing:.2px;
-      line-height:1.05;
-      color:#111;
-    }
-    .h.small{
-      font-size:26px;
       line-height:1.1;
-      text-align:center;
-    }
-
-    .sub{
-      margin:0 0 10px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-      font-weight:700;
+      color:#111;
+      text-align:left;     /* 統一靠左 */
     }
 
     /* Step1 */
@@ -185,11 +170,7 @@
       margin:0 0 6px;
       line-height:1.1;
     }
-    .tags{
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-    }
+    .tags{ display:flex; gap:6px; flex-wrap:wrap; }
     .tag{
       padding:6px 9px;
       border-radius:999px;
@@ -457,18 +438,11 @@
       text-align:center;
       font-weight:800;
       min-height:18px;
+      white-space:pre-wrap;
     }
     .statusError{ color:var(--danger); font-weight:950; }
 
     .hide{ display:none !important; }
-
-    @media (max-height:720px){
-      .h{ font-size:30px; }
-      .chip{ font-size:17px; padding:13px 14px; }
-      .dayCell{ min-height:60px; }
-      .btn{ font-size:15px; padding:13px 10px; }
-      .monthTitle{ font-size:15px; }
-    }
   </style>
 </head>
 
@@ -487,8 +461,9 @@
         <div id="lab2" class="label">選日期</div>
       </div>
       <div class="step">
+        <!-- ✅ 5) 3 改成「確認」 -->
         <div id="dot3" class="dot">3</div>
-        <div id="lab3" class="label">完成</div>
+        <div id="lab3" class="label">確認</div>
       </div>
     </div>
   </div>
@@ -497,7 +472,10 @@
     <!-- Step 1 -->
     <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
-      <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
+
+      <!-- ✅ 1) 移除 Step1 的那段說明文字 -->
+      <!-- (不留任何 sub) -->
+
       <div id="coachRow" class="row"></div>
     </div>
 
@@ -541,17 +519,18 @@
       </div>
     </div>
 
-    <!-- Step 3：確認預約信息 -->
+    <!-- Step 3：確認預約訊息 -->
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
       <div class="confirmWrap">
-        <div class="h small">Step 3｜確認預約信息</div>
+        <div class="h">Step 3｜確認預約訊息</div>
 
         <div class="infoBox" id="confirmInfo"></div>
 
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
           1. 若需取消或改期，請於開課前 1 小時完成。<br/>
-          2. 如有任何問題，請於「支點運動空間」官方Line聯繫我們。
+          <!-- ✅ 3) 改成你指定的句子 -->
+          2. 如有任何問題，請於「支點運動空間」官方Line聯繫。
         </div>
       </div>
     </div>
@@ -591,7 +570,7 @@
     uid: '',
     name: '',
     coach: null,
-    weekStart: null, // Monday
+    weekStart: null,
     dateKey: null,
     tab: 'am',
     slot: null
@@ -625,13 +604,11 @@
   function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
   function weekStartMonday(d){
     const x = startOfDay(d);
-    const day = x.getDay(); // 0 Sun ... 6 Sat
+    const day = x.getDay();
     const diff = (day === 0 ? -6 : 1 - day);
     return addDays(x, diff);
   }
-  function monthYearLabel(ws){
-    return `${ws.getMonth()+1}月 ${ws.getFullYear()}`;
-  }
+  function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
   function canBookNow(dateKey, timeStr){
@@ -645,6 +622,22 @@
 
   function buildBookPayload(){
     return `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot || ''} dur=60`;
+  }
+
+  function setStatus(msg, isError=false){
+    status.classList.toggle('statusError', !!isError);
+    status.textContent = msg;
+  }
+
+  function envInfo(){
+    try{
+      const ctx = liff.getContext ? liff.getContext() : null;
+      const os = liff.getOS ? liff.getOS() : 'unknown';
+      const lang = liff.getLanguage ? liff.getLanguage() : 'unknown';
+      return `inClient=${liff.isInClient()} os=${os} lang=${lang} ctxType=${ctx?.type || 'unknown'} chatId=${ctx?.chatId ? 'yes' : 'no'}`;
+    }catch(e){
+      return `envInfo error`;
+    }
   }
 
   function setStep(n){
@@ -663,14 +656,14 @@
       btnBack.classList.add('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !state.coach;
-      status.textContent = state.coach ? `已選擇教練：${state.coach.name}` : `${state.name || '您好'}，請先選擇教練`;
+      setStatus(state.coach ? `已選擇教練：${state.coach.name}` : `${state.name || '您好'}，請選擇教練`);
     }
 
     if(n===2){
       btnBack.classList.remove('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
-      status.textContent = state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '';
+      setStatus(state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '');
     }
 
     if(n===3){
@@ -678,14 +671,13 @@
       btnNext.textContent='確認預約';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
 
-      // ✅ 2) Step3 移除預約費用（只顯示教練+時間）
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
         <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
 
-      status.textContent = '';
+      setStatus('');
     }
   }
 
@@ -699,7 +691,7 @@
         state.coach=c;
         renderCoaches();
         btnNext.disabled=false;
-        status.textContent = `已選擇教練：${c.name}`;
+        setStatus(`已選擇教練：${c.name}`);
       };
       coachRow.appendChild(div);
     });
@@ -753,7 +745,7 @@
         state.slot=null;
         renderWeekStrip();
         renderSlotsStep2();
-        status.textContent = `已選日期：${state.dateKey}`;
+        setStatus(`已選日期：${state.dateKey}`);
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
 
@@ -796,7 +788,7 @@
         if(disabled) return;
         state.slot=t;
         renderSlotsStep2();
-        status.textContent = `已選日期：${state.dateKey}｜已選時段：${state.slot}`;
+        setStatus(`已選日期：${state.dateKey}｜已選時段：${state.slot}`);
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
 
@@ -817,8 +809,46 @@
     });
   }
 
+  async function sendBookingMessage(payload){
+    // 方案 A：sendMessages（需要 LINE 內，且通常需要聊天上下文）
+    try{
+      await liff.sendMessages([{ type:'text', text: payload }]);
+      return { ok:true, method:'sendMessages' };
+    }catch(e){
+      return { ok:false, method:'sendMessages', error:e };
+    }
+  }
+
+  async function shareBookingMessage(payload){
+    // 方案 B：shareTargetPicker（讓使用者選要送的聊天室/群組）
+    try{
+      if(!liff.isApiAvailable('shareTargetPicker')){
+        return { ok:false, method:'shareTargetPicker', error:new Error('API_NOT_AVAILABLE') };
+      }
+      const res = await liff.shareTargetPicker([{ type:'text', text: payload }]);
+      // res 可能是 null（使用者取消）或 object
+      if(res === null) return { ok:false, method:'shareTargetPicker', error:new Error('USER_CANCEL') };
+      return { ok:true, method:'shareTargetPicker' };
+    }catch(e){
+      return { ok:false, method:'shareTargetPicker', error:e };
+    }
+  }
+
+  function errToText(e){
+    try{
+      if(!e) return 'unknown';
+      const name = e.name || '';
+      const message = e.message || '';
+      const code = e.code ? ` code=${e.code}` : '';
+      return `${name}${code} ${message}`.trim();
+    }catch(_){
+      return 'unknown';
+    }
+  }
+
   async function init(){
     await liff.init({ liffId: LIFF_ID });
+
     if(!liff.isLoggedIn()) liff.login();
 
     const profile = await liff.getProfile();
@@ -826,7 +856,6 @@
     state.name = profile.displayName || '您好';
 
     renderCoaches();
-
     state.weekStart = weekStartMonday(new Date());
     renderWeekStrip();
     bindTabs();
@@ -838,50 +867,68 @@
     };
 
     btnNext.onclick=async ()=>{
+      if(state.step===finalStepBeforeSend()){
+        // noop
+      }
+
       // Step1 -> Step2
       if(state.step===1){
         if(!state.coach) return;
         setStep(2);
         renderCoachIntro();
-        status.textContent = '';
+        setStatus('');
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
         return;
       }
 
-      // Step2 -> Step3（只進確認頁，不送出）
+      // Step2 -> Step3
       if(state.step===2){
         if(!(state.coach && state.dateKey && state.slot)) return;
         setStep(3);
         return;
       }
 
-      // Step3：確認預約 → 發送關鍵字並關閉 LIFF（回到聊天室）
+      // Step3：確認預約 → 送出訊息 → 關閉
       if(state.step===3){
         if(!(state.coach && state.dateKey && state.slot)) return;
 
         const payload = buildBookPayload();
 
         btnNext.disabled = true;
-        status.classList.remove('statusError');
-        status.textContent = '送出中…';
+        setStatus(`送出中…\n${envInfo()}`);
 
-        // ✅ 重點：LIFF 的 sendMessages 只能在「LINE App 內」成功
+        // 你說你在 LINE App 內，但仍失敗：這裡會把原因顯示出來
         if(!liff.isInClient()){
-          status.classList.add('statusError');
-          status.textContent = '❌ 請在 LINE 內開啟後再確認預約';
+          setStatus(`❌ 目前不是在 LINE 內開啟\n${envInfo()}`, true);
           btnNext.disabled = false;
           return;
         }
 
-        try{
-          await liff.sendMessages([{ type:'text', text: payload }]);
-          // 關閉 LIFF：使用者會回到原本的聊天室畫面
+        // A: sendMessages
+        const r1 = await sendBookingMessage(payload);
+        if(r1.ok){
+          // 成功就關閉回聊天室
           liff.closeWindow();
-        }catch(e){
-          status.classList.add('statusError');
-          status.textContent = '❌ 送出失敗，請重試';
-          btnNext.disabled = false;
+          return;
         }
+
+        // B: shareTargetPicker（備援）
+        const r2 = await shareBookingMessage(payload);
+        if(r2.ok){
+          liff.closeWindow();
+          return;
+        }
+
+        // 都失敗：顯示錯誤細節
+        const msg =
+          `❌ 送出失敗\n` +
+          `A(sendMessages): ${errToText(r1.error)}\n` +
+          `B(shareTargetPicker): ${errToText(r2.error)}\n` +
+          `${envInfo()}\n` +
+          `提示：請確認 LIFF 的 Channel 有啟用 Messaging API 並已連結 OA（LINE 官方帳號）。`;
+
+        setStatus(msg, true);
+        btnNext.disabled = false;
       }
     };
 
@@ -890,6 +937,8 @@
 
     setStep(1);
   }
+
+  function finalStepBeforeSend(){ return 3; }
 
   init();
 </script>
