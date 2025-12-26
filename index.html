@@ -24,7 +24,7 @@
       font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
       background:var(--bg);
       color:var(--text);
-      font-size:18px; /* 整體字放大 */
+      font-size:18px;
     }
     .wrap{
       max-width:560px;
@@ -43,7 +43,7 @@
     .title{
       font-weight:950;
       font-size:20px;
-      text-align:center; /* ✅ 置中 */
+      text-align:left;          /* ✅ 1) 標題靠左 */
       padding:4px 2px 12px;
     }
     .steps{
@@ -96,17 +96,16 @@
     .h{
       margin:0 0 10px;
       font-weight:950;
-      font-size:22px; /* Step 標題大 */
+      font-size:22px;
     }
 
-    /* ✅ Step 1 說明字稍微小一點（你要的效果） */
     .sub{
       margin:0 0 12px;
       color:var(--muted);
-      font-size:16px;  /* 其它 Step 說明維持較大 */
+      font-size:16px;
       line-height:1.6;
     }
-    #card1 .sub{ font-size:15px; } /* 只縮小 Step1 那行 */
+    #card1 .sub{ font-size:15px; }
 
     .row{ display:flex; gap:10px; flex-wrap:wrap; }
 
@@ -114,11 +113,13 @@
       padding:12px 14px;
       border-radius:14px;
       background:var(--chip);
-      font-weight:900;
+      font-weight:950;
       font-size:16px;
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
+      min-width:120px;
+      text-align:center;
     }
     .chip.sel{
       background:var(--chipSel);
@@ -126,7 +127,7 @@
       outline:2px solid rgba(27,181,122,.35);
     }
 
-    /* --- Step2: 教練小卡（大頭貼+標籤） --- */
+    /* Step2 教練資訊卡 */
     .coachCard{
       display:flex;
       gap:12px;
@@ -147,13 +148,10 @@
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
     .coachMeta{ flex:1; min-width:0; }
-    .coachNameLine{
-      display:flex; align-items:center; gap:8px;
-      margin-bottom:6px;
-    }
     .coachName{
       font-weight:950;
       font-size:18px;
+      margin-bottom:6px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -161,7 +159,7 @@
     .tags{ display:flex; flex-wrap:wrap; gap:6px; }
     .tag{
       font-size:12px;
-      font-weight:900;
+      font-weight:950;
       padding:6px 10px;
       border-radius:999px;
       background:#f2f7f5;
@@ -169,7 +167,7 @@
       border:1px solid rgba(27,181,122,.18);
     }
 
-    /* --- Step2: 週曆 --- */
+    /* 週曆 */
     .weekbar{
       display:flex;
       align-items:center;
@@ -219,16 +217,13 @@
     .wk{
       font-size:13px;
       color:#666;
-      font-weight:900;
+      font-weight:950;
     }
     .md{
       font-size:16px;
       font-weight:950;
       color:#111;
-      letter-spacing:.2px;
     }
-
-    /* ✅ 選中的日期：大圓形突出 */
     .dayCell.sel{
       border-color:rgba(27,181,122,.35);
       outline:2px solid rgba(27,181,122,.35);
@@ -246,7 +241,7 @@
     }
     .dayCell.sel .wk, .dayCell.sel .md{ position:relative; z-index:1; }
 
-    /* --- Step3: 上午/下午/晚上 tabs + slots --- */
+    /* Step3 tabs + slots */
     .tabs{
       display:flex;
       gap:10px;
@@ -272,7 +267,6 @@
       background:var(--primary);
       color:#fff;
     }
-
     .grid{
       display:grid;
       grid-template-columns:repeat(3, 1fr);
@@ -306,6 +300,8 @@
       padding:12px 14px 16px;
       background:linear-gradient(0deg, rgba(246,247,248,1) 60%, rgba(246,247,248,.0));
     }
+
+    /* ✅ Step1 時只顯示一顆滿版按鈕 */
     .btnRow{
       display:flex;
       gap:10px;
@@ -331,6 +327,12 @@
     }
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
 
+    /* 控制 Step1 上一步不佔空間 */
+    .hideBtn{ display:none !important; }
+
+    /* 讓 Step1 的 Next 變滿版 */
+    .fullWidth{ width:100%; }
+
     .status{
       margin-top:10px;
       font-size:14px;
@@ -338,6 +340,14 @@
       text-align:center;
     }
     .hide{ display:none; }
+
+    /* Step1 沒教練時提示 */
+    .emptyHint{
+      color:#666;
+      font-size:14px;
+      line-height:1.6;
+      padding:10px 0 0;
+    }
   </style>
 </head>
 <body>
@@ -365,26 +375,23 @@
     <p class="h">Step 1｜選擇教練</p>
     <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
     <div id="coachRow" class="row"></div>
+    <div id="coachEmpty" class="emptyHint hide">目前沒有教練清單（COACHES 為空），請先填入教練資料。</div>
   </div>
 
   <!-- STEP 2 -->
   <div id="card2" class="card hide">
     <p class="h">Step 2｜選擇日期</p>
 
-    <!-- ✅ 教練資訊卡：在 Step2 下面（你要的） -->
     <div id="coachInfo" class="coachCard">
       <div class="avatar">
         <img id="coachAvatar" alt="coach avatar" src="" />
       </div>
       <div class="coachMeta">
-        <div class="coachNameLine">
-          <div id="coachName" class="coachName">—</div>
-        </div>
+        <div id="coachName" class="coachName">—</div>
         <div id="coachTags" class="tags"></div>
       </div>
     </div>
 
-    <!-- ✅ 週曆：本週一～週日 + 左右箭頭切週 -->
     <div class="weekbar">
       <button id="prevWeek" class="navBtn" aria-label="prev">‹</button>
       <div id="weekTitle" class="weekTitle">—</div>
@@ -422,22 +429,22 @@
   // ✅ 改成你的 LIFF ID
   const LIFF_ID = '2008631386-AEejMove';
 
-  // Demo 教練：你可以改成真名/大頭貼/標籤
+  // ✅ Demo 教練（你可改成真名/大頭貼/標籤）
   const COACHES = [
     {
       id:'coachA',
       name:'偉銘',
-      avatar:'https://i.imgur.com/8Km9tLL.png', // 可換成你的圖
-      tags:['肌力','體能','青少年','樂齡']'    },
+      avatar:'https://i.imgur.com/8Km9tLL.png',
+      tags:['肌力訓練','姿勢調整','初學友善']
+    },
     {
       id:'coachB',
       name:'教練 B',
-      avatar:'https://i.imgur.com/4ZQZ4ZB.png', // 可換成你的圖
-      tags:['體能','減脂','拳擊']
+      avatar:'https://i.imgur.com/4ZQZ4ZB.png',
+      tags:['體能訓練','減脂','銀髮友善']
     },
   ];
 
-  // 你後端要用的場地資訊（可先保留）
   const ROOM = { id:'room1', name:'場地' };
 
   const state = {
@@ -445,10 +452,10 @@
     uid: '',
     name: '',
     coach: null,
-    weekStart: null, // Date (Monday)
-    dateKey: null,   // YYYY-MM-DD
-    tab: 'AM',       // AM/PM/EV
-    slot: null       // HH:mm
+    weekStart: null,
+    dateKey: null,
+    tab: 'AM',
+    slot: null
   };
 
   const $ = s => document.querySelector(s);
@@ -458,8 +465,9 @@
   const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
 
   const coachRow=$('#coachRow');
-  const coachAvatar=$('#coachAvatar'), coachName=$('#coachName'), coachTags=$('#coachTags');
+  const coachEmpty=$('#coachEmpty');
 
+  const coachAvatar=$('#coachAvatar'), coachName=$('#coachName'), coachTags=$('#coachTags');
   const weekTitle=$('#weekTitle'), weekGrid=$('#weekGrid');
   const prevWeek=$('#prevWeek'), nextWeek=$('#nextWeek');
 
@@ -469,21 +477,14 @@
   const btnPrev=$('#btnPrev'), btnNext=$('#btnNext'), status=$('#status');
 
   function pad2(n){ return String(n).padStart(2,'0'); }
-  function fmtYMD(d){
-    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  }
-  function parseYMD(ymd){
-    const [y,m,dd]=ymd.split('-').map(Number);
-    return new Date(y, m-1, dd);
-  }
-  function wkChar(d){
-    return '日一二三四五六'[d.getDay()];
-  }
+  function fmtYMD(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function parseYMD(ymd){ const [y,m,dd]=ymd.split('-').map(Number); return new Date(y, m-1, dd); }
+  function wkChar(d){ return '日一二三四五六'[d.getDay()]; }
 
   function startOfWeekMonday(date){
     const d = new Date(date);
-    const day = d.getDay(); // 0 Sun ... 6 Sat
-    const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+    const day = d.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
     d.setDate(d.getDate() + diff);
     d.setHours(0,0,0,0);
     return d;
@@ -492,6 +493,17 @@
     const d=new Date(date);
     d.setDate(d.getDate()+n);
     return d;
+  }
+
+  /* ✅ Step1 上一步不顯示、不佔空間；Next 變滿版 */
+  function applyFooterLayout(){
+    if(state.step===1){
+      btnPrev.classList.add('hideBtn');   // ✅ 完全消失
+      btnNext.classList.add('fullWidth'); // ✅ 下一步滿版
+    }else{
+      btnPrev.classList.remove('hideBtn');
+      btnNext.classList.remove('fullWidth');
+    }
   }
 
   function setStep(n){
@@ -504,28 +516,33 @@
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
 
-    // 上一步按鈕：Step1 隱藏
-    btnPrev.style.visibility = (n===1) ? 'hidden' : 'visible';
-
-    // 下一步按鈕文字
     if(n===1) btnNext.textContent='下一步';
     if(n===2) btnNext.textContent='下一步';
     if(n===3) btnNext.textContent='確認預約';
 
-    // enable rules
     if(n===1) btnNext.disabled = !state.coach;
     if(n===2) btnNext.disabled = !state.dateKey;
     if(n===3) btnNext.disabled = !state.slot;
 
-    // ✅ 底部提示文字跟著 step 切換
+    // ✅ 底部文字：每一步都正確顯示
     if(n===1) status.textContent = `${state.name || '用戶'} 您好，第一步請先選擇教練`;
-    if(n===2) status.textContent = `已選擇 ${state.coach?.name || '教練'}，第二步請選擇日期`;
+    if(n===2) status.textContent = `第二步請選擇日期（已選：${state.coach?.name || '教練'}）`;
     if(n===3) status.textContent = `第三步請選擇時段（上午/下午/晚上）`;
+
+    applyFooterLayout();
   }
 
   /* ---------- Step 1: Coaches ---------- */
   function renderCoaches(){
     coachRow.innerHTML='';
+
+    if(!Array.isArray(COACHES) || COACHES.length===0){
+      coachEmpty.classList.remove('hide');
+      return;
+    }else{
+      coachEmpty.classList.add('hide');
+    }
+
     COACHES.forEach(c=>{
       const div=document.createElement('div');
       div.className='chip'+(state.coach?.id===c.id?' sel':'');
@@ -550,7 +567,7 @@
     coachName.textContent = state.coach.name;
 
     coachTags.innerHTML='';
-    (state.coach.tags || []).slice(0,4).forEach(t=>{
+    (state.coach.tags || []).slice(0,6).forEach(t=>{
       const span=document.createElement('span');
       span.className='tag';
       span.textContent=t;
@@ -566,14 +583,9 @@
   }
 
   function withinBookingWindow(dateObj){
-    // ✅ 只允許：一小時後～未來7天（含）
-    const nowPlus1h = new Date(Date.now() + 60*60*1000);
     const end = new Date();
     end.setDate(end.getDate() + 7);
     end.setHours(23,59,59,999);
-
-    // dateObj 是某天 00:00，這裡只判斷日期範圍
-    // 若選今天，時段會在 Step3 依「一小時後」禁用
     return dateObj <= end;
   }
 
@@ -584,6 +596,7 @@
     for(let i=0;i<7;i++){
       const d = addDays(state.weekStart, i);
       const ymd = fmtYMD(d);
+
       const cell = document.createElement('div');
       cell.className = 'dayCell' + (state.dateKey===ymd ? ' sel' : '');
 
@@ -598,7 +611,6 @@
       cell.appendChild(w);
       cell.appendChild(md);
 
-      // ✅ 允許點選（你後續可改成：必須真的有可預約才可點）
       const inRange = withinBookingWindow(d);
       if(!inRange){
         cell.style.opacity = '.35';
@@ -609,7 +621,7 @@
         state.dateKey = ymd;
         state.slot = null;
         renderWeekGrid();
-        renderSlots();      // 選日期後，下面立即刷新時段
+        renderSlots();
         btnNext.disabled = false;
       };
 
@@ -641,7 +653,6 @@
   tabEV.onclick=()=>setTab('EV');
 
   function slotsByTab(tab){
-    // 你可自行調整區間/顆粒
     if(tab==='AM') return ['10:00','11:00','12:00'];
     if(tab==='PM') return ['13:00','14:00','15:00','16:00','17:00'];
     return ['18:00','19:00','20:00','21:00'];
@@ -656,7 +667,7 @@
     return slotsByTab(state.tab).map(t=>{
       const [hh,mm] = t.split(':').map(Number);
       const dt = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0);
-      const disabled = dt < nowPlus1h; // ✅ 一小時後限制（選今天會禁用太近）
+      const disabled = dt < nowPlus1h;
       return { t, disabled };
     });
   }
@@ -668,7 +679,6 @@
       return;
     }
     const slots = genSlotsForSelectedDate();
-
     if(slots.length===0){
       slotGrid.innerHTML='<div style="grid-column:1/-1;color:#777;">此日無可預約時段</div>';
       return;
@@ -695,25 +705,21 @@
 
   btnNext.onclick=async ()=>{
     if(state.step===1){
-      // 進 Step2
       if(!state.coach) return;
       renderCoachInfo();
-      if(!state.weekStart) state.weekStart = startOfWeekMonday(new Date());
       renderWeekGrid();
       setStep(2);
       return;
     }
 
     if(state.step===2){
-      // 進 Step3
       if(!state.dateKey) return;
-      setTab('AM'); // 進入預設上午
+      setTab('AM');
       renderSlots();
       setStep(3);
       return;
     }
 
-    // Step3：送關鍵字到聊天室（你後端 Make 用 LINE webhook 接）
     if(!state.slot) return;
 
     const text =
@@ -733,17 +739,33 @@
   };
 
   async function init(){
-    await liff.init({ liffId: LIFF_ID });
-    if(!liff.isLoggedIn()) liff.login();
+    try{
+      status.textContent='載入中…';
 
-    const profile=await liff.getProfile();
-    state.uid=profile.userId;
-    state.name=profile.displayName || '';
+      await liff.init({ liffId: LIFF_ID });
 
-    state.weekStart = startOfWeekMonday(new Date());
+      if(!liff.isLoggedIn()){
+        // 在 LINE 外開啟會走 login，避免卡住
+        liff.login();
+        return;
+      }
 
-    renderCoaches();
-    setStep(1);
+      const profile=await liff.getProfile();
+      state.uid=profile.userId;
+      state.name=profile.displayName || '';
+
+      state.weekStart = startOfWeekMonday(new Date());
+
+      renderCoaches();
+      setStep(1);
+
+    }catch(err){
+      console.error(err);
+      status.textContent = '❌ 初始化失敗：請確認用 LINE 內開啟，或 LIFF ID 是否正確';
+      // 就算失敗，也讓頁面可操作（至少看到教練列表）
+      renderCoaches();
+      setStep(1);
+    }
   }
 
   init();
