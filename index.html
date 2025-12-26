@@ -22,6 +22,7 @@
       font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
       background:var(--bg);
       color:var(--text);
+      font-size:17px;
     }
     .wrap{
       max-width:520px;
@@ -181,7 +182,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="title">私課預約</div>
+    <div class="title">支點運動_私課預約</div>
     <div class="steps">
       <div class="step">
         <div id="dot1" class="dot active">1</div>
@@ -365,6 +366,7 @@
 
     const profile=await liff.getProfile();
     state.uid=profile.userId;
+    state.name = profile.displayName;
 
     renderCoaches();
     renderDates();
@@ -394,7 +396,7 @@
         status.textContent='✅ 已送出，回到聊天室處理預約…';
         setTimeout(()=>liff.closeWindow(), 600);
       }catch(e){
-        status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
+        status.textContent = `${state.name} 您好，私課預約第一步請先選擇教練`;
         btn.disabled=false;
       }
     };
@@ -407,3 +409,4 @@
 </script>
 </body>
 </html>
+
