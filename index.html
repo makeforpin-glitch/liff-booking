@@ -49,7 +49,7 @@
       flex:0 0 auto;
     }
 
-    /* ✅ 附圖1：整體字體縮一階 */
+    /* ✅ header title */
     .title{
       font-weight:900;
       font-size:18px;
@@ -116,7 +116,7 @@
       overflow:hidden;
     }
 
-    /* ✅ 附圖1：Step 標題不要太巨大 */
+    /* ✅ 2) 移除 step1/2/3 大標題：我們保留 class 但不使用 */
     .h{
       margin:0 0 8px;
       font-weight:950;
@@ -187,19 +187,19 @@
       gap:6px;
       flex-wrap:wrap;
     }
-    /* ✅ 2. TAG 再縮小 */
+    /* ✅ 3) TAG 字型放大一點點 (10 -> 11) */
     .tag{
-      padding:6px 8px;
+      padding:6px 9px;
       border-radius:999px;
       background:#eaf8f2;
       border:1px solid rgba(27,181,122,.22);
       color:#157a55;
       font-weight:900;
-      font-size:10px;
+      font-size:11px;
       line-height:1;
     }
 
-    /* ✅ Step2：改成附圖2 的結構（月份+一排週日期） */
+    /* Step2 */
     .step2Box{
       display:flex;
       flex-direction:column;
@@ -215,15 +215,16 @@
       background:#fff;
       flex:0 0 auto;
     }
+    /* ✅ 1) 壓縮月曆頭部，縮小月份字樣 */
     .calHead{
       display:grid;
-      grid-template-columns:46px 1fr 46px;
+      grid-template-columns:42px 1fr 42px; /* 46 -> 42 */
       gap:10px;
       align-items:center;
-      margin-bottom:8px;
+      margin-bottom:6px; /* 8 -> 6 */
     }
     .calBtn{
-      width:46px; height:46px;
+      width:42px; height:42px;            /* 46 -> 42 */
       border-radius:14px;
       border:1px solid rgba(0,0,0,.08);
       background:#fff;
@@ -233,19 +234,19 @@
       justify-content:center;
       cursor:pointer;
       user-select:none;
-      font-size:24px;
+      font-size:22px;                      /* 24 -> 22 */
       font-weight:950;
       color:#0d7a55;
     }
     .monthTitle{
       text-align:center;
       font-weight:950;
-      font-size:18px;
+      font-size:16px;                      /* ✅ 18 -> 16 */
       letter-spacing:.2px;
       line-height:1;
     }
 
-    /* ✅ 一排週日期 */
+    /* 一排週日期 */
     .weekStrip{
       display:grid;
       grid-template-columns:repeat(7, minmax(0, 1fr));
@@ -297,7 +298,7 @@
       box-shadow:0 0 0 5px rgba(27,181,122,.14);
     }
 
-    /* ✅ 3. 時段一定要出現：改成卡片內部可捲動，不是整頁捲 */
+    /* slots area */
     .slotsArea{
       flex:1 1 auto;
       min-height:0;
@@ -306,7 +307,6 @@
       gap:10px;
       overflow:hidden;
     }
-
     .tabs{
       display:flex;
       gap:22px;
@@ -333,7 +333,7 @@
       border-radius:999px;
     }
 
-    /* ✅ slotGrid 允許內部捲動，避免手機直接消失 */
+    /* ✅ slotGrid 可在卡片內滾動，避免時段「消失」 */
     .slotGrid{
       flex:1 1 auto;
       min-height:0;
@@ -418,9 +418,14 @@
       min-height:18px;
     }
 
+    .statusError{
+      color:#b23a2b;
+      font-weight:950;
+    }
+
     .hide{ display:none !important; }
 
-    /* ✅ Step3：附圖3 成功頁樣式 */
+    /* Step3 success page */
     .successWrap{
       display:flex;
       flex-direction:column;
@@ -486,10 +491,11 @@
     }
 
     @media (max-height:720px){
-      .h{ font-size:24px; }
+      .title{ font-size:17px; }
       .chip{ font-size:17px; padding:13px 14px; }
       .dayCell{ min-height:60px; }
       .btn{ font-size:15px; padding:13px 10px; }
+      .monthTitle{ font-size:15px; }
     }
   </style>
 </head>
@@ -518,7 +524,7 @@
   <div class="main">
     <!-- Step 1 -->
     <div id="card1" class="card">
-      <div class="h">Step 1｜選擇教練</div>
+      <!-- ✅ 2) 移除標題：不放 Step 1 大標 -->
       <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
       <div id="coachRow" class="row"></div>
     </div>
@@ -526,7 +532,7 @@
     <!-- Step 2 -->
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
-        <div class="h">Step 2｜選擇預約時間</div>
+        <!-- ✅ 2) 移除標題：不放 Step 2 大標 -->
 
         <div class="coachIntro">
           <div class="avatar"><img id="coachAvatar2" alt="" /></div>
@@ -563,7 +569,7 @@
       </div>
     </div>
 
-    <!-- Step 3：成功頁（附圖3） -->
+    <!-- Step 3：成功頁 -->
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
       <div class="successWrap">
         <div class="successIcon" aria-hidden="true">
@@ -573,9 +579,7 @@
         </div>
         <p class="successTitle">您已預約成功</p>
 
-        <div class="infoBox" id="successInfo">
-          <!-- JS 填入 -->
-        </div>
+        <div class="infoBox" id="successInfo"></div>
 
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
@@ -617,7 +621,7 @@
 
   const ROOM = { id:'room1', name:'場地' };
 
-  // ✅ 可自行改成你的收費邏輯
+  // 可自行改成你的收費邏輯
   const PRICE_TWD = 0;
 
   const state = {
@@ -696,6 +700,7 @@
       btnNext.classList.remove('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !state.coach;
+      status.classList.remove('statusError');
       status.textContent = state.coach
         ? `已選擇教練：${state.coach.name}`
         : `${state.name || '您好'}，第一步請先選擇教練`;
@@ -704,20 +709,20 @@
     if(n===2){
       btnBack.classList.remove('hide');
       btnNext.classList.remove('hide');
-      /* ✅ 4. Step2 底部按鈕：上一步 + 立即預約 */
       btnNext.textContent='立即預約';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      status.classList.remove('statusError');
       status.textContent = state.dateKey
         ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}`
         : '';
     }
 
     if(n===3){
-      /* ✅ 成功頁：改成「好的 / 返回首頁」 */
       btnBack.classList.add('hide');
       btnNext.classList.remove('hide');
       btnNext.textContent='好的，前往聊天室';
       btnNext.disabled = false;
+      status.classList.remove('statusError');
       status.textContent = '✅ 已完成';
 
       const infoHTML = `
@@ -745,6 +750,7 @@
         state.coach=c;
         renderCoaches();
         btnNext.disabled=false;
+        status.classList.remove('statusError');
         status.textContent = `已選擇教練：${c.name}`;
       };
       coachRow.appendChild(div);
@@ -764,7 +770,6 @@
     });
   }
 
-  /* ✅ Step2：週條（橫向 7 天） */
   function renderWeekStrip(){
     const ws = state.weekStart;
     monthTitle.textContent = monthYearLabel(ws);
@@ -800,6 +805,7 @@
         state.slot=null;
         renderWeekStrip();
         renderSlotsStep2();
+        status.classList.remove('statusError');
         status.textContent = `已選日期：${state.dateKey}`;
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
@@ -824,7 +830,6 @@
     };
     const list = presets[state.tab] || [];
 
-    // ✅ 沒選日期就顯示提示（但時段區仍存在，不會消失）
     if(!state.dateKey){
       const tip=document.createElement('div');
       tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:800; padding:6px 2px;';
@@ -844,6 +849,7 @@
         if(disabled) return;
         state.slot=t;
         renderSlotsStep2();
+        status.classList.remove('statusError');
         status.textContent = `已選日期：${state.dateKey}｜已選時段：${state.slot}`;
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
@@ -893,32 +899,42 @@
         if(!state.coach) return;
         setStep(2);
         renderCoachIntro();
+        status.classList.remove('statusError');
         status.textContent = '';
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
         return;
       }
 
       if(state.step===2){
-        // ✅ Step2：立即預約 → 送出後顯示 Step3 成功頁
         if(!(state.coach && state.dateKey && state.slot)) return;
 
         const payload = buildBookPayload();
         state.lastPayload = payload;
 
-        btnNext.disabled=true;
-        status.textContent='送出中…';
+        btnNext.disabled = true;
+        status.classList.remove('statusError');
+        status.textContent = '送出中…';
+
+        // ✅ 4) 不在 LINE 內：直接顯示 Step3（版面如圖2）
+        if(!liff.isInClient()){
+          status.textContent = '（目前非 LINE 內開啟：已進入確認畫面）';
+          setStep(3);
+          return;
+        }
 
         try{
           await liff.sendMessages([{ type:'text', text: payload }]);
           setStep(3);
         }catch(e){
-          status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
-          btnNext.disabled=false;
+          // ✅ 就算失敗，也進 Step3（版面仍是成功頁）
+          setStep(3);
+          status.classList.add('statusError');
+          status.textContent = '⚠️ 送出失敗（請確認在 LINE 內開啟）';
         }
         return;
       }
 
       if(state.step===3){
-        // ✅ 前往聊天室（或你要改成 closeWindow 也行）
         try{
           liff.closeWindow();
         }catch(e){
