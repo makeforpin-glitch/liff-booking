@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>支點運動_私課預約</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
   <style>
     :root{
       --bg:#f6f7f8;
@@ -13,12 +12,11 @@
       --text:#111;
       --muted:#7a7a7a;
       --primary:#1bb57a;
-      --primary2:#17a46f;
       --border:rgba(0,0,0,.08);
       --shadow:0 8px 22px rgba(0,0,0,.07);
-      --radius:16px;
-      --soft:#f1f1f1;
-      --soft2:#eef7f3;
+      --radius:18px;
+      --chip:#f1f1f1;
+      --chipSel:#dff4ea;
     }
     *{ box-sizing:border-box; }
     body{
@@ -26,29 +24,27 @@
       font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
       background:var(--bg);
       color:var(--text);
-      font-size:17px;
+      font-size:18px; /* 整體字放大 */
     }
     .wrap{
-      max-width:520px;
+      max-width:560px;
       margin:0 auto;
       min-height:100vh;
       display:flex;
       flex-direction:column;
     }
 
-    /* Top */
     .top{
       position:sticky; top:0;
       background:linear-gradient(180deg, rgba(246,247,248,1) 70%, rgba(246,247,248,.0));
-      padding:14px 14px 8px;
+      padding:14px 14px 10px;
       z-index:10;
     }
     .title{
-      font-weight:900;
+      font-weight:950;
       font-size:20px;
-      padding:2px 2px 10px;
       text-align:center; /* ✅ 置中 */
-      letter-spacing:.5px;
+      padding:4px 2px 12px;
     }
     .steps{
       display:flex;
@@ -72,28 +68,22 @@
       border-radius:999px;
       background:#e9f7f0;
       color:var(--primary);
-      font-weight:900;
+      font-weight:950;
       display:flex; align-items:center; justify-content:center;
       flex:0 0 auto;
+      font-size:15px;
     }
-    .dot.active{
-      background:var(--primary);
-      color:#fff;
-    }
+    .dot.active{ background:var(--primary); color:#fff; }
     .label{
-      font-size:14px;                 /* ✅ 放大 */
+      font-size:13px;
       color:var(--muted);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       font-weight:800;
     }
-    .label.active{
-      color:var(--text);
-      font-weight:950;
-    }
+    .label.active{ color:var(--text); font-weight:950; }
 
-    /* Cards */
     .card{
       background:var(--card);
       margin:12px 14px 0;
@@ -102,177 +92,196 @@
       box-shadow:var(--shadow);
       padding:16px;
     }
+
     .h{
       margin:0 0 10px;
       font-weight:950;
-      font-size:22px;     /* ✅ Step 標題維持大 */
-      letter-spacing:.2px;
+      font-size:22px; /* Step 標題大 */
     }
+
+    /* ✅ Step 1 說明字稍微小一點（你要的效果） */
     .sub{
       margin:0 0 12px;
       color:var(--muted);
-      font-size:16px;     /* ✅ 其他 step 說明放大 */
-      line-height:1.7;
+      font-size:16px;  /* 其它 Step 說明維持較大 */
+      line-height:1.6;
     }
-    /* ✅ 只有 Step1 那句說明稍微小一點 */
-    #card1 .sub{
-      font-size:15px;
-      line-height:1.65;
-    }
+    #card1 .sub{ font-size:15px; } /* 只縮小 Step1 那行 */
 
-    /* Chips (coach) */
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-    }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+
     .chip{
-      padding:14px 16px;
-      border-radius:16px;
-      background:var(--soft);
-      font-weight:950;
-      font-size:18px;     /* ✅ 放大 */
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--chip);
+      font-weight:900;
+      font-size:16px;
       cursor:pointer;
       user-select:none;
       border:1px solid transparent;
-      min-width:120px;
-      text-align:center;
     }
     .chip.sel{
-      background:#dff4ea;
+      background:var(--chipSel);
       border-color:rgba(27,181,122,.35);
       outline:2px solid rgba(27,181,122,.35);
     }
 
-    /* Calendar (Step2) */
-    .calHeader{
+    /* --- Step2: 教練小卡（大頭貼+標籤） --- */
+    .coachCard{
       display:flex;
-      align-items:center;
-      justify-content:center;
       gap:12px;
-      margin:6px 0 12px;
-    }
-    .iconBtn{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:var(--card);
-      font-weight:950;
-      font-size:20px;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
-      display:flex;
       align-items:center;
-      justify-content:center;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+      margin-bottom:12px;
     }
-    .calTitle{
+    .avatar{
+      width:52px; height:52px;
+      border-radius:999px;
+      background:#ddd;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .coachMeta{ flex:1; min-width:0; }
+    .coachNameLine{
+      display:flex; align-items:center; gap:8px;
+      margin-bottom:6px;
+    }
+    .coachName{
       font-weight:950;
       font-size:18px;
-      letter-spacing:.4px;
-      min-width:140px;
-      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tags{ display:flex; flex-wrap:wrap; gap:6px; }
+    .tag{
+      font-size:12px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#f2f7f5;
+      color:#1a7b57;
+      border:1px solid rgba(27,181,122,.18);
     }
 
-    .weekRow{
-      display:grid;
-      grid-template-columns:repeat(7, 1fr);
-      gap:10px;
-      color:var(--muted);
-      font-size:14px;
-      text-align:center;
-      font-weight:900;
-      margin:0 2px 10px;
-    }
-    .calGrid{
-      display:grid;
-      grid-template-columns:repeat(7, 1fr);
-      gap:10px;
-      padding:2px;
-    }
-    .day{
-      height:46px;
-      border-radius:16px;
-      background:var(--soft);
+    /* --- Step2: 週曆 --- */
+    .weekbar{
       display:flex;
       align-items:center;
-      justify-content:center;
-      font-weight:950;
-      cursor:pointer;
-      border:1px solid transparent;
-      position:relative;
-      font-size:16px;
-    }
-    .day.empty{
-      background:transparent;
-      cursor:default;
-      border:0;
-    }
-    .day.disabled{
-      opacity:.30;
-      pointer-events:none;
-    }
-
-    /* ✅ 選中的日期：大圓形突出（像醫療預約那種） */
-    .day.sel{
-      background:transparent;
-      border-color:transparent;
-    }
-    .day.sel::before{
-      content:"";
-      position:absolute;
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      background:var(--primary);
-      box-shadow:0 10px 22px rgba(27,181,122,.25);
-      z-index:0;
-    }
-    .day.sel span{
-      position:relative;
-      z-index:1;
-      color:#fff;
-    }
-
-    /* Step2: Tabs + Slots */
-    .tabs{
-      display:flex;
+      justify-content:space-between;
       gap:10px;
-      margin-top:14px;
-      background:var(--soft2);
-      border:1px solid rgba(27,181,122,.18);
-      padding:8px;
-      border-radius:18px;
+      margin:6px 0 12px;
     }
-    .tab{
-      flex:1;
-      padding:10px 10px;
+    .navBtn{
+      width:44px; height:44px;
       border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
       font-weight:950;
+      font-size:18px;
+    }
+    .weekTitle{
+      flex:1;
+      text-align:center;
+      font-weight:950;
+      font-size:16px;
+      color:#222;
+    }
+    .weekGrid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:10px;
+      align-items:stretch;
+    }
+    .dayCell{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px 6px;
       text-align:center;
       cursor:pointer;
       user-select:none;
-      color:var(--muted);
-      background:transparent;
-      border:1px solid transparent;
+      box-shadow:0 6px 16px rgba(0,0,0,.04);
+      position:relative;
+      min-height:74px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:6px;
+    }
+    .wk{
+      font-size:13px;
+      color:#666;
+      font-weight:900;
+    }
+    .md{
       font-size:16px;
+      font-weight:950;
+      color:#111;
+      letter-spacing:.2px;
+    }
+
+    /* ✅ 選中的日期：大圓形突出 */
+    .dayCell.sel{
+      border-color:rgba(27,181,122,.35);
+      outline:2px solid rgba(27,181,122,.35);
+      background:var(--chipSel);
+    }
+    .dayCell.sel::before{
+      content:"";
+      position:absolute;
+      left:50%; top:50%;
+      width:58px; height:58px;
+      transform:translate(-50%,-55%);
+      border-radius:999px;
+      background:rgba(27,181,122,.18);
+      z-index:0;
+    }
+    .dayCell.sel .wk, .dayCell.sel .md{ position:relative; z-index:1; }
+
+    /* --- Step3: 上午/下午/晚上 tabs + slots --- */
+    .tabs{
+      display:flex;
+      gap:10px;
+      padding:6px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+      margin:10px 0 12px;
+    }
+    .tab{
+      flex:1;
+      text-align:center;
+      padding:10px 8px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:15px;
+      color:#666;
+      cursor:pointer;
+      user-select:none;
     }
     .tab.active{
       background:var(--primary);
       color:#fff;
-      box-shadow:0 10px 20px rgba(27,181,122,.18);
     }
 
-    .slotGrid{
+    .grid{
       display:grid;
       grid-template-columns:repeat(3, 1fr);
       gap:10px;
-      margin-top:12px;
     }
     .slot{
       padding:14px 10px;
-      border-radius:16px;
-      background:var(--soft);
+      border-radius:14px;
+      background:var(--chip);
       font-weight:950;
       text-align:center;
       cursor:pointer;
@@ -281,7 +290,7 @@
       font-size:16px;
     }
     .slot.sel{
-      background:#dff4ea;
+      background:var(--chipSel);
       border-color:rgba(27,181,122,.35);
       outline:2px solid rgba(27,181,122,.35);
     }
@@ -290,7 +299,6 @@
       pointer-events:none;
     }
 
-    /* Footer */
     .footer{
       margin-top:auto;
       position:sticky;
@@ -298,36 +306,40 @@
       padding:12px 14px 16px;
       background:linear-gradient(0deg, rgba(246,247,248,1) 60%, rgba(246,247,248,.0));
     }
+    .btnRow{
+      display:flex;
+      gap:10px;
+    }
     .btn{
-      width:100%;
       border:0;
       border-radius:18px;
       padding:16px;
-      font-size:18px;       /* ✅ 放大 */
+      font-size:18px;
       font-weight:950;
-      background:var(--primary);
-      color:#fff;
       cursor:pointer;
       box-shadow:var(--shadow);
+      flex:1;
+    }
+    .btn.secondary{
+      background:#fff;
+      border:1px solid var(--border);
+      color:#222;
+    }
+    .btn.primary{
+      background:var(--primary);
+      color:#fff;
     }
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
     .status{
       margin-top:10px;
-      font-size:14px;       /* ✅ 放大 */
+      font-size:14px;
       color:var(--muted);
       text-align:center;
-      line-height:1.5;
     }
     .hide{ display:none; }
-    .note{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.6;
-    }
   </style>
 </head>
-
 <body>
 <div class="wrap">
   <div class="top">
@@ -348,50 +360,60 @@
     </div>
   </div>
 
-  <!-- Step 1 -->
+  <!-- STEP 1 -->
   <div id="card1" class="card">
     <p class="h">Step 1｜選擇教練</p>
     <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
     <div id="coachRow" class="row"></div>
   </div>
 
-  <!-- Step 2 -->
+  <!-- STEP 2 -->
   <div id="card2" class="card hide">
     <p class="h">Step 2｜選擇日期</p>
-    <p class="sub">請先在月曆選日期；下方會立即顯示該日可預約時段（上午/下午/晚上）。</p>
 
-    <div class="calHeader">
-      <button id="prevM" class="iconBtn" aria-label="prev month">‹</button>
-      <div id="calTitle" class="calTitle">—</div>
-      <button id="nextM" class="iconBtn" aria-label="next month">›</button>
+    <!-- ✅ 教練資訊卡：在 Step2 下面（你要的） -->
+    <div id="coachInfo" class="coachCard">
+      <div class="avatar">
+        <img id="coachAvatar" alt="coach avatar" src="" />
+      </div>
+      <div class="coachMeta">
+        <div class="coachNameLine">
+          <div id="coachName" class="coachName">—</div>
+        </div>
+        <div id="coachTags" class="tags"></div>
+      </div>
     </div>
 
-    <div class="weekRow">
-      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    <!-- ✅ 週曆：本週一～週日 + 左右箭頭切週 -->
+    <div class="weekbar">
+      <button id="prevWeek" class="navBtn" aria-label="prev">‹</button>
+      <div id="weekTitle" class="weekTitle">—</div>
+      <button id="nextWeek" class="navBtn" aria-label="next">›</button>
     </div>
 
-    <div id="calGrid" class="calGrid"></div>
+    <div id="weekGrid" class="weekGrid"></div>
+  </div>
 
-    <div class="tabs" style="margin-top:16px;">
+  <!-- STEP 3 -->
+  <div id="card3" class="card hide">
+    <p class="h">Step 3｜選擇時段</p>
+
+    <div class="tabs">
       <div id="tabAM" class="tab active">上午</div>
       <div id="tabPM" class="tab">下午</div>
       <div id="tabEV" class="tab">晚上</div>
     </div>
 
-    <div id="slotGrid2" class="slotGrid"></div>
+    <div id="slotGrid" class="grid"></div>
 
-    <div class="note">⚠️ 預約/取消需在開課前 1 小時完成。</div>
-  </div>
-
-  <!-- Step 3 -->
-  <div id="card3" class="card hide">
-    <p class="h">Step 3｜確認送出</p>
-    <p class="sub">確認資訊後按下「確認預約」，系統會把指令送回聊天室，由 Make 進行後續預約。</p>
-    <div class="note" id="confirmText">—</div>
+    <p class="sub" style="margin-top:12px;">⚠️ 預約/取消需在開課前 1 小時完成。</p>
   </div>
 
   <div class="footer">
-    <button id="btn" class="btn" disabled>下一步</button>
+    <div class="btnRow">
+      <button id="btnPrev" class="btn secondary">上一步</button>
+      <button id="btnNext" class="btn primary" disabled>下一步</button>
+    </div>
     <div id="status" class="status">載入中…</div>
   </div>
 </div>
@@ -400,13 +422,22 @@
   // ✅ 改成你的 LIFF ID
   const LIFF_ID = '2008631386-AEejMove';
 
-  // Demo 教練（之後換成你的教練名單）
+  // Demo 教練：你可以改成真名/大頭貼/標籤
   const COACHES = [
-    { id:'coachA', name:'偉銘' },
-    { id:'coachB', name:'教練 B' },
+    {
+      id:'coachA',
+      name:'偉銘',
+      avatar:'https://i.imgur.com/8Km9tLL.png', // 可換成你的圖
+      tags:['肌力','體能','青少年','樂齡']'    },
+    {
+      id:'coachB',
+      name:'教練 B',
+      avatar:'https://i.imgur.com/4ZQZ4ZB.png', // 可換成你的圖
+      tags:['體能','減脂','拳擊']
+    },
   ];
 
-  // Demo 場地
+  // 你後端要用的場地資訊（可先保留）
   const ROOM = { id:'room1', name:'場地' };
 
   const state = {
@@ -414,11 +445,10 @@
     uid: '',
     name: '',
     coach: null,
+    weekStart: null, // Date (Monday)
     dateKey: null,   // YYYY-MM-DD
-    slot: null,      // HH:mm
     tab: 'AM',       // AM/PM/EV
-    calYear: new Date().getFullYear(),
-    calMonth: new Date().getMonth() // 0-11
+    slot: null       // HH:mm
   };
 
   const $ = s => document.querySelector(s);
@@ -426,72 +456,74 @@
   const dot1=$('#dot1'), dot2=$('#dot2'), dot3=$('#dot3');
   const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
   const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
+
   const coachRow=$('#coachRow');
-  const calGrid=$('#calGrid'), calTitle=$('#calTitle');
-  const slotGrid2=$('#slotGrid2');
+  const coachAvatar=$('#coachAvatar'), coachName=$('#coachName'), coachTags=$('#coachTags');
+
+  const weekTitle=$('#weekTitle'), weekGrid=$('#weekGrid');
+  const prevWeek=$('#prevWeek'), nextWeek=$('#nextWeek');
+
   const tabAM=$('#tabAM'), tabPM=$('#tabPM'), tabEV=$('#tabEV');
-  const btn=$('#btn'), status=$('#status');
-  const confirmText=$('#confirmText');
+  const slotGrid=$('#slotGrid');
+
+  const btnPrev=$('#btnPrev'), btnNext=$('#btnNext'), status=$('#status');
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function fmtYMD(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+  function parseYMD(ymd){
+    const [y,m,dd]=ymd.split('-').map(Number);
+    return new Date(y, m-1, dd);
+  }
+  function wkChar(d){
+    return '日一二三四五六'[d.getDay()];
+  }
+
+  function startOfWeekMonday(date){
+    const d = new Date(date);
+    const day = d.getDay(); // 0 Sun ... 6 Sat
+    const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function addDays(date, n){
+    const d=new Date(date);
+    d.setDate(d.getDate()+n);
+    return d;
+  }
 
   function setStep(n){
     state.step = n;
 
-    // dots
     [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
     [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
 
-    // cards
     card1.classList.toggle('hide', n!==1);
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
 
-    // button text + enable rules
-    if(n===1){
-      btn.textContent='下一步';
-      btn.disabled = !state.coach;
-      status.textContent = `${state.name || '用戶'} 您好，第一步請先選擇教練`;
-    }else if(n===2){
-      btn.textContent='下一步';
-      btn.disabled = !(state.dateKey && state.slot);
-      status.textContent = '第二步請選日期，並在下方選擇時段（上午/下午/晚上）';
-    }else{
-      btn.textContent='確認預約';
-      btn.disabled = !(state.coach && state.dateKey && state.slot);
-      status.textContent = '第三步確認送出：按下「確認預約」即可回到聊天室';
-    }
+    // 上一步按鈕：Step1 隱藏
+    btnPrev.style.visibility = (n===1) ? 'hidden' : 'visible';
+
+    // 下一步按鈕文字
+    if(n===1) btnNext.textContent='下一步';
+    if(n===2) btnNext.textContent='下一步';
+    if(n===3) btnNext.textContent='確認預約';
+
+    // enable rules
+    if(n===1) btnNext.disabled = !state.coach;
+    if(n===2) btnNext.disabled = !state.dateKey;
+    if(n===3) btnNext.disabled = !state.slot;
+
+    // ✅ 底部提示文字跟著 step 切換
+    if(n===1) status.textContent = `${state.name || '用戶'} 您好，第一步請先選擇教練`;
+    if(n===2) status.textContent = `已選擇 ${state.coach?.name || '教練'}，第二步請選擇日期`;
+    if(n===3) status.textContent = `第三步請選擇時段（上午/下午/晚上）`;
   }
 
-  function fmtYMD(d){
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,'0');
-    const day=String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
-  }
-  function fmtLabel(ymd){
-    const [y,m,d]=ymd.split('-').map(Number);
-    const dt=new Date(y,m-1,d);
-    const wk='日一二三四五六'[dt.getDay()];
-    return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}（${wk}）`;
-  }
-  function ymdFromParts(y, m0, d){
-    const mm = String(m0+1).padStart(2,'0');
-    const dd = String(d).padStart(2,'0');
-    return `${y}-${mm}-${dd}`;
-  }
-
-  // ✅ 只允許：未來7天內（含今天），且今天要符合「一小時後」才會在時段上顯示
-  function withinNext7Days(ymd){
-    const start = new Date();
-    start.setHours(0,0,0,0);
-    const end = new Date(start);
-    end.setDate(end.getDate()+6);
-
-    const [y,m,d]=ymd.split('-').map(Number);
-    const dt=new Date(y,m-1,d);
-    dt.setHours(0,0,0,0);
-    return dt >= start && dt <= end;
-  }
-
+  /* ---------- Step 1: Coaches ---------- */
   function renderCoaches(){
     coachRow.innerHTML='';
     COACHES.forEach(c=>{
@@ -501,197 +533,216 @@
       div.onclick=()=>{
         state.coach=c;
         renderCoaches();
-        btn.disabled=false;
+        btnNext.disabled=false;
       };
       coachRow.appendChild(div);
     });
   }
 
-  function renderCalendar(){
-    const y = state.calYear;
-    const m0 = state.calMonth;
-
-    calTitle.textContent = `${y}年 ${String(m0+1).padStart(2,'0')}月`;
-
-    const first = new Date(y, m0, 1);
-    const firstDow = first.getDay(); // 0-6
-    const daysInMonth = new Date(y, m0+1, 0).getDate();
-
-    calGrid.innerHTML = '';
-
-    // leading empty
-    for(let i=0;i<firstDow;i++){
-      const div=document.createElement('div');
-      div.className='day empty';
-      calGrid.appendChild(div);
+  function renderCoachInfo(){
+    if(!state.coach){
+      coachAvatar.src='';
+      coachName.textContent='—';
+      coachTags.innerHTML='';
+      return;
     }
+    coachAvatar.src = state.coach.avatar || '';
+    coachName.textContent = state.coach.name;
 
-    // days
-    for(let d=1; d<=daysInMonth; d++){
-      const ymd = ymdFromParts(y, m0, d);
-      const div=document.createElement('div');
-      div.className='day';
-
-      const ok = withinNext7Days(ymd);
-      if(!ok) div.classList.add('disabled');
-
-      // selected
-      if(state.dateKey===ymd) div.classList.add('sel');
-
+    coachTags.innerHTML='';
+    (state.coach.tags || []).slice(0,4).forEach(t=>{
       const span=document.createElement('span');
-      span.textContent = d;
-      div.appendChild(span);
+      span.className='tag';
+      span.textContent=t;
+      coachTags.appendChild(span);
+    });
+  }
 
-      div.onclick = ()=>{
+  /* ---------- Step 2: Week calendar ---------- */
+  function renderWeekTitle(){
+    const s = state.weekStart;
+    const e = addDays(s, 6);
+    weekTitle.textContent = `${s.getFullYear()}/${pad2(s.getMonth()+1)}/${pad2(s.getDate())} － ${e.getFullYear()}/${pad2(e.getMonth()+1)}/${pad2(e.getDate())}`;
+  }
+
+  function withinBookingWindow(dateObj){
+    // ✅ 只允許：一小時後～未來7天（含）
+    const nowPlus1h = new Date(Date.now() + 60*60*1000);
+    const end = new Date();
+    end.setDate(end.getDate() + 7);
+    end.setHours(23,59,59,999);
+
+    // dateObj 是某天 00:00，這裡只判斷日期範圍
+    // 若選今天，時段會在 Step3 依「一小時後」禁用
+    return dateObj <= end;
+  }
+
+  function renderWeekGrid(){
+    weekGrid.innerHTML='';
+    renderWeekTitle();
+
+    for(let i=0;i<7;i++){
+      const d = addDays(state.weekStart, i);
+      const ymd = fmtYMD(d);
+      const cell = document.createElement('div');
+      cell.className = 'dayCell' + (state.dateKey===ymd ? ' sel' : '');
+
+      const w = document.createElement('div');
+      w.className='wk';
+      w.textContent = wkChar(d);
+
+      const md = document.createElement('div');
+      md.className='md';
+      md.textContent = `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}`;
+
+      cell.appendChild(w);
+      cell.appendChild(md);
+
+      // ✅ 允許點選（你後續可改成：必須真的有可預約才可點）
+      const inRange = withinBookingWindow(d);
+      if(!inRange){
+        cell.style.opacity = '.35';
+        cell.style.pointerEvents = 'none';
+      }
+
+      cell.onclick=()=>{
         state.dateKey = ymd;
-        state.slot = null;      // 重新選時段
-        // 進入日期後：立即刷新時段
-        renderCalendar();
-        renderSlotsForSelectedDate();
-        // step2 的下一步需要 date+slot
-        btn.disabled = !(state.dateKey && state.slot);
+        state.slot = null;
+        renderWeekGrid();
+        renderSlots();      // 選日期後，下面立即刷新時段
+        btnNext.disabled = false;
       };
 
-      calGrid.appendChild(div);
+      weekGrid.appendChild(cell);
     }
   }
 
-  // Tabs
+  prevWeek.onclick=()=>{
+    state.weekStart = addDays(state.weekStart, -7);
+    renderWeekGrid();
+  };
+  nextWeek.onclick=()=>{
+    state.weekStart = addDays(state.weekStart, 7);
+    renderWeekGrid();
+  };
+
+  /* ---------- Step 3: Tabs + Slots ---------- */
   function setTab(t){
     state.tab = t;
     tabAM.classList.toggle('active', t==='AM');
     tabPM.classList.toggle('active', t==='PM');
     tabEV.classList.toggle('active', t==='EV');
-    renderSlotsForSelectedDate();
+    state.slot = null;
+    renderSlots();
+    btnNext.disabled = true;
+  }
+  tabAM.onclick=()=>setTab('AM');
+  tabPM.onclick=()=>setTab('PM');
+  tabEV.onclick=()=>setTab('EV');
+
+  function slotsByTab(tab){
+    // 你可自行調整區間/顆粒
+    if(tab==='AM') return ['10:00','11:00','12:00'];
+    if(tab==='PM') return ['13:00','14:00','15:00','16:00','17:00'];
+    return ['18:00','19:00','20:00','21:00'];
   }
 
-  // 你可以把時段改成你實際要的（這裡先用 demo）
-  const SLOT_DEFS = {
-    AM: ['09:00','10:00','11:00'],
-    PM: ['13:00','14:00','15:00','16:00','17:00'],
-    EV: ['18:00','19:00','20:00','21:00']
-  };
+  function genSlotsForSelectedDate(){
+    const ymd = state.dateKey;
+    if(!ymd) return [];
+    const base = parseYMD(ymd);
+    const nowPlus1h = new Date(Date.now() + 60*60*1000);
 
-  // 一小時後規則：只對「今天」生效
-  function disabledByNowPlus1h(ymd, timeStr){
-    const nowPlus1h = new Date(Date.now()+60*60*1000);
-    const [y,m,d]=ymd.split('-').map(Number);
-    const [hh,mm]=timeStr.split(':').map(Number);
-    const dt=new Date(y,m-1,d,hh,mm,0);
-    return dt < nowPlus1h;
-  }
-
-  function renderSlotsForSelectedDate(){
-    slotGrid2.innerHTML='';
-
-    if(!state.dateKey){
-      slotGrid2.innerHTML = `<div style="grid-column:1/-1;color:#777;font-weight:800;">請先在月曆選擇日期</div>`;
-      return;
-    }
-
-    const times = SLOT_DEFS[state.tab] || [];
-    if(times.length===0){
-      slotGrid2.innerHTML = `<div style="grid-column:1/-1;color:#777;font-weight:800;">此區段暫無可選時段</div>`;
-      return;
-    }
-
-    times.forEach(t=>{
-      const div=document.createElement('div');
-      const disabled = disabledByNowPlus1h(state.dateKey, t);
-
-      div.className = 'slot' + (disabled ? ' disabled':'') + (state.slot===t ? ' sel':'' );
-      div.textContent = t;
-
-      div.onclick = ()=>{
-        if(disabled) return;
-        state.slot = t;
-        renderSlotsForSelectedDate();
-        btn.disabled = !(state.dateKey && state.slot);
-      };
-
-      slotGrid2.appendChild(div);
+    return slotsByTab(state.tab).map(t=>{
+      const [hh,mm] = t.split(':').map(Number);
+      const dt = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0);
+      const disabled = dt < nowPlus1h; // ✅ 一小時後限制（選今天會禁用太近）
+      return { t, disabled };
     });
   }
 
-  // Calendar nav buttons
-  $('#prevM').onclick = ()=>{
-    const dt = new Date(state.calYear, state.calMonth-1, 1);
-    state.calYear = dt.getFullYear();
-    state.calMonth = dt.getMonth();
-    renderCalendar();
-  };
-  $('#nextM').onclick = ()=>{
-    const dt = new Date(state.calYear, state.calMonth+1, 1);
-    state.calYear = dt.getFullYear();
-    state.calMonth = dt.getMonth();
-    renderCalendar();
-  };
+  function renderSlots(){
+    slotGrid.innerHTML='';
+    if(!state.dateKey){
+      slotGrid.innerHTML='<div style="grid-column:1/-1;color:#777;">請先選日期</div>';
+      return;
+    }
+    const slots = genSlotsForSelectedDate();
 
-  tabAM.onclick = ()=>setTab('AM');
-  tabPM.onclick = ()=>setTab('PM');
-  tabEV.onclick = ()=>setTab('EV');
+    if(slots.length===0){
+      slotGrid.innerHTML='<div style="grid-column:1/-1;color:#777;">此日無可預約時段</div>';
+      return;
+    }
 
-  function updateConfirm(){
-    const coachName = state.coach?.name ?? '-';
-    const dateLabel = state.dateKey ? fmtLabel(state.dateKey) : '-';
-    const timeLabel = state.slot ?? '-';
-    confirmText.textContent = `教練：${coachName}\n日期：${dateLabel}\n時段：${timeLabel}`;
-    confirmText.style.whiteSpace = 'pre-line';
-    confirmText.style.fontWeight = '900';
-    confirmText.style.fontSize = '16px';
-    confirmText.style.color = '#111';
+    slots.forEach(s=>{
+      const div=document.createElement('div');
+      div.className='slot' + (s.disabled?' disabled':'') + (state.slot===s.t?' sel':'');
+      div.textContent=s.t;
+      div.onclick=()=>{
+        state.slot=s.t;
+        renderSlots();
+        btnNext.disabled=false;
+      };
+      slotGrid.appendChild(div);
+    });
   }
 
-  async function init(){
-    // 讓網址列的標題更接近你要的（在 WebView / Safari 會吃 title）
-    document.title = '支點運動_私課預約';
+  /* ---------- Buttons ---------- */
+  btnPrev.onclick=()=>{
+    if(state.step===2){ setStep(1); return; }
+    if(state.step===3){ setStep(2); return; }
+  };
 
+  btnNext.onclick=async ()=>{
+    if(state.step===1){
+      // 進 Step2
+      if(!state.coach) return;
+      renderCoachInfo();
+      if(!state.weekStart) state.weekStart = startOfWeekMonday(new Date());
+      renderWeekGrid();
+      setStep(2);
+      return;
+    }
+
+    if(state.step===2){
+      // 進 Step3
+      if(!state.dateKey) return;
+      setTab('AM'); // 進入預設上午
+      renderSlots();
+      setStep(3);
+      return;
+    }
+
+    // Step3：送關鍵字到聊天室（你後端 Make 用 LINE webhook 接）
+    if(!state.slot) return;
+
+    const text =
+      `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot} dur=60`;
+
+    btnNext.disabled=true;
+    status.textContent='送出中…';
+
+    try{
+      await liff.sendMessages([{ type:'text', text }]);
+      status.textContent='✅ 已送出，回到聊天室處理預約…';
+      setTimeout(()=>liff.closeWindow(), 600);
+    }catch(e){
+      status.textContent='❌ 送出失敗，請確認是在 LINE 內開啟此頁面';
+      btnNext.disabled=false;
+    }
+  };
+
+  async function init(){
     await liff.init({ liffId: LIFF_ID });
     if(!liff.isLoggedIn()) liff.login();
 
     const profile=await liff.getProfile();
     state.uid=profile.userId;
-    state.name=profile.displayName;
+    state.name=profile.displayName || '';
+
+    state.weekStart = startOfWeekMonday(new Date());
 
     renderCoaches();
-    renderCalendar();
-    setTab('AM');
-    renderSlotsForSelectedDate();
-
-    // button flow
-    btn.onclick = async ()=>{
-      if(state.step===1){
-        setStep(2);
-        // 進到 step2 立即提示
-        return;
-      }
-
-      if(state.step===2){
-        // 需要日期+時段
-        if(!(state.dateKey && state.slot)) return;
-        updateConfirm();
-        setStep(3);
-        return;
-      }
-
-      // Step3：送回聊天室給 Make
-      const text =
-        `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot} dur=60`;
-
-      btn.disabled=true;
-      status.textContent='送出中…';
-
-      try{
-        await liff.sendMessages([{ type:'text', text }]);
-        status.textContent='✅ 已送出，回到聊天室處理預約…';
-        setTimeout(()=>liff.closeWindow(), 600);
-      }catch(e){
-        status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
-        btn.disabled=false;
-      }
-    };
-
-    // 初始 step1 status
     setStep(1);
   }
 
