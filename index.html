@@ -3,112 +3,407 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LINE 預約（月曆測試）</title>
-
-  <!-- LIFF SDK -->
+  <title>私課預約</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
   <style>
-    body { font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; padding:24px; background:#f4f6f8; }
-    .card { max-width:520px; margin:0 auto; background:#fff; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-    .title { font-size:22px; font-weight:700; margin-bottom:8px; }
-    .hint { color:#555; line-height:1.6; margin-bottom:16px; }
-    label { display:block; margin-top:12px; font-weight:600; }
-    input[type="date"] { width:100%; padding:10px; margin-top:8px; font-size:16px; border-radius:10px; border:1px solid #ccc; }
-    .status { margin-top:16px; font-size:14px; color:#333; background:#f1f3f5; padding:10px; border-radius:10px; }
-    .ok { color:#1e7e34; font-weight:600; }
-    button { width:100%; margin-top:16px; padding:12px; font-size:16px; border-radius:10px; border:none; background:#111; color:#fff; cursor:pointer; }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-    hr { margin:20px 0; border:none; border-top:1px solid #eee; }
+    :root{
+      --bg:#f6f7f8;
+      --card:#ffffff;
+      --text:#111;
+      --muted:#7a7a7a;
+      --primary:#1bb57a;
+      --border:rgba(0,0,0,.08);
+      --shadow:0 8px 22px rgba(0,0,0,.07);
+      --radius:16px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .top{
+      position:sticky; top:0;
+      background:linear-gradient(180deg, rgba(246,247,248,1) 70%, rgba(246,247,248,.0));
+      padding:14px 14px 8px;
+      z-index:10;
+    }
+    .title{
+      font-weight:900;
+      font-size:18px;
+      padding:2px 2px 10px;
+    }
+    .steps{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow:var(--shadow);
+    }
+    .step{
+      display:flex; align-items:center; gap:8px;
+      flex:1;
+      justify-content:center;
+      min-width:0;
+    }
+    .dot{
+      width:26px; height:26px;
+      border-radius:999px;
+      background:#e9f7f0;
+      color:var(--primary);
+      font-weight:900;
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+    }
+    .dot.active{
+      background:var(--primary);
+      color:#fff;
+    }
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .label.active{
+      color:var(--text);
+      font-weight:800;
+    }
+
+    .card{
+      background:var(--card);
+      margin:12px 14px 0;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .h{
+      margin:0 0 10px;
+      font-weight:900;
+      font-size:15px;
+    }
+    .sub{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      padding:10px 12px;
+      border-radius:14px;
+      background:#f1f1f1;
+      font-weight:800;
+      font-size:13px;
+      cursor:pointer;
+      user-select:none;
+      border:1px solid transparent;
+    }
+    .chip.sel{
+      background:#dff4ea;
+      border-color:rgba(27,181,122,.35);
+      outline:2px solid rgba(27,181,122,.35);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
+    }
+    .slot{
+      padding:12px 10px;
+      border-radius:14px;
+      background:#f1f1f1;
+      font-weight:900;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      border:1px solid transparent;
+    }
+    .slot.sel{
+      background:#dff4ea;
+      border-color:rgba(27,181,122,.35);
+      outline:2px solid rgba(27,181,122,.35);
+    }
+    .slot.disabled{
+      opacity:.35;
+      pointer-events:none;
+    }
+
+    .footer{
+      margin-top:auto;
+      position:sticky;
+      bottom:0;
+      padding:12px 14px 16px;
+      background:linear-gradient(0deg, rgba(246,247,248,1) 60%, rgba(246,247,248,.0));
+    }
+    .btn{
+      width:100%;
+      border:0;
+      border-radius:16px;
+      padding:14px;
+      font-size:16px;
+      font-weight:950;
+      background:var(--primary);
+      color:#fff;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; }
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+    .hide{ display:none; }
   </style>
 </head>
-
 <body>
-  <div class="card">
-    <div class="title">📅 LINE 預約（月曆測試）</div>
-
-    <div class="hint">
-      如果你是在 <b>LINE 裡</b> 看到這個畫面，代表：<br>
-      ✔ Endpoint URL 正確<br>
-      ✔ GitHub Pages 正常<br>
-      ✔ LIFF SDK 載入成功
+<div class="wrap">
+  <div class="top">
+    <div class="title">私課預約</div>
+    <div class="steps">
+      <div class="step">
+        <div id="dot1" class="dot active">1</div>
+        <div id="lab1" class="label active">選教練</div>
+      </div>
+      <div class="step">
+        <div id="dot2" class="dot">2</div>
+        <div id="lab2" class="label">選日期</div>
+      </div>
+      <div class="step">
+        <div id="dot3" class="dot">3</div>
+        <div id="lab3" class="label">選時段</div>
+      </div>
     </div>
-
-    <div id="liffStatus" class="status">LIFF 初始化中…</div>
-
-    <hr>
-
-    <label for="datePicker">選擇日期</label>
-    <input id="datePicker" type="date">
-    <div id="dateResult" class="status">尚未選擇日期</div>
-
-    <button id="sendBtn" disabled>送出日期到系統</button>
-    <div id="sendStatus" class="status"></div>
   </div>
 
-  <script>
-    /************ 只改這兩行 ************/
-    const LIFF_ID = "2008631386-AEejMove";
-    const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/kuwkwyhu9axcj37nj4yl2j4v52rlm726";
-    /***********************************/
+  <div id="card1" class="card">
+    <p class="h">Step 1｜選擇教練</p>
+    <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
+    <div id="coachRow" class="row"></div>
+  </div>
 
-    let userProfile = null;
-    let selectedDate = "";
+  <div id="card2" class="card hide">
+    <p class="h">Step 2｜選擇日期</p>
+    <p class="sub">顯示未來 7 天。今天只顯示「一小時後」的可預約時段。</p>
+    <div id="dateRow" class="row"></div>
+  </div>
 
-    async function initLIFF() {
-      const statusEl = document.getElementById("liffStatus");
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        userProfile = await liff.getProfile();
-        statusEl.innerHTML = `<span class="ok">LIFF 初始化成功</span><br>使用者：${userProfile.displayName}`;
-      } catch (err) {
-        statusEl.textContent = "❌ LIFF 初始化失敗，請檢查 LIFF ID";
-        console.error(err);
-      }
+  <div id="card3" class="card hide">
+    <p class="h">Step 3｜選擇時段</p>
+    <p class="sub">10:00–21:00（每小時一格）。</p>
+    <div id="slotGrid" class="grid"></div>
+    <p class="sub" style="margin-top:10px;">⚠️ 預約/取消需在開課前 1 小時完成。</p>
+  </div>
+
+  <div class="footer">
+    <button id="btn" class="btn" disabled>下一步</button>
+    <div id="status" class="status">載入中…</div>
+  </div>
+</div>
+
+<script>
+  // ✅ 改成你的 LIFF ID
+  const LIFF_ID = '2008631386-AEejMove';
+
+  // 先做 demo 教練（之後你要再換成你的教練名單）
+  const COACHES = [
+    { id:'coachA', name:'教練 A' },
+    { id:'coachB', name:'教練 B' },
+  ];
+
+  // 先做 demo 場地（你之後要多場地再擴充）
+  const ROOM = { id:'room1', name:'場地' };
+
+  const state = {
+    step: 1,
+    uid: '',
+    coach: null,
+    dateKey: null, // YYYY-MM-DD
+    slot: null     // HH:mm
+  };
+
+  const $ = s => document.querySelector(s);
+
+  const dot1=$('#dot1'), dot2=$('#dot2'), dot3=$('#dot3');
+  const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
+  const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
+  const coachRow=$('#coachRow'), dateRow=$('#dateRow'), slotGrid=$('#slotGrid');
+  const btn=$('#btn'), status=$('#status');
+
+  function setStep(n){
+    state.step = n;
+    // dots
+    [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
+    [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
+    // cards
+    card1.classList.toggle('hide', n!==1);
+    card2.classList.toggle('hide', n!==2);
+    card3.classList.toggle('hide', n!==3);
+    // button label + enable rules
+    if(n===1){
+      btn.textContent='下一步';
+      btn.disabled = !state.coach;
+    }else if(n===2){
+      btn.textContent='下一步';
+      btn.disabled = !state.dateKey;
+    }else{
+      btn.textContent='確認預約';
+      btn.disabled = !state.slot;
     }
-    initLIFF();
+  }
 
-    const datePicker = document.getElementById("datePicker");
-    const dateResult = document.getElementById("dateResult");
-    const sendBtn = document.getElementById("sendBtn");
-    const sendStatus = document.getElementById("sendStatus");
+  function fmtYMD(d){
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function fmtLabel(ymd){
+    const [y,m,d]=ymd.split('-').map(Number);
+    const dt=new Date(y,m-1,d);
+    const wk='日一二三四五六'[dt.getDay()];
+    return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}（${wk}）`;
+  }
 
-    datePicker.addEventListener("change", () => {
-      selectedDate = datePicker.value;
-      if (!selectedDate) return;
-      dateResult.textContent = `你選擇的日期是：${selectedDate}`;
-      sendBtn.disabled = false;
+  function renderCoaches(){
+    coachRow.innerHTML='';
+    COACHES.forEach(c=>{
+      const div=document.createElement('div');
+      div.className='chip'+(state.coach?.id===c.id?' sel':'');
+      div.textContent=c.name;
+      div.onclick=()=>{
+        state.coach=c;
+        renderCoaches();
+        btn.disabled=false;
+      };
+      coachRow.appendChild(div);
     });
+  }
 
-    sendBtn.addEventListener("click", async () => {
-      if (!selectedDate || !userProfile) return;
-      sendBtn.disabled = true;
-      sendStatus.textContent = "送出中…";
+  function renderDates(){
+    dateRow.innerHTML='';
+    const now=new Date();
+    for(let i=0;i<7;i++){
+      const d=new Date(now);
+      d.setDate(now.getDate()+i);
+      const ymd=fmtYMD(d);
+      const div=document.createElement('div');
+      div.className='chip'+(state.dateKey===ymd?' sel':'');
+      div.textContent=fmtLabel(ymd);
+      div.onclick=()=>{
+        state.dateKey=ymd;
+        state.slot=null;
+        renderDates();
+        renderSlots();
+        btn.disabled=false;
+      };
+      dateRow.appendChild(div);
+    }
+  }
 
-      try {
-        const payload = {
-          source: "liff",
-          date: selectedDate,
-          userId: userProfile.userId,
-          displayName: userProfile.displayName
-        };
+  function genSlotsForDate(ymd){
+    const out=[];
+    for(let h=10; h<=21; h++){
+      out.push(String(h).padStart(2,'0')+':00');
+    }
 
-        const res = await fetch(MAKE_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Webhook failed");
+    // 一小時後規則：選今天就禁用太近的
+    const nowPlus1h=new Date(Date.now()+60*60*1000);
+    const [y,m,d]=ymd.split('-').map(Number);
+    return out.map(t=>{
+      const [hh,mm]=t.split(':').map(Number);
+      const dt=new Date(y,m-1,d,hh,mm,0);
+      return { t, disabled: dt < nowPlus1h };
+    });
+  }
 
-        sendStatus.innerHTML = `<span class="ok">已送出</span>（${selectedDate}）`;
-      } catch (e) {
-        console.error(e);
-        sendStatus.textContent = "❌ 送出失敗，請稍後再試";
-      } finally {
-        sendBtn.disabled = false;
+  function renderSlots(){
+    slotGrid.innerHTML='';
+    if(!state.dateKey){
+      slotGrid.innerHTML='<div style="grid-column:1/-1;color:#777;">請先選日期</div>';
+      return;
+    }
+    const slots=genSlotsForDate(state.dateKey);
+    slots.forEach(s=>{
+      const div=document.createElement('div');
+      div.className='slot'+(s.disabled?' disabled':'')+(state.slot===s.t?' sel':'');
+      div.textContent=s.t;
+      div.onclick=()=>{
+        state.slot=s.t;
+        renderSlots();
+        btn.disabled=false;
+      };
+      slotGrid.appendChild(div);
+    });
+  }
+
+  async function init(){
+    await liff.init({ liffId: LIFF_ID });
+    if(!liff.isLoggedIn()) liff.login();
+
+    const profile=await liff.getProfile();
+    state.uid=profile.userId;
+
+    renderCoaches();
+    renderDates();
+    renderSlots();
+
+    status.textContent='請依序選擇教練 → 日期 → 時段';
+
+    btn.onclick=async ()=>{
+      if(state.step===1){
+        setStep(2);
+        return;
       }
-    });
-  </script>
+      if(state.step===2){
+        setStep(3);
+        return;
+      }
+
+      // Step 3：確認 → 送關鍵字到聊天室（後端你之後用同一個 LINE webhook scenario 處理）
+      const text =
+        `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot} dur=60`;
+
+      btn.disabled=true;
+      status.textContent='送出中…';
+
+      try{
+        await liff.sendMessages([{ type:'text', text }]);
+        status.textContent='✅ 已送出，回到聊天室處理預約…';
+        setTimeout(()=>liff.closeWindow(), 600);
+      }catch(e){
+        status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
+        btn.disabled=false;
+      }
+    };
+
+    setStep(1);
+    status.textContent=`已登入：${state.uid.slice(0,8)}... 請開始預約`;
+  }
+
+  init();
+</script>
 </body>
 </html>
