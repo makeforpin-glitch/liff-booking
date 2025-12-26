@@ -27,7 +27,7 @@
     *{ box-sizing:border-box; }
     html, body{
       height:100%;
-      overflow:hidden; /* ✅ 不要整頁往下滑 */
+      overflow:hidden;
     }
     body{
       margin:0;
@@ -52,7 +52,7 @@
       flex:0 0 auto;
     }
 
-    /* ✅ 1) 所有步驟 title 移除：保留 header title 也移除（若你要保留可把 display:none 拿掉） */
+    /* ✅ 不要最上方的「支點運動_私課預約」 */
     .title{ display:none; }
 
     .steps{
@@ -111,6 +111,21 @@
       box-shadow:var(--shadow);
       padding:14px;
       overflow:hidden;
+    }
+
+    /* ✅ 恢復每步驟標題 */
+    .h{
+      margin:0 0 10px;
+      font-weight:950;
+      font-size:34px;
+      letter-spacing:.2px;
+      line-height:1.05;
+      color:#111;
+    }
+    .h.small{
+      font-size:26px;
+      line-height:1.1;
+      text-align:center;
     }
 
     .sub{
@@ -374,14 +389,6 @@
       min-height:0;
     }
 
-    .confirmTitle{
-      font-size:16px;
-      font-weight:950;
-      margin:2px 0 6px;
-      text-align:center;
-      color:#111;
-    }
-
     .infoBox{
       width:100%;
       border-radius:16px;
@@ -451,10 +458,12 @@
       font-weight:800;
       min-height:18px;
     }
+    .statusError{ color:var(--danger); font-weight:950; }
 
     .hide{ display:none !important; }
 
     @media (max-height:720px){
+      .h{ font-size:30px; }
       .chip{ font-size:17px; padding:13px 14px; }
       .dayCell{ min-height:60px; }
       .btn{ font-size:15px; padding:13px 10px; }
@@ -487,7 +496,7 @@
   <div class="main">
     <!-- Step 1 -->
     <div id="card1" class="card">
-      <!-- ✅ 1) step title 已移除 -->
+      <div class="h">Step 1｜選擇教練</div>
       <p class="sub">請先選擇教練，後續只會顯示可預約的日期與時段。</p>
       <div id="coachRow" class="row"></div>
     </div>
@@ -495,7 +504,7 @@
     <!-- Step 2 -->
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
-        <!-- ✅ 1) step title 已移除 -->
+        <div class="h">Step 2｜選擇日期及時段</div>
 
         <div class="coachIntro">
           <div class="avatar"><img id="coachAvatar2" alt="" /></div>
@@ -532,20 +541,18 @@
       </div>
     </div>
 
-    <!-- Step 3：確認預約訊息 -->
+    <!-- Step 3：確認預約信息 -->
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
       <div class="confirmWrap">
-        <!-- ✅ 3) 移除成功字樣/打勾，改成確認介面 -->
-        <div class="confirmTitle">請確認以下預約資訊</div>
+        <div class="h small">Step 3｜確認預約信息</div>
 
         <div class="infoBox" id="confirmInfo"></div>
 
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
           1. 若需取消或改期，請於開課前 1 小時完成。<br/>
-          2. 如有任何問題，請於「支點運動空間官方line」聊天室聯繫我們。
+          2. 如有任何問題，請於「支點運動空間」官方Line聯繫我們。
         </div>
-        <!-- ✅ 4) 系統訊息已移除（不顯示灰字 payload） -->
       </div>
     </div>
   </div>
@@ -578,7 +585,6 @@
   ];
 
   const ROOM = { id:'room1', name:'場地' };
-  const PRICE_TWD = 0;
 
   const state = {
     step: 1,
@@ -651,6 +657,8 @@
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
 
+    status.classList.remove('statusError');
+
     if(n===1){
       btnBack.classList.add('hide');
       btnNext.textContent='下一步';
@@ -660,7 +668,6 @@
 
     if(n===2){
       btnBack.classList.remove('hide');
-      /* ✅ 2) step2 按鈕：立即預約 → 下一步 */
       btnNext.textContent='下一步';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       status.textContent = state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '';
@@ -668,14 +675,13 @@
 
     if(n===3){
       btnBack.classList.remove('hide');
-      /* ✅ 5) step3 下方按鈕：確認預約（送出關鍵字並關閉） */
       btnNext.textContent='確認預約';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
 
+      // ✅ 2) Step3 移除預約費用（只顯示教練+時間）
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
         <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
-        <div class="infoLine"><b>預約費用：</b>NT$${PRICE_TWD}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
 
@@ -849,17 +855,19 @@
         return;
       }
 
-      // Step3：確認預約 → 發送關鍵字並關閉 LIFF
+      // Step3：確認預約 → 發送關鍵字並關閉 LIFF（回到聊天室）
       if(state.step===3){
         if(!(state.coach && state.dateKey && state.slot)) return;
 
         const payload = buildBookPayload();
 
         btnNext.disabled = true;
+        status.classList.remove('statusError');
         status.textContent = '送出中…';
 
-        // 必須在 LINE 內才能 sendMessages
+        // ✅ 重點：LIFF 的 sendMessages 只能在「LINE App 內」成功
         if(!liff.isInClient()){
+          status.classList.add('statusError');
           status.textContent = '❌ 請在 LINE 內開啟後再確認預約';
           btnNext.disabled = false;
           return;
@@ -867,13 +875,13 @@
 
         try{
           await liff.sendMessages([{ type:'text', text: payload }]);
-          // ✅ 送出後關閉
+          // 關閉 LIFF：使用者會回到原本的聊天室畫面
           liff.closeWindow();
         }catch(e){
+          status.classList.add('statusError');
           status.textContent = '❌ 送出失敗，請重試';
           btnNext.disabled = false;
         }
-        return;
       }
     };
 
