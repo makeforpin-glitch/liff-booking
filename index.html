@@ -24,7 +24,7 @@
     *{ box-sizing:border-box; }
     html, body{
       height:100%;
-      overflow:hidden;            /* ✅ 不要整頁往下滑 */
+      overflow:hidden; /* ✅ 不要整頁往下滑 */
     }
     body{
       margin:0;
@@ -34,9 +34,8 @@
       -webkit-font-smoothing:antialiased;
     }
 
-    /* ✅ 整體滿版 */
     .wrap{
-      height:100dvh;              /* ✅ 以手機可用高度為準 */
+      height:100dvh;
       display:flex;
       flex-direction:column;
       max-width:560px;
@@ -50,10 +49,10 @@
       flex:0 0 auto;
     }
 
-    /* 標題靠左（你之前要） */
+    /* ✅ 附圖1：整體字體縮一階 */
     .title{
-      font-weight:950;
-      font-size:22px;
+      font-weight:900;
+      font-size:18px;
       letter-spacing:.2px;
       padding:2px 2px 8px;
       text-align:left;
@@ -71,42 +70,41 @@
       box-shadow:var(--shadow);
     }
     .step{
-      display:flex; align-items:center; gap:10px;
+      display:flex; align-items:center; gap:8px;
       flex:1;
       justify-content:center;
       min-width:0;
     }
     .dot{
-      width:34px; height:34px;
+      width:30px; height:30px;
       border-radius:999px;
       background:#e9f7f0;
       color:var(--primary);
-      font-weight:950;
+      font-weight:900;
       display:flex; align-items:center; justify-content:center;
       flex:0 0 auto;
-      font-size:16px;
+      font-size:14px;
     }
     .dot.active{ background:var(--primary); color:#fff; }
 
-    /* ✅ 「選教練/選日期/選時段」放大 */
     .label{
-      font-size:18px;
+      font-size:15px;
       font-weight:900;
       color:var(--muted);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .label.active{ color:var(--text); font-weight:950; }
+    .label.active{ color:var(--text); }
 
-    /* ✅ 內容區：固定高度、不捲動 */
     .main{
       flex:1 1 auto;
-      overflow:hidden;  /* ✅ 內容區也不捲 */
+      overflow:hidden;
       padding:0 14px;
       display:flex;
       flex-direction:column;
       gap:12px;
+      min-height:0;
     }
 
     .card{
@@ -115,35 +113,34 @@
       border:1px solid var(--border);
       box-shadow:var(--shadow);
       padding:14px;
-      overflow:hidden; /* ✅ 避免內部把外面撐爆 */
+      overflow:hidden;
     }
 
-    /* Step 標題維持大，但別太誇張避免滿版裝不下 */
+    /* ✅ 附圖1：Step 標題不要太巨大 */
     .h{
       margin:0 0 8px;
       font-weight:950;
-      font-size:36px;   /* ✅ 比你原本 44 小，換成更適合滿版 */
+      font-size:26px;
       letter-spacing:.2px;
-      line-height:1.05;
+      line-height:1.12;
     }
 
-    /* ✅ 其他文字縮小（你上一輪要求） */
     .sub{
       margin:0 0 10px;
       color:var(--muted);
-      font-size:13px;
+      font-size:12px;
       line-height:1.45;
       font-weight:700;
     }
 
-    /* Step1 coach */
+    /* Step1 */
     .row{ display:flex; gap:12px; flex-wrap:wrap; }
     .chip{
-      padding:16px 18px;
-      border-radius:18px;
+      padding:14px 16px;
+      border-radius:16px;
       background:#eeeeee;
       font-weight:950;
-      font-size:22px;
+      font-size:18px;
       cursor:pointer;
       user-select:none;
       border:2px solid transparent;
@@ -154,22 +151,22 @@
     .chip.sel{
       background:#dff4ea;
       border-color:rgba(27,181,122,.45);
-      box-shadow:0 0 0 3px rgba(27,181,122,.16) inset;
+      box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
     }
 
-    /* coach intro (step2/3) */
+    /* Step2 coach intro */
     .coachIntro{
       display:flex;
-      gap:12px;
+      gap:10px;
       align-items:center;
       border:1px solid rgba(0,0,0,.08);
-      border-radius:18px;
-      padding:12px;
+      border-radius:16px;
+      padding:10px;
       background:#fff;
       flex:0 0 auto;
     }
     .avatar{
-      width:56px; height:56px;
+      width:48px; height:48px;
       border-radius:999px;
       overflow:hidden;
       border:3px solid rgba(0,0,0,.06);
@@ -181,27 +178,28 @@
     .coachMeta{ flex:1; min-width:0; }
     .coachName{
       font-weight:950;
-      font-size:24px;
+      font-size:18px;
       margin:0 0 6px;
       line-height:1.1;
     }
     .tags{
       display:flex;
-      gap:8px;
+      gap:6px;
       flex-wrap:wrap;
     }
+    /* ✅ 2. TAG 再縮小 */
     .tag{
-      padding:8px 10px;
+      padding:6px 8px;
       border-radius:999px;
       background:#eaf8f2;
-      border:2px solid rgba(27,181,122,.22);
+      border:1px solid rgba(27,181,122,.22);
       color:#157a55;
       font-weight:900;
-      font-size:13px;  /* ✅ TAG 字縮小 */
+      font-size:10px;
       line-height:1;
     }
 
-    /* Step2 layout：日曆 + tabs + slots 同畫面（不滑動） */
+    /* ✅ Step2：改成附圖2 的結構（月份+一排週日期） */
     .step2Box{
       display:flex;
       flex-direction:column;
@@ -211,22 +209,22 @@
     }
 
     .cal{
-      border-radius:20px;
+      border-radius:18px;
       border:1px solid rgba(0,0,0,.08);
-      padding:12px;
+      padding:10px;
       background:#fff;
       flex:0 0 auto;
     }
     .calHead{
       display:grid;
-      grid-template-columns:54px 1fr 54px;
+      grid-template-columns:46px 1fr 46px;
       gap:10px;
       align-items:center;
       margin-bottom:8px;
     }
     .calBtn{
-      width:54px; height:54px;
-      border-radius:16px;
+      width:46px; height:46px;
+      border-radius:14px;
       border:1px solid rgba(0,0,0,.08);
       background:#fff;
       box-shadow:0 6px 16px rgba(0,0,0,.06);
@@ -235,74 +233,71 @@
       justify-content:center;
       cursor:pointer;
       user-select:none;
-      font-size:30px;
+      font-size:24px;
       font-weight:950;
       color:#0d7a55;
     }
     .monthTitle{
       text-align:center;
       font-weight:950;
-      font-size:28px;
-      letter-spacing:.5px;
+      font-size:18px;
+      letter-spacing:.2px;
       line-height:1;
     }
-    .dow{
-      display:grid;
-      grid-template-columns:repeat(7, minmax(0, 1fr));
-      gap:8px;
-      margin:8px 0;
-    }
-    .dow div{
-      text-align:center;
-      color:#666;
-      font-weight:900;
-      font-size:16px;
-    }
-    .days{
+
+    /* ✅ 一排週日期 */
+    .weekStrip{
       display:grid;
       grid-template-columns:repeat(7, minmax(0, 1fr));
       gap:8px;
     }
-    .dayBtn{
-      height:66px;
-      border-radius:18px;
-      border:1px solid rgba(0,0,0,.08);
+    .dayCell{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      padding:6px 0;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.06);
       background:#fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
       cursor:pointer;
       user-select:none;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      min-height:64px;
       position:relative;
-      overflow:visible;
     }
-    .dayBtn.disabled{
+    .dayCell.disabled{
       opacity:.35;
       pointer-events:none;
       box-shadow:none;
     }
-    .dNum{
-      font-weight:950;
-      font-size:20px;  /* ✅ 日期縮小 → 圈圈可完整 */
+    .dowTxt{
+      font-size:11px;
+      font-weight:900;
+      color:#666;
       line-height:1;
     }
-    .dayBtn.sel{
-      background:#eaf8f2;
-      border-color:rgba(27,181,122,.22);
-    }
-    .dayBtn.sel::after{
-      content:"";
-      position:absolute;
-      inset:8px;               /* ✅ 圈圈不會被裁切 */
+    .dateDot{
+      width:34px;
+      height:34px;
       border-radius:999px;
-      border:3px solid rgba(27,181,122,.55);
-      box-shadow:0 0 0 5px rgba(27,181,122,.12);
-      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:950;
+      color:#111;
+      background:transparent;
+      border:2px solid transparent;
+    }
+    .dayCell.sel .dateDot{
+      background:var(--primary);
+      color:#fff;
+      border-color:rgba(27,181,122,.25);
+      box-shadow:0 0 0 5px rgba(27,181,122,.14);
     }
 
-    /* ✅ tabs + slots：用剩餘空間，不要把頁面撐高 */
+    /* ✅ 3. 時段一定要出現：改成卡片內部可捲動，不是整頁捲 */
     .slotsArea{
       flex:1 1 auto;
       min-height:0;
@@ -314,14 +309,14 @@
 
     .tabs{
       display:flex;
-      gap:34px;
+      gap:22px;
       border-bottom:2px solid rgba(0,0,0,.08);
       padding-bottom:8px;
       flex:0 0 auto;
     }
     .tab{
       font-weight:950;
-      font-size:24px; /* ✅ 上午下午晚上放大 */
+      font-size:16px;
       color:#666;
       cursor:pointer;
       user-select:none;
@@ -333,32 +328,35 @@
       content:"";
       position:absolute;
       left:0; right:0; bottom:-2px;
-      height:6px;
+      height:5px;
       background:var(--primary);
       border-radius:999px;
     }
 
-    /* ✅ 時段格：固定行數，讓畫面不需要滑 */
+    /* ✅ slotGrid 允許內部捲動，避免手機直接消失 */
     .slotGrid{
       flex:1 1 auto;
       min-height:0;
       display:grid;
-      grid-template-columns:repeat(4, 1fr); /* ✅ 手機更像附圖的 4 顆一排 */
+      grid-template-columns:repeat(4, 1fr);
       gap:10px;
       align-content:start;
-      overflow:hidden;
+      overflow:auto;                 /* ✅ 關鍵：時段太多就捲這裡 */
+      padding-right:2px;
+      -webkit-overflow-scrolling:touch;
     }
     .slot{
       padding:10px 0;
       border-radius:999px;
       background:#ededed;
       font-weight:950;
-      font-size:14px;   /* ✅ 其他文字縮小 */
+      font-size:13px;
       text-align:center;
       cursor:pointer;
       user-select:none;
       border:2px solid transparent;
       line-height:1;
+      white-space:nowrap;
     }
     .slot.sel{
       background:#dff4ea;
@@ -372,14 +370,18 @@
       display:flex;
       gap:10px;
       align-items:flex-start;
-      color:var(--danger);
+      color:#c07a00;
       font-weight:900;
-      font-size:14px;  /* ✅ 縮小 */
+      font-size:12px;
       line-height:1.35;
+      background:#fff7e6;
+      border:1px solid rgba(192,122,0,.18);
+      border-radius:14px;
+      padding:10px;
     }
-    .warn .icon{ font-size:18px; line-height:1; }
+    .warn .icon{ font-size:16px; line-height:1; }
 
-    /* footer 固定在底部，避免滑動 */
+    /* footer */
     .footer{
       flex:0 0 auto;
       padding:10px 14px calc(12px + var(--safeB));
@@ -392,9 +394,9 @@
     .btn{
       flex:1;
       border:0;
-      border-radius:18px;
-      padding:16px 12px;
-      font-size:22px;
+      border-radius:16px;
+      padding:14px 12px;
+      font-size:16px;
       font-weight:950;
       cursor:pointer;
       box-shadow:var(--shadow);
@@ -409,24 +411,85 @@
 
     .status{
       margin-top:8px;
-      font-size:14px;
+      font-size:12px;
       color:var(--muted);
       text-align:center;
       font-weight:800;
-      min-height:20px;
+      min-height:18px;
     }
 
     .hide{ display:none !important; }
 
-    /* 小螢幕/短高度：再縮一點避免任何溢出 */
+    /* ✅ Step3：附圖3 成功頁樣式 */
+    .successWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      padding:8px 0 2px;
+    }
+    .successIcon{
+      width:56px; height:56px;
+      border-radius:999px;
+      background:#eaf8f2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(27,181,122,.25);
+    }
+    .successIcon svg{ width:28px; height:28px; }
+    .successTitle{
+      font-size:16px;
+      font-weight:950;
+      margin:0;
+    }
+
+    .infoBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#f3f8f6;
+      padding:12px;
+      font-size:12px;
+      line-height:1.6;
+      font-weight:800;
+      color:#1f3b2f;
+    }
+    .infoLine b{ font-weight:950; }
+
+    .remindTitle{
+      width:100%;
+      font-weight:950;
+      font-size:12px;
+      color:#c07a00;
+      margin-top:2px;
+    }
+
+    .remindBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(192,122,0,.18);
+      background:#fff7e6;
+      padding:12px;
+      font-size:12px;
+      line-height:1.6;
+      font-weight:800;
+      color:#7a4a00;
+    }
+
+    .miniNote{
+      font-size:11px;
+      color:#7a7a7a;
+      font-weight:800;
+      word-break:break-all;
+      margin-top:6px;
+    }
+
     @media (max-height:720px){
-      .h{ font-size:32px; }
-      .title{ font-size:20px; }
-      .label{ font-size:17px; }
-      .dayBtn{ height:62px; }
-      .monthTitle{ font-size:26px; }
-      .tab{ font-size:22px; }
-      .btn{ font-size:20px; padding:14px 10px; }
+      .h{ font-size:24px; }
+      .chip{ font-size:17px; padding:13px 14px; }
+      .dayCell{ min-height:60px; }
+      .btn{ font-size:15px; padding:13px 10px; }
     }
   </style>
 </head>
@@ -447,7 +510,7 @@
       </div>
       <div class="step">
         <div id="dot3" class="dot">3</div>
-        <div id="lab3" class="label">選時段</div>
+        <div id="lab3" class="label">完成</div>
       </div>
     </div>
   </div>
@@ -460,10 +523,10 @@
       <div id="coachRow" class="row"></div>
     </div>
 
-    <!-- Step 2：滿版彈窗感（日曆 + tabs + 時段同畫面） -->
+    <!-- Step 2 -->
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
-        <div class="h">Step 2｜選擇日期</div>
+        <div class="h">Step 2｜選擇預約時間</div>
 
         <div class="coachIntro">
           <div class="avatar"><img id="coachAvatar2" alt="" /></div>
@@ -480,34 +543,48 @@
             <div id="nextWeek" class="calBtn">›</div>
           </div>
 
-          <div class="dow">
-            <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
-          </div>
-
-          <div id="days" class="days"></div>
+          <div id="weekStrip" class="weekStrip"></div>
         </div>
 
-        <!-- ✅ 選到日期就顯示：tab + 時段（同畫面、不滑動） -->
         <div class="slotsArea">
           <div class="tabs">
             <div class="tab active" data-tab="am">上午</div>
             <div class="tab" data-tab="pm">下午</div>
             <div class="tab" data-tab="night">晚上</div>
           </div>
+
           <div id="slotGrid2" class="slotGrid"></div>
 
           <div class="warn">
-            <div class="icon">⚠️</div>
+            <div class="icon">🔔</div>
             <div>預約及取消需在開課前 1 小時完成。</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Step 3（保留確認用，你之後可改成真的確認頁） -->
-    <div id="card3" class="card hide">
-      <div class="h">Step 3｜確認</div>
-      <p class="sub" id="confirmText">—</p>
+    <!-- Step 3：成功頁（附圖3） -->
+    <div id="card3" class="card hide" style="flex:1; min-height:0;">
+      <div class="successWrap">
+        <div class="successIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M20 6L9 17l-5-5" stroke="var(--primary)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="successTitle">您已預約成功</p>
+
+        <div class="infoBox" id="successInfo">
+          <!-- JS 填入 -->
+        </div>
+
+        <div class="remindTitle">溫馨提醒</div>
+        <div class="remindBox">
+          1. 請提前 5 分鐘到場準備。<br/>
+          2. 若需取消/改期，請於開課前 1 小時完成。<br/>
+          3. 如有任何問題，請直接在 LINE 聊天室詢問我們。
+          <div class="miniNote" id="bookPayloadNote"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -540,6 +617,9 @@
 
   const ROOM = { id:'room1', name:'場地' };
 
+  // ✅ 可自行改成你的收費邏輯
+  const PRICE_TWD = 0;
+
   const state = {
     step: 1,
     uid: '',
@@ -549,6 +629,7 @@
     dateKey: null,
     tab: 'am',
     slot: null,
+    lastPayload: ''
   };
 
   const $ = s => document.querySelector(s);
@@ -568,9 +649,11 @@
   const prevWeek=$('#prevWeek');
   const nextWeek=$('#nextWeek');
   const monthTitle=$('#monthTitle');
-  const daysWrap=$('#days');
+  const weekStrip=$('#weekStrip');
   const slotGrid2=$('#slotGrid2');
-  const confirmText=$('#confirmText');
+
+  const successInfo=$('#successInfo');
+  const bookPayloadNote=$('#bookPayloadNote');
 
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
@@ -585,29 +668,70 @@
   function monthYearLabel(ws){
     return `${ws.getMonth()+1}月 ${ws.getFullYear()}`;
   }
+  function dowLabel(idx){ // Monday=0
+    return ['一','二','三','四','五','六','日'][idx] || '';
+  }
+
+  function canBookNow(dateKey, timeStr){
+    if(!dateKey || !timeStr) return false;
+    const selectedDate = new Date(dateKey+'T00:00:00');
+    const [hh,mm]=timeStr.split(':').map(Number);
+    const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
+    const nowPlus1h = new Date(Date.now()+60*60*1000);
+    return dt >= nowPlus1h;
+  }
 
   function setStep(n){
     state.step = n;
+
     [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
     [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
+
     card1.classList.toggle('hide', n!==1);
     card2.classList.toggle('hide', n!==2);
     card3.classList.toggle('hide', n!==3);
-    btnBack.classList.toggle('hide', n===1);
 
     if(n===1){
+      btnBack.classList.add('hide');
+      btnNext.classList.remove('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !state.coach;
-      status.textContent = state.coach ? `已選擇教練：${state.coach.name}` : `${state.name || '您好'}，第一步請先選擇教練`;
-    }else if(n===2){
-      btnNext.textContent='下一步';
-      btnNext.disabled = !state.dateKey;
-      status.textContent = state.dateKey ? `已選日期：${state.dateKey}` : ''; // ✅ 沒選日期不顯示
-    }else{
-      btnNext.textContent='確認預約';
-      btnNext.disabled = !(state.dateKey && state.slot);
-      status.textContent = state.dateKey ? `已選日期：${state.dateKey}` : '';
-      confirmText.textContent = `教練：${state.coach.name}｜日期：${state.dateKey || '—'}｜時間：${state.slot || '—'}`;
+      status.textContent = state.coach
+        ? `已選擇教練：${state.coach.name}`
+        : `${state.name || '您好'}，第一步請先選擇教練`;
+    }
+
+    if(n===2){
+      btnBack.classList.remove('hide');
+      btnNext.classList.remove('hide');
+      /* ✅ 4. Step2 底部按鈕：上一步 + 立即預約 */
+      btnNext.textContent='立即預約';
+      btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      status.textContent = state.dateKey
+        ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}`
+        : '';
+    }
+
+    if(n===3){
+      /* ✅ 成功頁：改成「好的 / 返回首頁」 */
+      btnBack.classList.add('hide');
+      btnNext.classList.remove('hide');
+      btnNext.textContent='好的，前往聊天室';
+      btnNext.disabled = false;
+      status.textContent = '✅ 已完成';
+
+      const infoHTML = `
+        <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
+        <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
+        <div class="infoLine"><b>預約費用：</b>NT$${PRICE_TWD}</div>
+      `;
+      successInfo.innerHTML = infoHTML;
+
+      if(state.lastPayload){
+        bookPayloadNote.textContent = `（系統訊息：${state.lastPayload}）`;
+      }else{
+        bookPayloadNote.textContent = '';
+      }
     }
   }
 
@@ -640,10 +764,11 @@
     });
   }
 
-  function renderWeek(){
+  /* ✅ Step2：週條（橫向 7 天） */
+  function renderWeekStrip(){
     const ws = state.weekStart;
     monthTitle.textContent = monthYearLabel(ws);
-    daysWrap.innerHTML='';
+    weekStrip.innerHTML='';
 
     const today0 = startOfDay(new Date());
 
@@ -651,41 +776,46 @@
       const d = addDays(ws, i);
       const key = ymd(d);
 
-      const btn=document.createElement('div');
-      btn.className='dayBtn';
+      const cell=document.createElement('div');
+      cell.className='dayCell';
 
-      const isPast = startOfDay(d) < today0; // ✅ 過去日期不可點（今天可點）
-      if(isPast) btn.classList.add('disabled');
-      if(state.dateKey===key) btn.classList.add('sel');
+      const isPast = startOfDay(d) < today0;
+      if(isPast) cell.classList.add('disabled');
+      if(state.dateKey===key) cell.classList.add('sel');
 
-      const num=document.createElement('div');
-      num.className='dNum';
-      num.textContent = d.getDate(); // ✅ 只顯示日期數字
-      btn.appendChild(num);
+      const dow=document.createElement('div');
+      dow.className='dowTxt';
+      dow.textContent = dowLabel(i);
 
-      btn.onclick=()=>{
+      const dot=document.createElement('div');
+      dot.className='dateDot';
+      dot.textContent = d.getDate();
+
+      cell.appendChild(dow);
+      cell.appendChild(dot);
+
+      cell.onclick=()=>{
         if(isPast) return;
         state.dateKey=key;
         state.slot=null;
-        renderWeek();
+        renderWeekStrip();
         renderSlotsStep2();
-        btnNext.disabled=false;
-        status.textContent = `已選日期：${state.dateKey}`; // ✅ 點選日期後才顯示
+        status.textContent = `已選日期：${state.dateKey}`;
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
 
-      daysWrap.appendChild(btn);
+      weekStrip.appendChild(cell);
     }
   }
 
   function goWeek(offset){
     state.weekStart = addDays(state.weekStart, offset*7);
-    renderWeek();
+    renderWeekStrip();
+    renderSlotsStep2();
   }
 
   function renderSlotsStep2(){
-    // ✅ 沒選日期就先清空（不顯示任何時段，避免擠版面）
     slotGrid2.innerHTML='';
-    if(!state.dateKey) return;
 
     const presets = {
       am:    ['05:00','06:00','07:00','08:00','09:00','10:00','11:00'],
@@ -694,25 +824,30 @@
     };
     const list = presets[state.tab] || [];
 
-    // 一小時後禁用（今天才需要）
-    const selectedDate = new Date(state.dateKey+'T00:00:00');
-    const nowPlus1h = new Date(Date.now()+60*60*1000);
+    // ✅ 沒選日期就顯示提示（但時段區仍存在，不會消失）
+    if(!state.dateKey){
+      const tip=document.createElement('div');
+      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:800; padding:6px 2px;';
+      tip.textContent='請先選擇上方日期';
+      slotGrid2.appendChild(tip);
+      return;
+    }
 
     list.forEach(t=>{
-      const [hh,mm]=t.split(':').map(Number);
-      const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
-      const disabled = dt < nowPlus1h;
+      const disabled = !canBookNow(state.dateKey, t);
 
       const div=document.createElement('div');
       div.className='slot'+(disabled?' disabled':'')+(state.slot===t?' sel':'');
       div.textContent=t;
+
       div.onclick=()=>{
         if(disabled) return;
         state.slot=t;
         renderSlotsStep2();
-        // Step2 仍要按「下一步」進 Step3
-        btnNext.disabled = !state.dateKey;
+        status.textContent = `已選日期：${state.dateKey}｜已選時段：${state.slot}`;
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
+
       slotGrid2.appendChild(div);
     });
   }
@@ -725,8 +860,13 @@
         state.tab = el.dataset.tab;
         state.slot = null;
         renderSlotsStep2();
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
     });
+  }
+
+  function buildBookPayload(){
+    return `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot || ''} dur=60`;
   }
 
   async function init(){
@@ -740,41 +880,50 @@
     renderCoaches();
 
     state.weekStart = weekStartMonday(new Date());
-    renderWeek();
+    renderWeekStrip();
     bindTabs();
     renderSlotsStep2();
 
     btnBack.onclick=()=>{
       if(state.step===2) setStep(1);
-      else if(state.step===3) setStep(2);
     };
 
     btnNext.onclick=async ()=>{
       if(state.step===1){
+        if(!state.coach) return;
         setStep(2);
         renderCoachIntro();
-        // Step2 初始不顯示狀態（沒選日期）
         status.textContent = '';
         return;
       }
+
       if(state.step===2){
-        setStep(3);
+        // ✅ Step2：立即預約 → 送出後顯示 Step3 成功頁
+        if(!(state.coach && state.dateKey && state.slot)) return;
+
+        const payload = buildBookPayload();
+        state.lastPayload = payload;
+
+        btnNext.disabled=true;
+        status.textContent='送出中…';
+
+        try{
+          await liff.sendMessages([{ type:'text', text: payload }]);
+          setStep(3);
+        }catch(e){
+          status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
+          btnNext.disabled=false;
+        }
         return;
       }
 
-      // Step3：送關鍵字到聊天室
-      const text = `#BOOK coach=${state.coach.id} room=${ROOM.id} date=${state.dateKey} time=${state.slot || ''} dur=60`;
-
-      btnNext.disabled=true;
-      status.textContent='送出中…';
-
-      try{
-        await liff.sendMessages([{ type:'text', text }]);
-        status.textContent='✅ 已送出，回到聊天室處理預約…';
-        setTimeout(()=>liff.closeWindow(), 600);
-      }catch(e){
-        status.textContent='❌ 送出失敗，請重試（請確認是在 LINE 內開啟）';
-        btnNext.disabled=false;
+      if(state.step===3){
+        // ✅ 前往聊天室（或你要改成 closeWindow 也行）
+        try{
+          liff.closeWindow();
+        }catch(e){
+          // no-op
+        }
       }
     };
 
