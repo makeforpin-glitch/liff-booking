@@ -547,6 +547,7 @@
   // ✅ Flex 按鈕改成：開同一個 LIFF，讓 LIFF 自動 sendMessages 送文字（保留不動：但成功 Flex 已移除按鈕）
   function buildSendKeywordLiffUrl(keyword){
     const k = encodeURIComponent(keyword);
+    // 用同一個 LIFF，加上參數 action=sendKeyword&k=...
     return `https://liff.line.me/${LIFF_ID}?action=sendKeyword&k=${k}`;
   }
 
@@ -937,8 +938,6 @@
                 "1. 取消或改期，請於開課前1小時完成。\n" +
                 "2. 如有任何問題，請於，「支點運動空間」官方Line聯繫我們。"
             }
-
-            /* ✅ 已移除：查看預約按鈕區塊（其餘維持不變） */
           ]
         }
       }
@@ -964,7 +963,7 @@
   async function init(){
     // ✅ 先判斷是不是「送關鍵字模式」
     const didSendMode = await runSendKeywordMode();
-    if(didSendMode) return;
+    if(didSendMode) return; // 送完就 closeWindow 或 alert，不需要進入預約 UI
 
     await liff.init({ liffId: LIFF_ID });
 
