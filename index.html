@@ -46,199 +46,1004 @@
       padding:10px 14px 8px;
       padding-top: calc(10px + var(--safeT));
       background:linear-gradient(180deg, rgba(246,247,248,1) 75%, rgba(246,247,248,0));
+      flex:0 0 auto;
     }
+
+    .title{ display:none; }
 
     .steps{
       display:flex;
       gap:10px;
+      align-items:center;
+      justify-content:space-between;
       background:var(--card);
       border:1px solid var(--border);
       border-radius:999px;
       padding:10px 12px;
       box-shadow:var(--shadow);
-      justify-content:space-between;
     }
-
-    .step{ display:flex; align-items:center; gap:8px; }
+    .step{
+      display:flex; align-items:center; gap:8px;
+      flex:1;
+      justify-content:center;
+      min-width:0;
+    }
     .dot{
-      width:30px;height:30px;border-radius:999px;
-      background:#e9f7f0;color:var(--primary);
-      display:flex;align-items:center;justify-content:center;
+      width:30px; height:30px;
+      border-radius:999px;
+      background:#e9f7f0;
+      color:var(--primary);
       font-weight:900;
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      font-size:14px;
     }
     .dot.active{ background:var(--primary); color:#fff; }
-    .label{ font-weight:900; color:#777; }
-    .label.active{ color:#111; }
+
+    .label{
+      font-size:15px;
+      font-weight:900;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .label.active{ color:var(--text); }
 
     .main{
-      flex:1;
+      flex:1 1 auto;
+      overflow:hidden;
       padding:0 14px;
       display:flex;
       flex-direction:column;
       gap:12px;
-      overflow:hidden;
+      min-height:0;
     }
 
     .card{
-      background:#fff;
-      border-radius:18px;
+      background:var(--card);
+      border-radius:var(--radius);
       border:1px solid var(--border);
       box-shadow:var(--shadow);
       padding:14px;
+      overflow:hidden;
     }
 
-    .h{ font-size:22px;font-weight:950;margin:0 0 10px; }
+    .h{
+      margin:0 0 10px;
+      font-weight:950;
+      font-size:22px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      color:#111;
+      text-align:left;
+    }
 
     .row{ display:flex; gap:12px; flex-wrap:wrap; }
     .chip{
       padding:14px 16px;
       border-radius:16px;
-      background:#eee;
-      font-size:18px;
+      background:#eeeeee;
       font-weight:950;
+      font-size:18px;
       cursor:pointer;
-      flex:1;
+      user-select:none;
+      border:2px solid transparent;
+      min-width:140px;
       text-align:center;
+      flex:1 1 0;
     }
     .chip.sel{
       background:#dff4ea;
-      border:2px solid rgba(27,181,122,.45);
+      border-color:rgba(27,181,122,.45);
+      box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
+    }
+
+    .coachIntro{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:16px;
+      padding:10px;
+      background:#fff;
+      flex:0 0 auto;
+    }
+    .avatar{
+      width:48px; height:48px;
+      border-radius:999px;
+      overflow:hidden;
+      border:3px solid rgba(0,0,0,.06);
+      background:#ddd;
+      flex:0 0 auto;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    .coachMeta{ flex:1; min-width:0; }
+    .coachName{
+      font-weight:950;
+      font-size:18px;
+      margin:0 0 6px;
+      line-height:1.1;
+    }
+    .tags{ display:flex; gap:6px; flex-wrap:wrap; }
+    .tag{
+      padding:6px 9px;
+      border-radius:999px;
+      background:#eaf8f2;
+      border:1px solid rgba(27,181,122,.22);
+      color:#157a55;
+      font-weight:900;
+      font-size:11px;
+      line-height:1;
+    }
+
+    .step2Box{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      height:100%;
+      min-height:0;
+    }
+
+    .cal{
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.08);
+      padding:10px;
+      background:#fff;
+      flex:0 0 auto;
+    }
+    .calHead{
+      display:grid;
+      grid-template-columns:42px 1fr 42px;
+      gap:10px;
+      align-items:center;
+      margin-bottom:6px;
+    }
+    .calBtn{
+      width:42px; height:42px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      font-size:22px;
+      font-weight:950;
+      color:#0d7a55;
+    }
+    .monthTitle{
+      text-align:center;
+      font-weight:950;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1;
+    }
+
+    .weekStrip{
+      display:grid;
+      grid-template-columns:repeat(7, minmax(0, 1fr));
+      gap:8px;
+    }
+    .dayCell{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      padding:6px 0;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.06);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+      cursor:pointer;
+      user-select:none;
+      min-height:64px;
+      position:relative;
+    }
+    .dayCell.disabled{
+      opacity:.35;
+      pointer-events:none;
+      box-shadow:none;
+    }
+    .dowTxt{
+      font-size:11px;
+      font-weight:900;
+      color:#666;
+      line-height:1;
+    }
+    .dateDot{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:950;
+      color:#111;
+      background:transparent;
+      border:2px solid transparent;
+    }
+    .dayCell.sel .dateDot{
+      background:var(--primary);
+      color:#fff;
+      border-color:rgba(27,181,122,.25);
+      box-shadow:0 0 0 5px rgba(27,181,122,.14);
+    }
+
+    .slotsArea{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+    .tabs{
+      display:flex;
+      gap:22px;
+      border-bottom:2px solid rgba(0,0,0,.08);
+      padding-bottom:8px;
+      flex:0 0 auto;
+    }
+    .tab{
+      font-weight:950;
+      font-size:16px;
+      color:#666;
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      padding-bottom:10px;
+    }
+    .tab.active{ color:#111; }
+    .tab.active::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:-2px;
+      height:5px;
+      background:var(--primary);
+      border-radius:999px;
+    }
+
+    .slotGrid{
+      flex:1 1 auto;
+      min-height:0;
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:10px;
+      align-content:start;
+      overflow:auto;
+      padding-right:2px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .slot{
+      padding:10px 0;
+      border-radius:999px;
+      background:#ededed;
+      font-weight:950;
+      font-size:13px;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      border:2px solid transparent;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .slot.sel{
+      background:#dff4ea;
+      border-color:rgba(27,181,122,.35);
+      box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
+    }
+    .slot.disabled{ opacity:.35; pointer-events:none; }
+
+    .warn{
+      flex:0 0 auto;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color:#c07a00;
+      font-weight:900;
+      font-size:12px;
+      line-height:1.35;
+      background:var(--warnBg);
+      border:1px solid var(--warnBorder);
+      border-radius:14px;
+      padding:10px;
+    }
+    .warn .icon{ font-size:16px; line-height:1; }
+
+    .confirmWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:4px 0 2px;
+      min-height:0;
     }
 
     .infoBox{
-      background:#f3f8f6;
+      width:100%;
       border-radius:16px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#f3f8f6;
       padding:12px;
       font-size:15px;
-      font-weight:900;
       line-height:1.8;
+      font-weight:900;
       color:#1f3b2f;
+    }
+    .infoLine{ margin:3px 0; }
+    .infoLine b{
+      font-weight:950;
+      font-size:16px;
     }
 
     .remindTitle{
-      font-size:12px;
+      width:100%;
       font-weight:950;
-      color:#7a4a00;
-      margin-top:6px;
-    }
-    .remindBox{
-      background:#fff7e6;
-      border-radius:14px;
-      padding:10px;
       font-size:12px;
-      font-weight:900;
+      color:#c07a00;
+      margin-top:2px;
+    }
+
+    .remindBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--warnBorder);
+      background:var(--warnBg);
+      padding:12px;
+      font-size:12px;
       line-height:1.6;
-      color:#7a4a00;
+      font-weight:900;
+      color:var(--warnText);
     }
 
     .footer{
+      flex:0 0 auto;
       padding:10px 14px calc(12px + var(--safeB));
+      background:linear-gradient(0deg, rgba(246,247,248,1) 72%, rgba(246,247,248,0));
+    }
+    .btnRow{
+      display:flex;
+      gap:12px;
     }
     .btn{
-      width:100%;
-      padding:14px;
+      flex:1;
+      border:0;
       border-radius:16px;
-      border:none;
-      background:var(--primary);
-      color:#fff;
+      padding:14px 12px;
       font-size:16px;
       font-weight:950;
+      cursor:pointer;
+      box-shadow:var(--shadow);
     }
-    .btn:disabled{ opacity:.5; }
+    .btnPrimary{ background:var(--primary); color:#fff; }
+    .btnGhost{
+      background:#fff;
+      color:#111;
+      border:1px solid rgba(0,0,0,.10);
+    }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; }
 
     .status{
-      font-size:12px;
-      color:#777;
-      text-align:center;
       margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      font-weight:900;
+      min-height:18px;
+      white-space:pre-wrap;
     }
+    .statusError{ color:var(--danger); font-weight:950; }
 
-    .hide{ display:none; }
+    .hide{ display:none !important; }
   </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
+    <div class="title">支點運動_私課預約</div>
+
     <div class="steps">
       <div class="step">
-        <div class="dot active">1</div>
-        <div class="label active">選教練</div>
+        <div id="dot1" class="dot active">1</div>
+        <div id="lab1" class="label active">選教練</div>
       </div>
       <div class="step">
-        <div class="dot">2</div>
-        <div class="label">選日期</div>
+        <div id="dot2" class="dot">2</div>
+        <div id="lab2" class="label">選日期</div>
       </div>
       <div class="step">
-        <div class="dot">3</div>
-        <div class="label">完成</div>
+        <div id="dot3" class="dot">3</div>
+        <div id="lab3" class="label">確認</div>
       </div>
     </div>
   </div>
 
   <div class="main">
-    <div class="card" id="step1">
+    <!-- Step 1 -->
+    <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
-      <div class="row" id="coachRow"></div>
+      <div id="coachRow" class="row"></div>
     </div>
 
-    <div class="card hide" id="step3">
-      <div class="h">預約完成 🎉</div>
+    <!-- Step 2 -->
+    <div id="card2" class="card hide" style="flex:1; min-height:0;">
+      <div class="step2Box">
+        <div class="h">Step 2｜選擇日期及時段</div>
 
-      <div class="infoBox" id="confirmInfo"></div>
+        <div class="coachIntro">
+          <div class="avatar"><img id="coachAvatar2" alt="" /></div>
+          <div class="coachMeta">
+            <div id="coachName2" class="coachName">—</div>
+            <div id="coachTags2" class="tags"></div>
+          </div>
+        </div>
 
-      <div class="remindTitle">溫馨提醒</div>
-      <div class="remindBox">
-        1. 若需取消或改期，請於開課前 1 小時完成。<br/>
-        2. 如有任何問題，請透過 Rich Menu 聯繫「支點運動空間」。
+        <div class="cal">
+          <div class="calHead">
+            <div id="prevWeek" class="calBtn">‹</div>
+            <div id="monthTitle" class="monthTitle">—</div>
+            <div id="nextWeek" class="calBtn">›</div>
+          </div>
+
+          <div id="weekStrip" class="weekStrip"></div>
+        </div>
+
+        <div class="slotsArea">
+          <div class="tabs">
+            <div class="tab active" data-tab="am">上午</div>
+            <div class="tab" data-tab="pm">下午</div>
+            <div class="tab" data-tab="night">晚上</div>
+          </div>
+
+          <div id="slotGrid2" class="slotGrid"></div>
+
+          <div class="warn">
+            <div class="icon">🔔</div>
+            <div>預約及取消需在開課前 1 小時完成。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="card3" class="card hide" style="flex:1; min-height:0;">
+      <div class="confirmWrap">
+        <div class="h">Step 3｜確認預約訊息</div>
+
+        <div class="infoBox" id="confirmInfo"></div>
+
+        <div class="remindTitle">溫馨提醒</div>
+        <div class="remindBox">
+          1. 若需取消或改期，請於開課前 1 小時完成。<br/>
+          2. 如有任何問題，請於「支點運動空間」官方Line聯繫。
+        </div>
       </div>
     </div>
   </div>
 
   <div class="footer">
-    <button class="btn" id="btnNext" disabled>確認預約</button>
-    <div class="status" id="status">載入中…</div>
+    <div class="btnRow">
+      <button id="btnBack" class="btn btnGhost hide">上一步</button>
+      <button id="btnNext" class="btn btnPrimary" disabled>下一步</button>
+    </div>
+    <div id="status" class="status">載入中…</div>
   </div>
 </div>
 
 <script>
   const LIFF_ID = '2008631386-AEejMove';
 
+  // ✅ 你的 Make Webhook（預約資料送去 Make）
+  const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
+
+  // ✅ 要送到聊天室的關鍵字（保留不動：你其他地方可能還會用到；但成功 Flex 已移除按鈕，不會再觸發）
+  const VIEW_BOOKING_KEYWORD = '查看預約';
+
+  // ✅ Flex 按鈕改成：開同一個 LIFF，讓 LIFF 自動 sendMessages 送文字（保留不動：但成功 Flex 已移除按鈕）
+  function buildSendKeywordLiffUrl(keyword){
+    const k = encodeURIComponent(keyword);
+    return `https://liff.line.me/${LIFF_ID}?action=sendKeyword&k=${k}`;
+  }
+
   const COACHES = [
-    { id:'a', name:'偉銘' },
-    { id:'b', name:'教練 B' }
+    {
+      id:'coachA',
+      name:'偉銘',
+      avatar:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80',
+      tags:['肌力訓練','樂齡運動','青少年體能']
+    },
+    {
+      id:'coachB',
+      name:'教練 B',
+      avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=240&q=80',
+      tags:['肌力訓練','姿勢調整','初學友善']
+    },
   ];
 
-  const state = { coach:null };
+  const ROOM = { id:'room1', name:'場地' };
+
+  const state = {
+    step: 1,
+    uid: '',
+    name: '',
+    coach: null,
+    weekStart: null,
+    dateKey: null,
+    tab: 'am',
+    slot: null
+  };
 
   const $ = s => document.querySelector(s);
 
+  const dot1=$('#dot1'), dot2=$('#dot2'), dot3=$('#dot3');
+  const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
+  const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
+  const coachRow=$('#coachRow');
+  const btnBack=$('#btnBack');
+  const btnNext=$('#btnNext');
+  const status=$('#status');
+
+  const coachAvatar2=$('#coachAvatar2');
+  const coachName2=$('#coachName2');
+  const coachTags2=$('#coachTags2');
+
+  const prevWeek=$('#prevWeek');
+  const nextWeek=$('#nextWeek');
+  const monthTitle=$('#monthTitle');
+  const weekStrip=$('#weekStrip');
+  const slotGrid2=$('#slotGrid2');
+
+  const confirmInfo=$('#confirmInfo');
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function ymd(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+  function weekStartMonday(d){
+    const x = startOfDay(d);
+    const day = x.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    return addDays(x, diff);
+  }
+  function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
+  function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
+
+  function canBookNow(dateKey, timeStr){
+    if(!dateKey || !timeStr) return false;
+    const selectedDate = new Date(dateKey+'T00:00:00');
+    const [hh,mm]=timeStr.split(':').map(Number);
+    const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
+    const nowPlus1h = new Date(Date.now()+60*60*1000);
+    return dt >= nowPlus1h;
+  }
+
+  function buildBookingData(){
+    return {
+      userId: state.uid,
+      displayName: state.name,
+      coachId: state.coach?.id,
+      coachName: state.coach?.name,
+      roomId: ROOM.id,
+      roomName: ROOM.name,
+      date: state.dateKey,
+      time: state.slot,
+      duration: 60,
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  function setStatus(msg, isError=false){
+    status.classList.toggle('statusError', !!isError);
+    status.textContent = msg;
+  }
+
+  function envInfo(){
+    try{
+      const ctx = liff.getContext ? liff.getContext() : null;
+      const os = liff.getOS ? liff.getOS() : 'unknown';
+      const lang = liff.getLanguage ? liff.getLanguage() : 'unknown';
+      return `inClient=${liff.isInClient()} os=${os} lang=${lang} ctxType=${ctx?.type || 'unknown'} chatId=${ctx?.chatId ? 'yes' : 'no'}`;
+    }catch(e){
+      return `envInfo error`;
+    }
+  }
+
+  // ✅ 解析 querystring
+  function getQuery(){
+    const p = new URLSearchParams(location.search);
+    return {
+      action: p.get('action') || '',
+      k: p.get('k') || ''
+    };
+  }
+
+  // ✅ (保留不動) 當這頁是被「送關鍵字模式」打開時：自動把關鍵字送到聊天室，然後關閉
+  async function runSendKeywordMode(){
+    const q = getQuery();
+    if(q.action !== 'sendKeyword') return false;
+
+    try{
+      await liff.init({ liffId: LIFF_ID });
+
+      if(!liff.isLoggedIn()){
+        liff.login();
+        return true;
+      }
+
+      if(!liff.isInClient()){
+        alert('請在 LINE 內開啟才能送出查看預約。');
+        return true;
+      }
+
+      const keyword = decodeURIComponent(q.k || '') || VIEW_BOOKING_KEYWORD;
+
+      await liff.sendMessages([{ type:'text', text: keyword }]);
+
+      liff.closeWindow();
+      return true;
+    }catch(e){
+      alert('送出查看預約失敗：' + (e?.message || 'unknown'));
+      return true;
+    }
+  }
+
+  /* ✅ Step1 底部狀態文字：強制顯示「user您好，請選擇教練」 */
+  function getHelloName(){
+    const raw = (state.name && String(state.name).trim()) ? String(state.name).trim() : 'user';
+    return raw;
+  }
+
+  function setStep(n){
+    state.step = n;
+
+    [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
+    [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
+
+    card1.classList.toggle('hide', n!==1);
+    card2.classList.toggle('hide', n!==2);
+    card3.classList.toggle('hide', n!==3);
+
+    status.classList.remove('statusError');
+
+    if(n===1){
+      btnBack.classList.add('hide');
+      btnNext.textContent='下一步';
+      btnNext.disabled = !state.coach;
+
+      if(state.coach){
+        setStatus(`已選擇教練：${state.coach.name}`);
+      }else{
+        setStatus(`${getHelloName()}您好，請選擇教練`);
+      }
+    }
+
+    if(n===2){
+      btnBack.classList.remove('hide');
+      btnNext.textContent='下一步';
+      btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      setStatus(state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '');
+    }
+
+    if(n===3){
+      btnBack.classList.remove('hide');
+      btnNext.textContent='確認預約';
+      btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+
+      const infoHTML = `
+        <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
+        <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
+      `;
+      confirmInfo.innerHTML = infoHTML;
+
+      setStatus('');
+    }
+  }
+
+  function renderCoaches(){
+    coachRow.innerHTML='';
+    COACHES.forEach(c=>{
+      const div=document.createElement('div');
+      div.className='chip'+(state.coach?.id===c.id?' sel':'');
+      div.textContent=c.name;
+      div.onclick=()=>{
+        state.coach=c;
+        renderCoaches();
+        btnNext.disabled=false;
+        setStatus(`已選擇教練：${c.name}`);
+      };
+      coachRow.appendChild(div);
+    });
+  }
+
+  function renderCoachIntro(){
+    if(!state.coach) return;
+    coachAvatar2.src = state.coach.avatar;
+    coachName2.textContent = state.coach.name;
+    coachTags2.innerHTML='';
+    state.coach.tags.forEach(t=>{
+      const el=document.createElement('div');
+      el.className='tag';
+      el.textContent=t;
+      coachTags2.appendChild(el);
+    });
+  }
+
+  function renderWeekStrip(){
+    const ws = state.weekStart;
+    monthTitle.textContent = monthYearLabel(ws);
+    weekStrip.innerHTML='';
+
+    const today0 = startOfDay(new Date());
+
+    for(let i=0;i<7;i++){
+      const d = addDays(ws, i);
+      const key = ymd(d);
+
+      const cell=document.createElement('div');
+      cell.className='dayCell';
+
+      const isPast = startOfDay(d) < today0;
+      if(isPast) cell.classList.add('disabled');
+      if(state.dateKey===key) cell.classList.add('sel');
+
+      const dow=document.createElement('div');
+      dow.className='dowTxt';
+      dow.textContent = dowLabel(i);
+
+      const dot=document.createElement('div');
+      dot.className='dateDot';
+      dot.textContent = d.getDate();
+
+      cell.appendChild(dow);
+      cell.appendChild(dot);
+
+      cell.onclick=()=>{
+        if(isPast) return;
+        state.dateKey=key;
+        state.slot=null;
+        renderWeekStrip();
+        renderSlotsStep2();
+        setStatus(`已選日期：${state.dateKey}`);
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      };
+
+      weekStrip.appendChild(cell);
+    }
+  }
+
+  function goWeek(offset){
+    state.weekStart = addDays(state.weekStart, offset*7);
+    renderWeekStrip();
+    renderSlotsStep2();
+  }
+
+  function renderSlotsStep2(){
+    slotGrid2.innerHTML='';
+
+    const presets = {
+      am:    ['05:00','06:00','07:00','08:00','09:00','10:00','11:00'],
+      pm:    ['13:00','14:00','15:00','16:00','17:00'],
+      night: ['18:00','19:00','20:00','21:00']
+    };
+    const list = presets[state.tab] || [];
+
+    if(!state.dateKey){
+      const tip=document.createElement('div');
+      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+      tip.textContent='請先選擇上方日期';
+      slotGrid2.appendChild(tip);
+      return;
+    }
+
+    list.forEach(t=>{
+      const disabled = !canBookNow(state.dateKey, t);
+
+      const div=document.createElement('div');
+      div.className='slot'+(disabled?' disabled':'')+(state.slot===t?' sel':'');
+      div.textContent=t;
+
+      div.onclick=()=>{
+        if(disabled) return;
+        state.slot=t;
+        renderSlotsStep2();
+        setStatus(`已選日期：${state.dateKey}｜已選時段：${state.slot}`);
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      };
+
+      slotGrid2.appendChild(div);
+    });
+  }
+
+  function bindTabs(){
+    document.querySelectorAll('.tab').forEach(el=>{
+      el.onclick=()=>{
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        el.classList.add('active');
+        state.tab = el.dataset.tab;
+        state.slot = null;
+        renderSlotsStep2();
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      };
+    });
+  }
+
+  async function postToMake(data){
+    if(!MAKE_WEBHOOK_URL) return { ok:true, skipped:true };
+    try{
+      const res = await fetch(MAKE_WEBHOOK_URL, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text().catch(()=> '');
+      if(!res.ok) throw new Error(`Make webhook failed: ${res.status} ${text}`);
+      return { ok:true, status: res.status, body: text };
+    }catch(e){
+      return { ok:false, error:e };
+    }
+  }
+
+  /* ✅ 成功 Flex（✅已移除「查看預約」按鈕，其餘不變） */
+  function buildSuccessFlex(){
+    const coachName = state.coach?.name || '—';
+    const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
+
+    return [{
+      type: "flex",
+      altText: "私課預約成功",
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          backgroundColor: "#1bb57a",
+          paddingAll: "16px",
+          contents: [
+            { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
+            { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
+          ]
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "md",
+          paddingAll: "16px",
+          contents: [
+            {
+              type: "box",
+              layout: "vertical",
+              backgroundColor: "#F3F8F6",
+              cornerRadius: "12px",
+              paddingAll: "12px",
+              contents: [
+                { type: "text", text: `預約教練　${coachName}`, size: "md", weight: "bold", color: "#1F3B2F" },
+                { type: "text", text: `預約時間　${whenText}`, size: "md", weight: "bold", color: "#1F3B2F", margin: "sm" }
+              ]
+            },
+
+            { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "xs", margin: "md" },
+            {
+              type: "text",
+              wrap: true,
+              color: "#7A4A00",
+              size: "xs",
+              text:
+                "1. 取消或改期，請於開課前1小時完成。\n" +
+                "2. 如有任何問題，請於，「支點運動空間」官方Line聯繫我們。"
+            }
+
+            /* ✅ 已移除：查看預約按鈕區塊（其餘維持不變） */
+          ]
+        }
+      }
+    }];
+  }
+
+  async function sendFlexToChat(){
+    await liff.sendMessages(buildSuccessFlex());
+  }
+
+  function errToText(e){
+    try{
+      if(!e) return 'unknown';
+      const name = e.name || '';
+      const message = e.message || '';
+      const code = e.code ? ` code=${e.code}` : '';
+      return `${name}${code} ${message}`.trim();
+    }catch(_){
+      return 'unknown';
+    }
+  }
+
   async function init(){
+    // ✅ 先判斷是不是「送關鍵字模式」
+    const didSendMode = await runSendKeywordMode();
+    if(didSendMode) return;
+
     await liff.init({ liffId: LIFF_ID });
+
     if(!liff.isLoggedIn()) liff.login();
 
-    const coachRow = $('#coachRow');
-    COACHES.forEach(c=>{
-      const d=document.createElement('div');
-      d.className='chip';
-      d.textContent=c.name;
-      d.onclick=()=>{
-        state.coach=c;
-        document.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));
-        d.classList.add('sel');
-        $('#btnNext').disabled=false;
-      };
-      coachRow.appendChild(d);
-    });
+    const profile = await liff.getProfile();
+    state.uid = profile.userId;
+    state.name = profile.displayName || '';
 
-    $('#btnNext').onclick=()=>{
-      $('#step1').classList.add('hide');
-      $('#step3').classList.remove('hide');
-      $('#confirmInfo').innerHTML =
-        `<b>預約教練：</b>${state.coach.name}<br/><b>狀態：</b>已完成預約`;
-      $('#btnNext').classList.add('hide');
-      $('#status').textContent='預約完成';
+    renderCoaches();
+    state.weekStart = weekStartMonday(new Date());
+    renderWeekStrip();
+    bindTabs();
+    renderSlotsStep2();
+
+    btnBack.onclick=()=>{
+      if(state.step===2) setStep(1);
+      else if(state.step===3) setStep(2);
     };
+
+    btnNext.onclick=async ()=>{
+      if(state.step===1){
+        if(!state.coach) return;
+        setStep(2);
+        renderCoachIntro();
+        setStatus('');
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+        return;
+      }
+
+      if(state.step===2){
+        if(!(state.coach && state.dateKey && state.slot)) return;
+        setStep(3);
+        return;
+      }
+
+      if(state.step===3){
+        if(!(state.coach && state.dateKey && state.slot)) return;
+
+        btnNext.disabled = true;
+        setStatus(`送出中…\n${envInfo()}`);
+
+        if(!liff.isInClient()){
+          setStatus(`❌ 目前不是在 LINE 內開啟\n${envInfo()}`, true);
+          btnNext.disabled = false;
+          return;
+        }
+
+        // ① 送預約資料去 Make
+        const bookingData = buildBookingData();
+        const mk = await postToMake(bookingData);
+        if(!mk.ok){
+          setStatus(`❌ Make webhook 送出失敗\n${errToText(mk.error)}\n${envInfo()}`, true);
+          btnNext.disabled = false;
+          return;
+        }
+
+        // ② 回聊天室送「成功 Flex」
+        try{
+          await sendFlexToChat();
+          liff.closeWindow();
+          return;
+        }catch(e){
+          setStatus(
+            `❌ 成功寫入預約，但卡片送出失敗\n` +
+            `${errToText(e)}\n` +
+            `${envInfo()}\n` +
+            `提示：請確認 LIFF 的 Channel 已啟用 Messaging API、已連結 OA，且 LIFF 有 messaging scope。`,
+            true
+          );
+          btnNext.disabled = false;
+        }
+      }
+    };
+
+    prevWeek.onclick=()=>goWeek(-1);
+    nextWeek.onclick=()=>goWeek(1);
+
+    setStep(1);
   }
 
   init();
