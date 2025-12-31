@@ -363,7 +363,6 @@
       min-height:0;
     }
 
-    /* ✅ Step3：預約教練/時間字放大 */
     .infoBox{
       width:100%;
       border-radius:16px;
@@ -542,17 +541,14 @@
   // ✅ 你的 Make Webhook（預約資料送去 Make）
   const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
 
-  // ✅ Flex 按鈕要帶入的關鍵字
+  // ✅ 要送到聊天室的關鍵字
   const VIEW_BOOKING_KEYWORD = '查看預約';
 
-  // ✅ 你的 OA ID（你的是 @支點）
-  const OA_LINE_ID = '@支點';
-
-  // ✅ 產生「開啟 OA 聊天室 + 帶入文字」URL（Flex action 只能用 uri，不能用 message）
-  function buildOaMessageUrl(text){
-    const oa = encodeURIComponent(OA_LINE_ID);
-    const msg = encodeURIComponent(text);
-    return `https://line.me/R/oaMessage/${oa}/?${msg}`;
+  // ✅ Flex 按鈕改成：開同一個 LIFF，讓 LIFF 自動 sendMessages 送文字（最穩、不卡 OA、沒有 User not found）
+  function buildSendKeywordLiffUrl(keyword){
+    const k = encodeURIComponent(keyword);
+    // 用同一個 LIFF，加上參數 action=sendKeyword&k=...
+    return `https://liff.line.me/${LIFF_ID}?action=sendKeyword&k=${k}`;
   }
 
   const COACHES = [
@@ -655,6 +651,48 @@
       return `inClient=${liff.isInClient()} os=${os} lang=${lang} ctxType=${ctx?.type || 'unknown'} chatId=${ctx?.chatId ? 'yes' : 'no'}`;
     }catch(e){
       return `envInfo error`;
+    }
+  }
+
+  // ✅ 解析 querystring
+  function getQuery(){
+    const p = new URLSearchParams(location.search);
+    return {
+      action: p.get('action') || '',
+      k: p.get('k') || ''
+    };
+  }
+
+  // ✅ (2) 當這頁是被「查看預約」按鈕打開時：自動把關鍵字送到聊天室，然後關閉
+  async function runSendKeywordMode(){
+    const q = getQuery();
+    if(q.action !== 'sendKeyword') return false;
+
+    try{
+      await liff.init({ liffId: LIFF_ID });
+
+      if(!liff.isLoggedIn()){
+        // 登入後 LINE 會重開此頁，參數會保留
+        liff.login();
+        return true;
+      }
+
+      if(!liff.isInClient()){
+        alert('請在 LINE 內開啟才能送出查看預約。');
+        return true;
+      }
+
+      const keyword = decodeURIComponent(q.k || '') || VIEW_BOOKING_KEYWORD;
+
+      // 送出文字到聊天室（真正達成「按下按鈕就送出」）
+      await liff.sendMessages([{ type:'text', text: keyword }]);
+
+      // 關閉 LIFF 視窗回到聊天室
+      liff.closeWindow();
+      return true;
+    }catch(e){
+      alert('送出查看預約失敗：' + (e?.message || 'unknown'));
+      return true;
     }
   }
 
@@ -854,8 +892,7 @@
     }
   }
 
-  /* ✅ 成功 Flex：提醒文字更新；按鈕字加粗+放大；
-     ✅ 修正重點：Flex action 改用 uri（LIFF sendMessages 不允許 message action） */
+  /* ✅ 成功 Flex（已依照你的 1、3 要求縮小字體與按鈕） */
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
@@ -894,31 +931,34 @@
               ]
             },
 
-            { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "sm", margin: "md" },
+            /* ✅(1) 溫馨提醒與內容字形縮小 */
+            { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "xs", margin: "md" },
             {
               type: "text",
               wrap: true,
               color: "#7A4A00",
-              size: "sm",
+              size: "xs",
               text:
                 "1. 取消或改期，請於開課前1小時完成。\n" +
                 "2. 如有任何問題，請於，「支點運動空間」官方Line聯繫我們。"
             },
 
+            /* ✅(3) 按鈕縮小，但維持粗體
+               ✅(2) 改成開 LIFF → LIFF 自動送出「查看預約」到聊天室 */
             {
               type: "box",
               layout: "vertical",
               backgroundColor: "#1bb57a",
               cornerRadius: "12px",
-              paddingAll: "14px",
+              paddingAll: "12px",
               margin: "lg",
               action: {
                 type: "uri",
                 label: "查看預約",
-                uri: buildOaMessageUrl(VIEW_BOOKING_KEYWORD)
+                uri: buildSendKeywordLiffUrl(VIEW_BOOKING_KEYWORD)
               },
               contents: [
-                { type: "text", text: "查看預約", align: "center", color: "#ffffff", weight: "bold", size: "xl" }
+                { type: "text", text: "查看預約", align: "center", color: "#ffffff", weight: "bold", size: "lg" }
               ]
             }
           ]
@@ -944,6 +984,10 @@
   }
 
   async function init(){
+    // ✅ 先判斷是不是「送關鍵字模式」
+    const didSendMode = await runSendKeywordMode();
+    if(didSendMode) return; // 送完就 closeWindow 或 alert，不需要進入預約 UI
+
     await liff.init({ liffId: LIFF_ID });
 
     if(!liff.isLoggedIn()) liff.login();
