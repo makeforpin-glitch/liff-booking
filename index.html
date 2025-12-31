@@ -110,15 +110,14 @@
       overflow:hidden;
     }
 
-    /* 2) Step 標題：縮小一點 + 統一靠左 */
     .h{
       margin:0 0 10px;
       font-weight:950;
-      font-size:22px;      /* 比之前再小一點 */
+      font-size:22px;
       letter-spacing:.2px;
       line-height:1.1;
       color:#111;
-      text-align:left;     /* 統一靠左 */
+      text-align:left;
     }
 
     /* Step1 */
@@ -461,7 +460,6 @@
         <div id="lab2" class="label">選日期</div>
       </div>
       <div class="step">
-        <!-- ✅ 5) 3 改成「確認」 -->
         <div id="dot3" class="dot">3</div>
         <div id="lab3" class="label">確認</div>
       </div>
@@ -472,10 +470,6 @@
     <!-- Step 1 -->
     <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
-
-      <!-- ✅ 1) 移除 Step1 的那段說明文字 -->
-      <!-- (不留任何 sub) -->
-
       <div id="coachRow" class="row"></div>
     </div>
 
@@ -529,7 +523,6 @@
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
           1. 若需取消或改期，請於開課前 1 小時完成。<br/>
-          <!-- ✅ 3) 改成你指定的句子 -->
           2. 如有任何問題，請於「支點運動空間」官方Line聯繫。
         </div>
       </div>
@@ -547,6 +540,11 @@
 
 <script>
   const LIFF_ID = '2008631386-AEejMove';
+
+  // ✅ 你要的「查看預約」按鈕連結：請改成你的實際網址（LIFF / 網頁都可以）
+  // 例1（另一個 LIFF）：'line://app/你的LIFF_ID'
+  // 例2（網頁）：'https://makeforpin-glitch.github.io/liff-booking/my-bookings.html'
+  const VIEW_BOOKING_URL = 'https://example.com/view-booking'; // ← 改這裡
 
   const COACHES = [
     {
@@ -809,28 +807,101 @@
     });
   }
 
-  async function sendBookingMessage(payload){
-    // 方案 A：sendMessages（需要 LINE 內，且通常需要聊天上下文）
-    try{
-      await liff.sendMessages([{ type:'text', text: payload }]);
-      return { ok:true, method:'sendMessages' };
-    }catch(e){
-      return { ok:false, method:'sendMessages', error:e };
-    }
+  function buildSuccessFlexMessage(){
+    const coachName = state.coach?.name || '—';
+    const dtText = `${state.dateKey || '—'} ${state.slot || '—'}`;
+
+    return {
+      type: "flex",
+      altText: "私課預約成功",
+      contents: {
+        type: "bubble",
+        size: "mega",
+        hero: {
+          type: "box",
+          layout: "vertical",
+          backgroundColor: "#1bb57a",
+          paddingAll: "18px",
+          contents: [
+            { type: "text", text: "私課預約成功", color: "#FFFFFF", weight: "bold", size: "xl" },
+            { type: "text", text: "支點運動空間", color: "#E8FFF6", size: "sm", margin: "sm" }
+          ]
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "md",
+          paddingAll: "18px",
+          contents: [
+            {
+              type: "box",
+              layout: "vertical",
+              backgroundColor: "#F3F8F6",
+              cornerRadius: "12px",
+              paddingAll: "14px",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    { type: "text", text: "預約教練", color: "#1f3b2f", size: "sm", flex: 2 },
+                    { type: "text", text: coachName, color: "#1f3b2f", size: "sm", weight: "bold", flex: 5, wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    { type: "text", text: "預約時間", color: "#1f3b2f", size: "sm", flex: 2 },
+                    { type: "text", text: dtText, color: "#1f3b2f", size: "sm", weight: "bold", flex: 5, wrap: true }
+                  ]
+                }
+              ]
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              spacing: "sm",
+              margin: "md",
+              contents: [
+                { type: "text", text: "溫馨提醒", color: "#7a4a00", weight: "bold", size: "sm" },
+                { type: "text", text: "1. 若需取消或改期，請於開課前 1 小時完成。", color: "#7a4a00", size: "sm", wrap: true },
+                { type: "text", text: "2. 如有任何問題，請於「支點運動空間」官方Line聯繫。", color: "#7a4a00", size: "sm", wrap: true }
+              ]
+            }
+          ]
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          paddingAll: "18px",
+          contents: [
+            {
+              type: "button",
+              style: "primary",
+              color: "#1bb57a",
+              action: {
+                type: "uri",
+                label: "查看預約",
+                uri: VIEW_BOOKING_URL
+              }
+            }
+          ]
+        }
+      }
+    };
   }
 
-  async function shareBookingMessage(payload){
-    // 方案 B：shareTargetPicker（讓使用者選要送的聊天室/群組）
+  async function sendSuccessFlex(){
     try{
-      if(!liff.isApiAvailable('shareTargetPicker')){
-        return { ok:false, method:'shareTargetPicker', error:new Error('API_NOT_AVAILABLE') };
-      }
-      const res = await liff.shareTargetPicker([{ type:'text', text: payload }]);
-      // res 可能是 null（使用者取消）或 object
-      if(res === null) return { ok:false, method:'shareTargetPicker', error:new Error('USER_CANCEL') };
-      return { ok:true, method:'shareTargetPicker' };
+      await liff.sendMessages([buildSuccessFlexMessage()]);
+      return { ok:true };
     }catch(e){
-      return { ok:false, method:'shareTargetPicker', error:e };
+      return { ok:false, error:e };
     }
   }
 
@@ -867,10 +938,6 @@
     };
 
     btnNext.onclick=async ()=>{
-      if(state.step===finalStepBeforeSend()){
-        // noop
-      }
-
       // Step1 -> Step2
       if(state.step===1){
         if(!state.coach) return;
@@ -888,46 +955,29 @@
         return;
       }
 
-      // Step3：確認預約 → 送出訊息 → 關閉
+      // Step3：確認預約 → 在聊天室送出「成功Flex卡片」→ 關閉
       if(state.step===3){
         if(!(state.coach && state.dateKey && state.slot)) return;
 
-        const payload = buildBookPayload();
-
         btnNext.disabled = true;
-        setStatus(`送出中…\n${envInfo()}`);
+        setStatus(`送出成功卡片中…\n${envInfo()}`);
 
-        // 你說你在 LINE App 內，但仍失敗：這裡會把原因顯示出來
         if(!liff.isInClient()){
           setStatus(`❌ 目前不是在 LINE 內開啟\n${envInfo()}`, true);
           btnNext.disabled = false;
           return;
         }
 
-        // A: sendMessages
-        const r1 = await sendBookingMessage(payload);
-        if(r1.ok){
-          // 成功就關閉回聊天室
+        const r = await sendSuccessFlex();
+        if(r.ok){
           liff.closeWindow();
           return;
         }
 
-        // B: shareTargetPicker（備援）
-        const r2 = await shareBookingMessage(payload);
-        if(r2.ok){
-          liff.closeWindow();
-          return;
-        }
-
-        // 都失敗：顯示錯誤細節
-        const msg =
-          `❌ 送出失敗\n` +
-          `A(sendMessages): ${errToText(r1.error)}\n` +
-          `B(shareTargetPicker): ${errToText(r2.error)}\n` +
-          `${envInfo()}\n` +
-          `提示：請確認 LIFF 的 Channel 有啟用 Messaging API 並已連結 OA（LINE 官方帳號）。`;
-
-        setStatus(msg, true);
+        setStatus(
+          `❌ 發送 Flex 失敗\n${errToText(r.error)}\n${envInfo()}\n提示：請確認 LIFF 的 Channel 有啟用 Messaging API 並已連結 OA（LINE 官方帳號）。`,
+          true
+        );
         btnNext.disabled = false;
       }
     };
@@ -937,8 +987,6 @@
 
     setStep(1);
   }
-
-  function finalStepBeforeSend(){ return 3; }
 
   init();
 </script>
