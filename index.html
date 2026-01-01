@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>支點運動_私課預約</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src
+    src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
     :root{
@@ -541,13 +542,12 @@
   // ✅ 你的 Make Webhook（預約資料送去 Make）
   const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
 
-  // ✅ 要送到聊天室的關鍵字（保留不動：你其他地方可能還會用到；但成功 Flex 已移除按鈕，不會再觸發）
+  // ✅ 要送到聊天室的關鍵字（此版已不再使用，但保留不影響）
   const VIEW_BOOKING_KEYWORD = '查看預約';
 
-  // ✅ Flex 按鈕改成：開同一個 LIFF，讓 LIFF 自動 sendMessages 送文字（保留不動：但成功 Flex 已移除按鈕）
+  // ✅ Flex 按鈕改成：開同一個 LIFF...（此版已不再使用，但保留不影響）
   function buildSendKeywordLiffUrl(keyword){
     const k = encodeURIComponent(keyword);
-    // 用同一個 LIFF，加上參數 action=sendKeyword&k=...
     return `https://liff.line.me/${LIFF_ID}?action=sendKeyword&k=${k}`;
   }
 
@@ -654,7 +654,7 @@
     }
   }
 
-  // ✅ 解析 querystring
+  // ✅ 解析 querystring（保留不影響）
   function getQuery(){
     const p = new URLSearchParams(location.search);
     return {
@@ -663,7 +663,7 @@
     };
   }
 
-  // ✅ (保留不動) 當這頁是被「送關鍵字模式」打開時：自動把關鍵字送到聊天室，然後關閉
+  // ✅ 送關鍵字模式（保留不影響；你已不需要按鈕）
   async function runSendKeywordMode(){
     const q = getQuery();
     if(q.action !== 'sendKeyword') return false;
@@ -682,9 +682,7 @@
       }
 
       const keyword = decodeURIComponent(q.k || '') || VIEW_BOOKING_KEYWORD;
-
       await liff.sendMessages([{ type:'text', text: keyword }]);
-
       liff.closeWindow();
       return true;
     }catch(e){
@@ -889,10 +887,55 @@
     }
   }
 
-  /* ✅ 成功 Flex（✅已移除「查看預約」按鈕，其餘不變） */
+  /* ✅ 成功 Flex：A 方案（黑白＋藍灰點綴）＋右上角淡化 Logo；✅ 已移除「查看預約」按鈕 */
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
+
+    const ACCENT = "#475569";     // 藍灰點綴（百搭：紫/藍/綠/棕都不衝）
+    const HEADER_BG = "#111111";  // 黑
+    const SUB_BG = "#F5F5F6";     // 淺灰
+    const TEXT_DARK = "#111111";
+    const TEXT_MUTED = "#6B7280";
+
+    // ✅ 請換成你的支點運動空間 logo（建議透明底 PNG / 單色版）
+    const LOGO_URL = "https://example.com/pivot-logo-mono.png";
+
+    const headerContents = [
+      {
+        type: "box",
+        layout: "horizontal",
+        contents: [
+          {
+            type: "box",
+            layout: "vertical",
+            flex: 1,
+            contents: [
+              { type: "text", text: "私課預約成功", color: "#FFFFFF", weight: "bold", size: "xl" },
+              { type: "text", text: "支點運動空間", color: "#D9D9D9", size: "sm", margin: "sm" }
+            ]
+          },
+          ...(LOGO_URL ? [{
+            type: "image",
+            url: LOGO_URL,
+            size: "xs",
+            aspectMode: "fit",
+            align: "end",
+            gravity: "center",
+            // ✅ 淡化 logo：讓它像浮水印
+            opacity: 0.35
+          }] : [])
+        ]
+      },
+      {
+        type: "box",
+        layout: "vertical",
+        margin: "md",
+        contents: [
+          { type: "box", layout: "vertical", height: "4px", backgroundColor: ACCENT, cornerRadius: "999px", contents: [] }
+        ]
+      }
+    ];
 
     return [{
       type: "flex",
@@ -903,12 +946,9 @@
         header: {
           type: "box",
           layout: "vertical",
-          backgroundColor: "#1bb57a",
+          backgroundColor: HEADER_BG,
           paddingAll: "16px",
-          contents: [
-            { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
-            { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
-          ]
+          contents: headerContents
         },
         body: {
           type: "box",
@@ -919,12 +959,27 @@
             {
               type: "box",
               layout: "vertical",
-              backgroundColor: "#F3F8F6",
+              backgroundColor: SUB_BG,
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
-                { type: "text", text: `預約教練　${coachName}`, size: "md", weight: "bold", color: "#1F3B2F" },
-                { type: "text", text: `預約時間　${whenText}`, size: "md", weight: "bold", color: "#1F3B2F", margin: "sm" }
+                {
+                  type: "box",
+                  layout: "baseline",
+                  contents: [
+                    { type: "text", text: "預約教練", size: "sm", color: TEXT_MUTED, flex: 2, weight: "bold" },
+                    { type: "text", text: coachName, size: "md", color: TEXT_DARK, flex: 5, weight: "bold", wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  margin: "md",
+                  contents: [
+                    { type: "text", text: "預約時間", size: "sm", color: TEXT_MUTED, flex: 2, weight: "bold" },
+                    { type: "text", text: whenText, size: "md", color: TEXT_DARK, flex: 5, weight: "bold", wrap: true }
+                  ]
+                }
               ]
             },
 
@@ -937,7 +992,19 @@
               text:
                 "1. 取消或改期，請於開課前1小時完成。\n" +
                 "2. 如有任何問題，請於，「支點運動空間」官方Line聯繫我們。"
+            },
+
+            {
+              type: "box",
+              layout: "horizontal",
+              margin: "lg",
+              contents: [
+                { type: "box", layout: "vertical", width: "10px", height: "10px", backgroundColor: ACCENT, cornerRadius: "999px", contents: [] },
+                { type: "text", text: "已完成預約登記", size: "sm", color: TEXT_MUTED, margin: "sm", weight: "bold" }
+              ]
             }
+
+            // ✅ 已完全移除「查看預約」按鈕區塊
           ]
         }
       }
@@ -961,9 +1028,9 @@
   }
 
   async function init(){
-    // ✅ 先判斷是不是「送關鍵字模式」
+    // ✅ 先判斷是不是「送關鍵字模式」（保留不影響）
     const didSendMode = await runSendKeywordMode();
-    if(didSendMode) return; // 送完就 closeWindow 或 alert，不需要進入預約 UI
+    if(didSendMode) return;
 
     await liff.init({ liffId: LIFF_ID });
 
