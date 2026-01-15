@@ -541,8 +541,12 @@
   // ✅ 你的 Make Webhook（預約資料送去 Make）
   const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
 
-  // ✅ 支點 Logo（公開 https，Flex 最穩）
-  const PIVOT_LOGO_URL = 'https://raw.githubusercontent.com/makeforpin-glitch/liff-booking/main/assets/logo/pivot-logo.png';
+  // ✅ 你的「去背 logo」(更穩的 raw 版本)
+  const PIVOT_LOGO_URL =
+    'https://raw.githubusercontent.com/makeforpin-glitch/liff-booking/main/assets/logo/pivot-logo.png';
+  // 如果你想用你原本那條也可以（但有時 LINE 會比較不穩）：
+  // const PIVOT_LOGO_URL =
+  //   'https://github.com/makeforpin-glitch/liff-booking/blob/main/assets/logo/pivot-logo.png?raw=true';
 
   const COACHES = [
     {
@@ -647,7 +651,7 @@
     }
   }
 
-  /* Step1 底部狀態文字 */
+  /* Step1 底部狀態文字：強制顯示「user您好，請選擇教練」 */
   function getHelloName(){
     const raw = (state.name && String(state.name).trim()) ? String(state.name).trim() : 'user';
     return raw;
@@ -843,17 +847,10 @@
     }
   }
 
-  // ✅ A 方案成功 Flex：黑白灰主調 + 藍灰點綴 + 右上角淡化Logo（已移除查看預約按鈕）
+  /* ✅ 成功 Flex：改回原本綠色 + 右上角去背 Logo + 移除查看預約按鈕 */
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
-
-    const HEADER_BG = "#1F1F1F";
-    const ACCENT = "#475569";      // 藍灰點綴（百搭紫/藍/綠/棕）
-    const SUB_BG = "#F5F5F6";
-    const TEXT_DARK = "#111111";
-    const TEXT_MUTED = "#6B7280";
-    const REMIND = "#6B4A1E";
 
     return [{
       type: "flex",
@@ -864,7 +861,7 @@
         header: {
           type: "box",
           layout: "vertical",
-          backgroundColor: HEADER_BG,
+          backgroundColor: "#1bb57a",
           paddingAll: "16px",
           contents: [
             {
@@ -876,37 +873,19 @@
                   layout: "vertical",
                   flex: 1,
                   contents: [
-                    { type: "text", text: "私課預約成功", color: "#FFFFFF", weight: "bold", size: "xl" },
-                    { type: "text", text: "支點運動空間", color: "#D9D9D9", size: "sm", margin: "sm" }
+                    { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
+                    { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
                   ]
                 },
-                // 右上角 Logo：用淡底+留白做「淡刷感」（Flex 沒 opacity，所以用這招最穩）
                 {
-                  type: "box",
-                  layout: "vertical",
-                  width: "56px",
-                  height: "56px",
-                  cornerRadius: "14px",
-                  backgroundColor: "#F2F2F2",
-                  paddingAll: "8px",
-                  contents: [
-                    {
-                      type: "image",
-                      url: PIVOT_LOGO_URL,
-                      size: "full",
-                      aspectMode: "fit",
-                      aspectRatio: "1:1"
-                    }
-                  ]
+                  type: "image",
+                  url: PIVOT_LOGO_URL,
+                  size: "xxs",
+                  aspectMode: "fit",
+                  aspectRatio: "1:1",
+                  align: "end",
+                  gravity: "top"
                 }
-              ]
-            },
-            {
-              type: "box",
-              layout: "vertical",
-              margin: "md",
-              contents: [
-                { type: "box", layout: "vertical", height: "4px", backgroundColor: ACCENT, cornerRadius: "999px", contents: [] }
               ]
             }
           ]
@@ -920,41 +899,25 @@
             {
               type: "box",
               layout: "vertical",
-              backgroundColor: SUB_BG,
+              backgroundColor: "#F3F8F6",
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
-                {
-                  type: "box",
-                  layout: "baseline",
-                  contents: [
-                    { type: "text", text: "預約教練", size: "sm", color: TEXT_MUTED, flex: 2, weight: "bold" },
-                    { type: "text", text: coachName, size: "md", color: TEXT_DARK, flex: 5, weight: "bold", wrap: true }
-                  ]
-                },
-                {
-                  type: "box",
-                  layout: "baseline",
-                  margin: "md",
-                  contents: [
-                    { type: "text", text: "預約時間", size: "sm", color: TEXT_MUTED, flex: 2, weight: "bold" },
-                    { type: "text", text: whenText, size: "md", color: TEXT_DARK, flex: 5, weight: "bold", wrap: true }
-                  ]
-                }
+                { type: "text", text: `預約教練　${coachName}`, size: "md", weight: "bold", color: "#1F3B2F" },
+                { type: "text", text: `預約時間　${whenText}`, size: "md", weight: "bold", color: "#1F3B2F", margin: "sm" }
               ]
             },
 
-            { type: "text", text: "溫馨提醒", color: REMIND, weight: "bold", size: "xs", margin: "md" },
+            { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "xs", margin: "md" },
             {
               type: "text",
               wrap: true,
-              color: REMIND,
+              color: "#7A4A00",
               size: "xs",
               text:
                 "1. 取消或改期，請於開課前1小時完成。\n" +
                 "2. 如有任何問題，請於「支點運動空間」官方Line聯繫我們。"
             }
-            // ✅ 已移除查看預約按鈕
           ]
         }
       }
@@ -978,92 +941,84 @@
   }
 
   async function init(){
-    try{
-      await liff.init({ liffId: LIFF_ID });
+    await liff.init({ liffId: LIFF_ID });
 
-      // ✅ 修正：login 後要 return，避免還沒登入就 getProfile 導致流程中斷（你之前那種空畫面常見原因）
-      if(!liff.isLoggedIn()){
-        liff.login();
+    if(!liff.isLoggedIn()) liff.login();
+
+    const profile = await liff.getProfile();
+    state.uid = profile.userId;
+    state.name = profile.displayName || '';
+
+    renderCoaches();
+    state.weekStart = weekStartMonday(new Date());
+    renderWeekStrip();
+    bindTabs();
+    renderSlotsStep2();
+
+    btnBack.onclick=()=>{
+      if(state.step===2) setStep(1);
+      else if(state.step===3) setStep(2);
+    };
+
+    btnNext.onclick=async ()=>{
+      if(state.step===1){
+        if(!state.coach) return;
+        setStep(2);
+        renderCoachIntro();
+        setStatus('');
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
         return;
       }
 
-      const profile = await liff.getProfile();
-      state.uid = profile.userId;
-      state.name = profile.displayName || '';
+      if(state.step===2){
+        if(!(state.coach && state.dateKey && state.slot)) return;
+        setStep(3);
+        return;
+      }
 
-      renderCoaches();
-      state.weekStart = weekStartMonday(new Date());
-      renderWeekStrip();
-      bindTabs();
-      renderSlotsStep2();
+      if(state.step===3){
+        if(!(state.coach && state.dateKey && state.slot)) return;
 
-      btnBack.onclick=()=>{
-        if(state.step===2) setStep(1);
-        else if(state.step===3) setStep(2);
-      };
+        btnNext.disabled = true;
+        setStatus(`送出中…\n${envInfo()}`);
 
-      btnNext.onclick=async ()=>{
-        if(state.step===1){
-          if(!state.coach) return;
-          setStep(2);
-          renderCoachIntro();
-          setStatus('');
-          btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+        if(!liff.isInClient()){
+          setStatus(`❌ 目前不是在 LINE 內開啟\n${envInfo()}`, true);
+          btnNext.disabled = false;
           return;
         }
 
-        if(state.step===2){
-          if(!(state.coach && state.dateKey && state.slot)) return;
-          setStep(3);
+        // ① 送預約資料去 Make
+        const bookingData = buildBookingData();
+        const mk = await postToMake(bookingData);
+        if(!mk.ok){
+          setStatus(`❌ Make webhook 送出失敗\n${errToText(mk.error)}\n${envInfo()}`, true);
+          btnNext.disabled = false;
           return;
         }
 
-        if(state.step===3){
-          if(!(state.coach && state.dateKey && state.slot)) return;
-
-          btnNext.disabled = true;
-          setStatus(`送出中…\n${envInfo()}`);
-
-          if(!liff.isInClient()){
-            setStatus(`❌ 目前不是在 LINE 內開啟\n${envInfo()}`, true);
-            btnNext.disabled = false;
-            return;
-          }
-
-          // ① 送預約資料去 Make
-          const bookingData = buildBookingData();
-          const mk = await postToMake(bookingData);
-          if(!mk.ok){
-            setStatus(`❌ Make webhook 送出失敗\n${errToText(mk.error)}\n${envInfo()}`, true);
-            btnNext.disabled = false;
-            return;
-          }
-
-          // ② 回聊天室送「成功 Flex」
-          try{
-            await sendFlexToChat();
-            liff.closeWindow();
-            return;
-          }catch(e){
-            setStatus(
-              `❌ 成功寫入預約，但卡片送出失敗\n` +
-              `${errToText(e)}\n` +
-              `${envInfo()}\n` +
-              `提示：請確認 LIFF 的 Channel 已啟用 Messaging API、已連結 OA，且 LIFF 有 messaging scope。`,
-              true
-            );
-            btnNext.disabled = false;
-          }
+        // ② 回聊天室送「成功 Flex」
+        try{
+          await sendFlexToChat();
+          liff.closeWindow();
+          return;
+        }catch(e){
+          setStatus(
+            `❌ 成功寫入預約，但卡片送出失敗\n` +
+            `${errToText(e)}\n` +
+            `${envInfo()}\n` +
+            `提示：請確認 LIFF 的 Channel 已啟用 Messaging API、已連結 OA，且 LIFF 有 messaging scope。`,
+            true
+          );
+          btnNext.disabled = false;
         }
-      };
+      }
+    };
 
-      prevWeek.onclick=()=>goWeek(-1);
-      nextWeek.onclick=()=>goWeek(1);
+    prevWeek.onclick=()=>goWeek(-1);
+    nextWeek.onclick=()=>goWeek(1);
 
-      setStep(1);
-    }catch(e){
-      setStatus(`❌ LIFF 初始化失敗：${errToText(e)}`, true);
-    }
+    setStep(1);
   }
 
   init();
