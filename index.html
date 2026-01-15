@@ -132,11 +132,30 @@
       min-width:140px;
       text-align:center;
       flex:1 1 0;
+      position:relative;
     }
     .chip.sel{
       background:#dff4ea;
       border-color:rgba(27,181,122,.45);
       box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
+    }
+    .chip.loading{
+      opacity:.65;
+      pointer-events:none;
+    }
+    .chip.loading::after{
+      content:"傳送中…";
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:12px;
+      font-weight:950;
+      color:#0d7a55;
+      background:#eaf8f2;
+      border:1px solid rgba(27,181,122,.25);
+      padding:4px 8px;
+      border-radius:999px;
     }
 
     .coachIntro{
@@ -538,10 +557,11 @@
 <script>
   const LIFF_ID = '2008631386-AEejMove';
 
-  // ✅ Make Webhook（同一個 URL 同時支援：
-  // 1) action=getAvailableSlots：回傳可預約時段 options
-  // 2) action=createBooking：寫入預約並回應
-  const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
+  // ✅ 同一個 Make Webhook：用 action 分流
+  // - action=selectCoach       ：Step1 選教練時通知 Make（可選）
+  // - action=getAvailableSlots ：Step1 選教練後向 Make 取可預約時段（建議用）
+  // - action=createBooking     ：Step3 確認預約後寫入預約
+  const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3'; // 例：https://hook.us1.make.com/xxxxxx
 
   const COACHES = [
     {
@@ -569,8 +589,10 @@
     dateKey: null,
     tab: 'am',
     slot: null,
-    // 🔥 Make 回傳的可預約時段（[{label,value}]，value 建議為 "YYYY-MM-DD HH:mm"）
-    availableOptions: []
+    // Make 回傳的可預約 options：[{label,value}]
+    availableOptions: [],
+    // Step1 選教練時的小 loading 狀態
+    selectingCoachId: null
   };
 
   const $ = s => document.querySelector(s);
@@ -629,16 +651,26 @@
     return raw;
   }
 
-  // ✅ 將 "YYYY-MM-DD HH:mm" 拆成 {dateKey, time}
+  function errToText(e){
+    try{
+      if(!e) return 'unknown';
+      const name = e.name || '';
+      const message = e.message || '';
+      const code = e.code ? ` code=${e.code}` : '';
+      return `${name}${code} ${message}`.trim();
+    }catch(_){
+      return 'unknown';
+    }
+  }
+
+  // --- 日期時間解析與分桶 ---
   function splitDateTimeValue(v){
     const s = String(v || '').trim();
-    // 支援 "YYYY-MM-DD HH:mm" 或 "YYYY-MM-DDTHH:mm"
     const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
     if(!m) return { dateKey:null, time:null };
     return { dateKey:m[1], time:m[2] };
   }
 
-  // ✅ Make 回傳 options → 依日期分組、依分頁(am/pm/night)過濾
   function timeBucket(t){
     const hh = Number(String(t).slice(0,2));
     if(Number.isNaN(hh)) return 'other';
@@ -647,6 +679,66 @@
     return 'night';
   }
 
+  // --- Make 互動 ---
+  async function callMake(payload){
+    if(!MAKE_WEBHOOK_URL) throw new Error('MAKE_WEBHOOK_URL is empty');
+
+    const res = await fetch(MAKE_WEBHOOK_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text().catch(()=> '');
+    let data = null;
+    try{ data = text ? JSON.parse(text) : null; }catch(_){ data = null; }
+
+    if(!res.ok) throw new Error(`Make webhook failed: ${res.status} ${text}`);
+    return { text, data };
+  }
+
+  // ✅ Step1：選教練後「通知 Make」(可選)
+  async function sendCoachSelectionToMake(coach){
+    const payload = {
+      action: 'selectCoach',
+      userId: state.uid,
+      displayName: state.name,
+      coachId: coach.id,
+      coachName: coach.name
+    };
+    // 不要求回傳內容，只要 Make 收得到即可
+    await callMake(payload);
+  }
+
+  // ✅ Step1：選教練後「向 Make 取得可預約時段」(建議)
+  // Make 回傳格式：{ options:[{label,value},...] }
+  async function fetchAvailableOptionsFromMake(coach){
+    const payload = {
+      action: 'getAvailableSlots',
+      targetType: 'coach',
+      targetName: coach.name,
+      coachId: coach.id,
+      userId: state.uid,
+      displayName: state.name
+    };
+
+    const { data } = await callMake(payload);
+    if(!data || !Array.isArray(data.options)) throw new Error('Make response missing options[]');
+
+    return data.options.filter(o=>{
+      const v = o && o.value != null ? String(o.value) : '';
+      return /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(v);
+    });
+  }
+
+  async function postBookingToMake(){
+    const bookingData = buildBookingData();
+    const payload = bookingData; // 內含 action=createBooking
+    const { text } = await callMake(payload);
+    return text;
+  }
+
+  // --- UI ---
   function setStep(n){
     state.step = n;
 
@@ -688,7 +780,6 @@
         <div class="infoLine"><b>預約時間：</b>${state.dateKey || '—'} ${state.slot || '—'}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
-
       setStatus('');
     }
   }
@@ -697,19 +788,65 @@
     coachRow.innerHTML='';
     COACHES.forEach(c=>{
       const div=document.createElement('div');
-      div.className='chip'+(state.coach?.id===c.id?' sel':'');
+      const isSel = state.coach?.id===c.id;
+      const isLoading = state.selectingCoachId===c.id;
+      div.className='chip' + (isSel?' sel':'') + (isLoading?' loading':'');
+
       div.textContent=c.name;
-      div.onclick=()=>{
+
+      div.onclick=async ()=>{
+        // 防止重複點
+        if(state.selectingCoachId) return;
+
+        // 設定選擇狀態
         state.coach=c;
-        // 重置 step2 選擇
         state.dateKey=null;
         state.slot=null;
         state.tab='am';
         state.availableOptions=[];
+        state.selectingCoachId=c.id;
+        btnNext.disabled = true;
+
         renderCoaches();
-        btnNext.disabled=false;
-        setStatus(`已選擇教練：${c.name}`);
+        setStatus(`已選擇教練：${c.name}\n讀取可預約時段中…`);
+
+        try{
+          // ① 先把「選教練」事件回傳給 Make（你要記錄/追蹤就用）
+          //    如果你不需要，也可把這行刪掉
+          await sendCoachSelectionToMake(c);
+
+          // ② 立刻向 Make 取得這位教練可預約時段（推薦）
+          state.availableOptions = await fetchAvailableOptionsFromMake(c);
+
+          if(!state.availableOptions.length){
+            setStatus('目前沒有可預約的時段', true);
+            state.selectingCoachId=null;
+            renderCoaches();
+            return;
+          }
+
+          // 預設先選到第一天（提高 UX）
+          const first = splitDateTimeValue(state.availableOptions[0].value);
+          state.dateKey = first.dateKey || null;
+
+          state.selectingCoachId=null;
+          renderCoaches();
+
+          // 進入 Step2
+          setStep(2);
+          renderCoachIntro();
+          renderWeekStrip();
+          renderSlotsStep2();
+
+          setStatus(state.dateKey ? `已選日期：${state.dateKey}` : '');
+          btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+        }catch(e){
+          state.selectingCoachId=null;
+          renderCoaches();
+          setStatus(`❌ 回傳/讀取失敗\n${errToText(e)}`, true);
+        }
       };
+
       coachRow.appendChild(div);
     });
   }
@@ -741,11 +878,10 @@
       const cell=document.createElement('div');
       cell.className='dayCell';
 
-      // 只禁用過去日期
       const isPast = startOfDay(d) < today0;
       if(isPast) cell.classList.add('disabled');
 
-      // 如果 Make 回傳中完全沒有這一天的時段，也禁用（避免點了沒東西）
+      // 若該日沒有任何可預約時段，也禁用
       const hasAny = state.availableOptions.some(o=>{
         const { dateKey } = splitDateTimeValue(o?.value);
         return dateKey === key;
@@ -810,7 +946,6 @@
       return;
     }
 
-    // 去重 + 排序
     const uniq = [...new Set(timesForDay)].sort();
 
     uniq.forEach(t=>{
@@ -842,40 +977,6 @@
     });
   }
 
-  // ✅ 讀取「可預約時段 options」：Make 必須回傳 { options:[{label,value},...] }
-  async function fetchAvailableOptions(){
-    if(!MAKE_WEBHOOK_URL) throw new Error('MAKE_WEBHOOK_URL is empty');
-    if(!state.coach) throw new Error('coach not selected');
-
-    const payload = {
-      action: 'getAvailableSlots',
-      targetType: 'coach',
-      targetName: state.coach.name,
-      // 可選：把 user 也傳給 Make，方便你做黑名單 / 權限
-      userId: state.uid,
-      displayName: state.name
-    };
-
-    const res = await fetch(MAKE_WEBHOOK_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const text = await res.text().catch(()=> '');
-    let data = null;
-    try{ data = text ? JSON.parse(text) : null; }catch(_){ data = null; }
-
-    if(!res.ok) throw new Error(`Make webhook failed: ${res.status} ${text}`);
-    if(!data || !Array.isArray(data.options)) throw new Error('Make response missing options[]');
-
-    // 過濾掉不合法 value
-    return data.options.filter(o=>{
-      const v = o && o.value != null ? String(o.value) : '';
-      return /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(v);
-    });
-  }
-
   function buildBookingData(){
     return {
       action: 'createBooking',
@@ -885,30 +986,14 @@
       coachName: state.coach?.name,
       roomId: ROOM.id,
       roomName: ROOM.name,
-      date: state.dateKey,   // YYYY-MM-DD
-      time: state.slot,      // HH:mm
+      date: state.dateKey,
+      time: state.slot,
       duration: 60,
       createdAt: new Date().toISOString()
     };
   }
 
-  async function postToMake(data){
-    if(!MAKE_WEBHOOK_URL) return { ok:true, skipped:true };
-    try{
-      const res = await fetch(MAKE_WEBHOOK_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text().catch(()=> '');
-      if(!res.ok) throw new Error(`Make webhook failed: ${res.status} ${text}`);
-      return { ok:true, status: res.status, body: text };
-    }catch(e){
-      return { ok:false, error:e };
-    }
-  }
-
-  // ✅ 成功 Flex（維持綠色、且已移除所有 Logo/查看預約按鈕）
+  // ✅ 成功 Flex
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
@@ -967,18 +1052,6 @@
     await liff.sendMessages(buildSuccessFlex());
   }
 
-  function errToText(e){
-    try{
-      if(!e) return 'unknown';
-      const name = e.name || '';
-      const message = e.message || '';
-      const code = e.code ? ` code=${e.code}` : '';
-      return `${name}${code} ${message}`.trim();
-    }catch(_){
-      return 'unknown';
-    }
-  }
-
   async function init(){
     await liff.init({ liffId: LIFF_ID });
 
@@ -1000,38 +1073,19 @@
     };
 
     btnNext.onclick=async ()=>{
-      // Step 1 -> Step 2：先去 Make 拿可預約時段
       if(state.step===1){
+        // Step1 進 Step2 已經在點教練時完成
         if(!state.coach) return;
-
-        btnNext.disabled = true;
-        setStatus('讀取可預約時段中…');
-
-        try{
-          state.availableOptions = await fetchAvailableOptions();
-          if(!state.availableOptions.length){
-            setStatus('目前沒有可預約的時段', true);
-            btnNext.disabled = false;
-            return;
-          }
-
-          // 預設選第一個有時段的日期（使用者體驗較好）
-          const first = splitDateTimeValue(state.availableOptions[0].value);
-          state.dateKey = first.dateKey || null;
-          state.slot = null;
-
-          // 顯示 step2
-          setStep(2);
-          renderCoachIntro();
-          renderWeekStrip();
-          renderSlotsStep2();
-          setStatus(state.dateKey ? `已選日期：${state.dateKey}` : '');
-
-          btnNext.disabled = !(state.coach && state.dateKey && state.slot);
-        }catch(e){
-          setStatus(`❌ 讀取失敗\n${errToText(e)}`, true);
-          btnNext.disabled = false;
+        // 如果使用者選好教練但還在 Step1，允許直接進 Step2（不重打 Make）
+        if(!state.availableOptions.length){
+          setStatus('請先點選教練以讀取可預約時段', true);
+          return;
         }
+        setStep(2);
+        renderCoachIntro();
+        renderWeekStrip();
+        renderSlotsStep2();
+        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
         return;
       }
 
@@ -1053,16 +1107,16 @@
           return;
         }
 
-        // ① 送預約資料去 Make
-        const bookingData = buildBookingData();
-        const mk = await postToMake(bookingData);
-        if(!mk.ok){
-          setStatus(`❌ Make webhook 送出失敗\n${errToText(mk.error)}\n${envInfo()}`, true);
+        // ① 寫入預約到 Make
+        try{
+          await postBookingToMake();
+        }catch(e){
+          setStatus(`❌ Make webhook 送出失敗\n${errToText(e)}\n${envInfo()}`, true);
           btnNext.disabled = false;
           return;
         }
 
-        // ② 回聊天室送「成功 Flex」
+        // ② 送成功 Flex
         try{
           await sendFlexToChat();
           liff.closeWindow();
