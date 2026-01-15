@@ -538,7 +538,9 @@
 <script>
   const LIFF_ID = '2008631386-AEejMove';
 
-  // ✅ 你的 Make Webhook（預約資料送去 Make）
+  // ✅ Make Webhook（同一個 URL 同時支援：
+  // 1) action=getAvailableSlots：回傳可預約時段 options
+  // 2) action=createBooking：寫入預約並回應
   const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
 
   const COACHES = [
@@ -566,7 +568,9 @@
     weekStart: null,
     dateKey: null,
     tab: 'am',
-    slot: null
+    slot: null,
+    // 🔥 Make 回傳的可預約時段（[{label,value}]，value 建議為 "YYYY-MM-DD HH:mm"）
+    availableOptions: []
   };
 
   const $ = s => document.querySelector(s);
@@ -604,30 +608,6 @@
   function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
-  function canBookNow(dateKey, timeStr){
-    if(!dateKey || !timeStr) return false;
-    const selectedDate = new Date(dateKey+'T00:00:00');
-    const [hh,mm]=timeStr.split(':').map(Number);
-    const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
-    const nowPlus1h = new Date(Date.now()+60*60*1000);
-    return dt >= nowPlus1h;
-  }
-
-  function buildBookingData(){
-    return {
-      userId: state.uid,
-      displayName: state.name,
-      coachId: state.coach?.id,
-      coachName: state.coach?.name,
-      roomId: ROOM.id,
-      roomName: ROOM.name,
-      date: state.dateKey,
-      time: state.slot,
-      duration: 60,
-      createdAt: new Date().toISOString()
-    };
-  }
-
   function setStatus(msg, isError=false){
     status.classList.toggle('statusError', !!isError);
     status.textContent = msg;
@@ -647,6 +627,24 @@
   function getHelloName(){
     const raw = (state.name && String(state.name).trim()) ? String(state.name).trim() : 'user';
     return raw;
+  }
+
+  // ✅ 將 "YYYY-MM-DD HH:mm" 拆成 {dateKey, time}
+  function splitDateTimeValue(v){
+    const s = String(v || '').trim();
+    // 支援 "YYYY-MM-DD HH:mm" 或 "YYYY-MM-DDTHH:mm"
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+    if(!m) return { dateKey:null, time:null };
+    return { dateKey:m[1], time:m[2] };
+  }
+
+  // ✅ Make 回傳 options → 依日期分組、依分頁(am/pm/night)過濾
+  function timeBucket(t){
+    const hh = Number(String(t).slice(0,2));
+    if(Number.isNaN(hh)) return 'other';
+    if(hh <= 11) return 'am';
+    if(hh <= 17) return 'pm';
+    return 'night';
   }
 
   function setStep(n){
@@ -677,7 +675,7 @@
       btnBack.classList.remove('hide');
       btnNext.textContent='下一步';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
-      setStatus(state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '');
+      setStatus(state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '請選擇上方日期');
     }
 
     if(n===3){
@@ -703,6 +701,11 @@
       div.textContent=c.name;
       div.onclick=()=>{
         state.coach=c;
+        // 重置 step2 選擇
+        state.dateKey=null;
+        state.slot=null;
+        state.tab='am';
+        state.availableOptions=[];
         renderCoaches();
         btnNext.disabled=false;
         setStatus(`已選擇教練：${c.name}`);
@@ -738,8 +741,17 @@
       const cell=document.createElement('div');
       cell.className='dayCell';
 
+      // 只禁用過去日期
       const isPast = startOfDay(d) < today0;
       if(isPast) cell.classList.add('disabled');
+
+      // 如果 Make 回傳中完全沒有這一天的時段，也禁用（避免點了沒東西）
+      const hasAny = state.availableOptions.some(o=>{
+        const { dateKey } = splitDateTimeValue(o?.value);
+        return dateKey === key;
+      });
+      if(!isPast && !hasAny) cell.classList.add('disabled');
+
       if(state.dateKey===key) cell.classList.add('sel');
 
       const dow=document.createElement('div');
@@ -754,7 +766,7 @@
       cell.appendChild(dot);
 
       cell.onclick=()=>{
-        if(isPast) return;
+        if(cell.classList.contains('disabled')) return;
         state.dateKey=key;
         state.slot=null;
         renderWeekStrip();
@@ -776,13 +788,6 @@
   function renderSlotsStep2(){
     slotGrid2.innerHTML='';
 
-    const presets = {
-      am:    ['05:00','06:00','07:00','08:00','09:00','10:00','11:00'],
-      pm:    ['13:00','14:00','15:00','16:00','17:00'],
-      night: ['18:00','19:00','20:00','21:00']
-    };
-    const list = presets[state.tab] || [];
-
     if(!state.dateKey){
       const tip=document.createElement('div');
       tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
@@ -791,15 +796,29 @@
       return;
     }
 
-    list.forEach(t=>{
-      const disabled = !canBookNow(state.dateKey, t);
+    const timesForDay = state.availableOptions
+      .map(o => splitDateTimeValue(o?.value))
+      .filter(x => x.dateKey === state.dateKey && x.time)
+      .map(x => x.time)
+      .filter(t => timeBucket(t) === state.tab);
 
+    if(!timesForDay.length){
+      const tip=document.createElement('div');
+      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+      tip.textContent='此日期此時段區間沒有可預約時段';
+      slotGrid2.appendChild(tip);
+      return;
+    }
+
+    // 去重 + 排序
+    const uniq = [...new Set(timesForDay)].sort();
+
+    uniq.forEach(t=>{
       const div=document.createElement('div');
-      div.className='slot'+(disabled?' disabled':'')+(state.slot===t?' sel':'');
+      div.className='slot'+(state.slot===t?' sel':'');
       div.textContent=t;
 
       div.onclick=()=>{
-        if(disabled) return;
         state.slot=t;
         renderSlotsStep2();
         setStatus(`已選日期：${state.dateKey}｜已選時段：${state.slot}`);
@@ -821,6 +840,56 @@
         btnNext.disabled = !(state.coach && state.dateKey && state.slot);
       };
     });
+  }
+
+  // ✅ 讀取「可預約時段 options」：Make 必須回傳 { options:[{label,value},...] }
+  async function fetchAvailableOptions(){
+    if(!MAKE_WEBHOOK_URL) throw new Error('MAKE_WEBHOOK_URL is empty');
+    if(!state.coach) throw new Error('coach not selected');
+
+    const payload = {
+      action: 'getAvailableSlots',
+      targetType: 'coach',
+      targetName: state.coach.name,
+      // 可選：把 user 也傳給 Make，方便你做黑名單 / 權限
+      userId: state.uid,
+      displayName: state.name
+    };
+
+    const res = await fetch(MAKE_WEBHOOK_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text().catch(()=> '');
+    let data = null;
+    try{ data = text ? JSON.parse(text) : null; }catch(_){ data = null; }
+
+    if(!res.ok) throw new Error(`Make webhook failed: ${res.status} ${text}`);
+    if(!data || !Array.isArray(data.options)) throw new Error('Make response missing options[]');
+
+    // 過濾掉不合法 value
+    return data.options.filter(o=>{
+      const v = o && o.value != null ? String(o.value) : '';
+      return /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(v);
+    });
+  }
+
+  function buildBookingData(){
+    return {
+      action: 'createBooking',
+      userId: state.uid,
+      displayName: state.name,
+      coachId: state.coach?.id,
+      coachName: state.coach?.name,
+      roomId: ROOM.id,
+      roomName: ROOM.name,
+      date: state.dateKey,   // YYYY-MM-DD
+      time: state.slot,      // HH:mm
+      duration: 60,
+      createdAt: new Date().toISOString()
+    };
   }
 
   async function postToMake(data){
@@ -931,12 +1000,38 @@
     };
 
     btnNext.onclick=async ()=>{
+      // Step 1 -> Step 2：先去 Make 拿可預約時段
       if(state.step===1){
         if(!state.coach) return;
-        setStep(2);
-        renderCoachIntro();
-        setStatus('');
-        btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+
+        btnNext.disabled = true;
+        setStatus('讀取可預約時段中…');
+
+        try{
+          state.availableOptions = await fetchAvailableOptions();
+          if(!state.availableOptions.length){
+            setStatus('目前沒有可預約的時段', true);
+            btnNext.disabled = false;
+            return;
+          }
+
+          // 預設選第一個有時段的日期（使用者體驗較好）
+          const first = splitDateTimeValue(state.availableOptions[0].value);
+          state.dateKey = first.dateKey || null;
+          state.slot = null;
+
+          // 顯示 step2
+          setStep(2);
+          renderCoachIntro();
+          renderWeekStrip();
+          renderSlotsStep2();
+          setStatus(state.dateKey ? `已選日期：${state.dateKey}` : '');
+
+          btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+        }catch(e){
+          setStatus(`❌ 讀取失敗\n${errToText(e)}`, true);
+          btnNext.disabled = false;
+        }
         return;
       }
 
