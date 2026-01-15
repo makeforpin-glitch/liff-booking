@@ -541,13 +541,6 @@
   // ✅ 你的 Make Webhook（預約資料送去 Make）
   const MAKE_WEBHOOK_URL = ''; // 例：https://hook.us1.make.com/xxxxxx
 
-  // ✅ 你的「去背 logo」(更穩的 raw 版本)
-  const PIVOT_LOGO_URL =
-    'https://raw.githubusercontent.com/makeforpin-glitch/liff-booking/main/assets/logo/pivot-logo.png?v=3';
-  // 如果你想用你原本那條也可以（但有時 LINE 會比較不穩）：
-  // const PIVOT_LOGO_URL =
-  //   'https://github.com/makeforpin-glitch/liff-booking/blob/main/assets/logo/pivot-logo.png?raw=true';
-
   const COACHES = [
     {
       id:'coachA',
@@ -651,7 +644,6 @@
     }
   }
 
-  /* Step1 底部狀態文字：強制顯示「user您好，請選擇教練」 */
   function getHelloName(){
     const raw = (state.name && String(state.name).trim()) ? String(state.name).trim() : 'user';
     return raw;
@@ -847,7 +839,7 @@
     }
   }
 
-  /* ✅ 成功 Flex：改回原本綠色 + 右上角去背 Logo + 移除查看預約按鈕 */
+  // ✅ 成功 Flex（維持綠色、且已移除所有 Logo/查看預約按鈕）
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const whenText = `${state.dateKey || '—'} ${state.slot || '—'}`;
@@ -864,30 +856,8 @@
           backgroundColor: "#1bb57a",
           paddingAll: "16px",
           contents: [
-            {
-              type: "box",
-              layout: "horizontal",
-              contents: [
-                {
-                  type: "box",
-                  layout: "vertical",
-                  flex: 1,
-                  contents: [
-                    { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
-                    { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
-                  ]
-                },
-                {
-                  type: "image",
-                  url: PIVOT_LOGO_URL,
-                  size: "xxs",
-                  aspectMode: "fit",
-                  aspectRatio: "1:1",
-                  align: "end",
-                  gravity: "top"
-                }
-              ]
-            }
+            { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
+            { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
           ]
         },
         body: {
@@ -1025,4 +995,3 @@
 </script>
 </body>
 </html>
-
