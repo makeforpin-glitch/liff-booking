@@ -147,6 +147,21 @@
       pointer-events:none;
     }
 
+    /* ✅ Step1 人數區標題 */
+    .subTitle{
+      margin:14px 0 10px;
+      font-weight:950;
+      font-size:15px;
+      color:#111;
+    }
+
+    /* ✅ 人數 chip（只有 1/2 人） */
+    .chip.peoplemp{
+      flex:1 1 0;
+      min-width:140px;
+      font-size:18px;
+    }
+
     .coachIntro{
       display:flex;
       gap:10px;
@@ -356,11 +371,11 @@
       color:var(--muted);
       line-height:1.4;
     }
-    /* 暗紅 + 粗體 + 稍微放大（不用太大） */
+    /* 暗紅 + 粗體 + 稍微放大 */
     .slotTip.important{
       color:var(--danger);
       font-weight:950;
-      font-size:14px; /* 原本 12，這裡放大一點點 */
+      font-size:14px;
     }
     .slotTip.error{
       color:var(--danger);
@@ -497,6 +512,10 @@
     <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
       <div id="coachRow" class="row"></div>
+
+      <!-- ✅ 新增：人數選擇（最多 2 人） -->
+      <div class="subTitle">選擇人數（最多 2 人）</div>
+      <div id="peopleRow" class="row"></div>
     </div>
 
     <!-- Step 2 -->
@@ -571,9 +590,6 @@
    * ✅ 你要改這兩個網址
    * 1) MAKE_OPTIONS_WEBHOOK_URL：拿「可預約時段 options」用（回傳 {options:[{label,value}...] }）
    * 2) MAKE_BOOKING_WEBHOOK_URL：送出「預約成立」用（寫入預約紀錄，最後回聊天室送成功Flex）
-   *
-   * 如果你想共用同一個 Make webhook，也可以兩個填同一個，
-   * 但 Make 端要用 action 分流（例如 action=getOptions / action=book）
    */
   const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
   const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
@@ -593,13 +609,14 @@
     },
   ];
 
-  const ROOM = { id:'room1', name:'場地' };
-
   const state = {
     step: 1,
     uid: '',
     name: '',
     coach: null,
+
+    // ✅ 新增：人數（最多 2 人）
+    people: null, // 1 或 2
 
     weekStart: null,
     dateKey: null,
@@ -618,6 +635,7 @@
   const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
   const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
   const coachRow=$('#coachRow');
+  const peopleRow=$('#peopleRow');
   const btnBack=$('#btnBack');
   const btnNext=$('#btnNext');
   const status=$('#status');
@@ -648,13 +666,11 @@
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
   function weekdayZhFromDateKey(dateKey){
-    // dateKey: "YYYY-MM-DD"
     const d = new Date(dateKey + 'T00:00:00');
     const map = ['日','一','二','三','四','五','六'];
     return map[d.getDay()] || '';
   }
 
-  // ✅ 額外保險：即使 Make 有篩 1 小時，我們前端也再擋一次（避免資料延遲）
   function canBookNow(dateKey, timeStr){
     if(!dateKey || !timeStr) return false;
     const selectedDate = new Date(dateKey+'T00:00:00');
@@ -674,6 +690,16 @@
     return raw;
   }
 
+  function step1StatusText(){
+    if(!state.coach){
+      return `${getHelloName()}您好，請選擇教練`;
+    }
+    if(!state.people){
+      return `已選擇教練：${state.coach.name}\n請選擇人數（最多 2 人）`;
+    }
+    return `已選擇教練：${state.coach.name}｜人數：${state.people} 人`;
+  }
+
   function setStep(n){
     state.step = n;
 
@@ -689,22 +715,17 @@
     if(n===1){
       btnBack.classList.add('hide');
       btnNext.textContent='下一步';
-      btnNext.disabled = !state.coach;
-
-      if(state.coach){
-        setStatus(`已選擇教練：${state.coach.name}`);
-      }else{
-        setStatus(`${getHelloName()}您好，請選擇教練`);
-      }
+      btnNext.disabled = !(state.coach && state.people);
+      setStatus(step1StatusText());
     }
 
     if(n===2){
       btnBack.classList.remove('hide');
       btnNext.textContent='下一步';
-      btnNext.disabled = state.loadingOptions || !(state.coach && state.dateKey && state.slot);
+      btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
 
       if(state.loadingOptions){
-        setStatus(`已選擇教練：${state.coach?.name || '—'}\n讀取可預約時段中…`);
+        setStatus(`已選擇教練：${state.coach?.name || '—'}｜人數：${state.people || '—'} 人\n讀取可預約時段中…`);
       }else{
         if(!hasAnySlots()){
           setStatus('目前沒有可預約的時段', true);
@@ -717,11 +738,12 @@
     if(n===3){
       btnBack.classList.remove('hide');
       btnNext.textContent='確認預約';
-      btnNext.disabled = !(state.coach && state.dateKey && state.slot);
+      btnNext.disabled = !(state.coach && state.people && state.dateKey && state.slot);
 
       const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
+        <div class="infoLine"><b>人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
         <div class="infoLine"><b>預約時間：</b>${state.dateKey ? `${state.dateKey} (${wd})` : '—'} ${state.slot || '—'}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
@@ -740,12 +762,37 @@
       div.onclick=()=>{
         state.coach=c;
         renderCoaches();
-        btnNext.disabled=false;
-        // ✅ 不做任何「傳送中」覆蓋，讀取提示只放在底部 status
-        setStatus(`已選擇教練：${c.name}`);
+        // ✅ 選教練後不清空人數，讓使用者不必重選；但仍重新渲染人數列
+        renderPeople();
+        btnNext.disabled = !(state.coach && state.people);
+        setStatus(step1StatusText());
       };
 
       coachRow.appendChild(div);
+    });
+  }
+
+  // ✅ 新增：渲染人數（最多 2 人）
+  function renderPeople(){
+    peopleRow.innerHTML='';
+    [1,2].forEach(n=>{
+      const div=document.createElement('div');
+      div.className = 'chip chipmp' + (state.people===n ? ' sel' : '');
+      div.textContent = `${n} 人`;
+
+      div.onclick=()=>{
+        state.people = n;
+        renderPeople();
+        btnNext.disabled = !(state.coach && state.people);
+        setStatus(step1StatusText());
+      };
+
+      // 若尚未選教練，先鎖住人數按鈕（避免使用者先點人數）
+      if(!state.coach){
+        div.classList.add('disabled');
+      }
+
+      peopleRow.appendChild(div);
     });
   }
 
@@ -767,11 +814,9 @@
   }
 
   function buildAvailabilityMap(options){
-    // options: [{label:"YYYY/MM/DD HH:mm", value:"YYYY/MM/DD HH:mm"}]
     const map = {};
     (options || []).forEach(o=>{
       const raw = (o && (o.value || o.label)) ? String(o.value || o.label) : '';
-      // 支援 "2026/01/16 08:00" 或 "2026-01-16 08:00"
       const m = raw.match(/^(\d{4})[\/-](\d{2})[\/-](\d{2})\s+(\d{2}:\d{2})$/);
       if(!m) return;
       const dateKey = `${m[1]}-${m[2]}-${m[3]}`;
@@ -780,7 +825,6 @@
       if(!map[dateKey].includes(time)) map[dateKey].push(time);
     });
 
-    // 每天時間排序
     Object.keys(map).forEach(k=>{
       map[k].sort((a,b)=>a.localeCompare(b));
     });
@@ -831,7 +875,7 @@
         renderWeekStrip();
         renderSlotsStep2();
         setStatus(`已選日期：${state.dateKey}`);
-        btnNext.disabled = state.loadingOptions || !(state.coach && state.dateKey && state.slot);
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
       };
 
       weekStrip.appendChild(cell);
@@ -864,7 +908,6 @@
   function renderSlotsStep2(){
     slotGrid2.innerHTML='';
 
-    // ✅ 你要的（上午/下午/晚上下面那行）：「讀取可預約時段中…」→ 暗紅粗體+微放大
     if(state.loadingOptions){
       appendTip('讀取可預約時段中…', 'important');
       return;
@@ -875,7 +918,6 @@
       return;
     }
 
-    // ✅ 你要的（上午/下午/晚上下面那行）：「請先選擇上方日期」→ 暗紅粗體+微放大
     if(!state.dateKey){
       appendTip('請先選擇上方日期', 'important');
       return;
@@ -901,7 +943,7 @@
         state.slot=t;
         renderSlotsStep2();
         setStatus(`已選日期：${state.dateKey}｜已選時段：${state.slot}`);
-        btnNext.disabled = state.loadingOptions || !(state.coach && state.dateKey && state.slot);
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
       };
 
       slotGrid2.appendChild(div);
@@ -916,7 +958,7 @@
         state.tab = el.dataset.tab;
         state.slot = null;
         renderSlotsStep2();
-        btnNext.disabled = state.loadingOptions || !(state.coach && state.dateKey && state.slot);
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
       };
     });
   }
@@ -928,10 +970,12 @@
       return;
     }
 
+    // ✅ 會把「教練 + 人數」一起送回 Make，讓 Make 做人數限制與可預約篩選
     const payload = {
       action: "getOptions",
       coachName: state.coach?.name || "",
       coachId: state.coach?.id || "",
+      people: state.people || 0,
       userId: state.uid || ""
     };
 
@@ -966,7 +1010,7 @@
     renderSlotsStep2();
 
     try{
-      setStatus(`已選擇教練：${state.coach?.name || '—'}\n讀取可預約時段中…`);
+      setStatus(`已選擇教練：${state.coach?.name || '—'}｜人數：${state.people || '—'} 人\n讀取可預約時段中…`);
       await fetchOptionsFromMake();
 
       state.loadingOptions = false;
@@ -980,7 +1024,7 @@
         setStatus('請先選擇上方日期');
       }
 
-      btnNext.disabled = state.loadingOptions || !(state.coach && state.dateKey && state.slot);
+      btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
     }catch(e){
       state.loadingOptions = false;
       state.optionsRaw = [];
@@ -999,6 +1043,7 @@
       userId: state.uid,
       displayName: state.name,
       coachName: state.coach?.name,
+      people: state.people,              // ✅ 一併回傳人數給 Make（寫入/檢查用）
       date: state.dateKey,
       time: state.slot,
       weekday,
@@ -1026,6 +1071,7 @@
     const coachName = state.coach?.name || '—';
     const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
     const whenText = `${state.dateKey || '—'} (${wd}) ${state.slot || '—'}`;
+    const peopleText = state.people ? `${state.people} 人` : '—';
 
     return [{
       type: "flex",
@@ -1071,8 +1117,17 @@
                   spacing: "md",
                   margin: "sm",
                   contents: [
+                    { type: "text", text: "人數", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  margin: "sm",
+                  contents: [
                     { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
-                    /* ✅ 只把「日期(星期)時間」縮小一點：md -> sm */
                     { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 }
@@ -1121,6 +1176,7 @@
     state.name = profile.displayName || '';
 
     renderCoaches();
+    renderPeople(); // ✅ 人數列先渲染（尚未選教練會 disabled）
     state.weekStart = weekStartMonday(new Date());
     renderWeekStrip();
     bindTabs();
@@ -1133,22 +1189,20 @@
 
     btnNext.onclick=async ()=>{
       if(state.step===1){
-        if(!state.coach) return;
-
-        // ✅ Step1 → Step2：在這裡才去 Make 讀取 options（避免任何「傳送中」覆蓋教練名字）
+        if(!(state.coach && state.people)) return;
         await loadOptionsForCoach();
         return;
       }
 
       if(state.step===2){
         if(state.loadingOptions) return;
-        if(!(state.coach && state.dateKey && state.slot)) return;
+        if(!(state.coach && state.people && state.dateKey && state.slot)) return;
         setStep(3);
         return;
       }
 
       if(state.step===3){
-        if(!(state.coach && state.dateKey && state.slot)) return;
+        if(!(state.coach && state.people && state.dateKey && state.slot)) return;
 
         btnNext.disabled = true;
         setStatus(`送出中…`);
