@@ -16,7 +16,7 @@
       --border:rgba(0,0,0,.08);
       --shadow:0 10px 26px rgba(0,0,0,.08);
       --radius:18px;
-      --danger:#b23a2b;
+      --danger:#b23a2b; /* 暗紅 */
       --safeB: env(safe-area-inset-bottom, 0px);
       --safeT: env(safe-area-inset-top, 0px);
       --warnBg:#fff7e6;
@@ -347,6 +347,27 @@
     }
     .slot.disabled{ opacity:.35; pointer-events:none; }
 
+    /* ✅ 你要改的：上午/下午/晚上下面那行提示文字（在 slotGrid 裡） */
+    .slotTip{
+      grid-column:1 / -1;
+      padding:8px 2px;
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    /* 暗紅 + 粗體 + 稍微放大（不用太大） */
+    .slotTip.important{
+      color:var(--danger);
+      font-weight:950;
+      font-size:14px; /* 原本 12，這裡放大一點點 */
+    }
+    .slotTip.error{
+      color:var(--danger);
+      font-weight:950;
+      font-size:12px;
+    }
+
     .warn{
       flex:0 0 auto;
       display:flex;
@@ -585,8 +606,9 @@
     tab: 'am',
     slot: null,
 
-    optionsRaw: [],
-    availabilityMap: {},
+    // ✅ 從 Make 回來的可預約資料
+    optionsRaw: [],              // [{label,value}...]
+    availabilityMap: {},         // { "YYYY-MM-DD": ["08:00","09:00"...] }
     loadingOptions: false
   };
 
@@ -625,15 +647,14 @@
   function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
-  function weekdayZhFromYMD(dateKey){
-    // dateKey: YYYY-MM-DD
-    if(!dateKey) return '';
-    const [y,m,d] = dateKey.split('-').map(Number);
-    const dt = new Date(y, (m||1)-1, d||1);
+  function weekdayZhFromDateKey(dateKey){
+    // dateKey: "YYYY-MM-DD"
+    const d = new Date(dateKey + 'T00:00:00');
     const map = ['日','一','二','三','四','五','六'];
-    return map[dt.getDay()] || '';
+    return map[d.getDay()] || '';
   }
 
+  // ✅ 額外保險：即使 Make 有篩 1 小時，我們前端也再擋一次（避免資料延遲）
   function canBookNow(dateKey, timeStr){
     if(!dateKey || !timeStr) return false;
     const selectedDate = new Date(dateKey+'T00:00:00');
@@ -698,12 +719,10 @@
       btnNext.textContent='確認預約';
       btnNext.disabled = !(state.coach && state.dateKey && state.slot);
 
-      const wd = weekdayZhFromYMD(state.dateKey);
-      const whenText = `${state.dateKey || '—'} (${wd || '—'}) ${state.slot || '—'}`;
-
+      const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
-        <div class="infoLine"><b>預約時間：</b>${whenText}</div>
+        <div class="infoLine"><b>預約時間：</b>${state.dateKey ? `${state.dateKey} (${wd})` : '—'} ${state.slot || '—'}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
 
@@ -722,6 +741,7 @@
         state.coach=c;
         renderCoaches();
         btnNext.disabled=false;
+        // ✅ 不做任何「傳送中」覆蓋，讀取提示只放在底部 status
         setStatus(`已選擇教練：${c.name}`);
       };
 
@@ -747,9 +767,11 @@
   }
 
   function buildAvailabilityMap(options){
+    // options: [{label:"YYYY/MM/DD HH:mm", value:"YYYY/MM/DD HH:mm"}]
     const map = {};
     (options || []).forEach(o=>{
       const raw = (o && (o.value || o.label)) ? String(o.value || o.label) : '';
+      // 支援 "2026/01/16 08:00" 或 "2026-01-16 08:00"
       const m = raw.match(/^(\d{4})[\/-](\d{2})[\/-](\d{2})\s+(\d{2}:\d{2})$/);
       if(!m) return;
       const dateKey = `${m[1]}-${m[2]}-${m[3]}`;
@@ -758,6 +780,7 @@
       if(!map[dateKey].includes(time)) map[dateKey].push(time);
     });
 
+    // 每天時間排序
     Object.keys(map).forEach(k=>{
       map[k].sort((a,b)=>a.localeCompare(b));
     });
@@ -831,30 +854,30 @@
     return list;
   }
 
+  function appendTip(text, cls){
+    const tip=document.createElement('div');
+    tip.className = `slotTip ${cls || ''}`.trim();
+    tip.textContent=text;
+    slotGrid2.appendChild(tip);
+  }
+
   function renderSlotsStep2(){
     slotGrid2.innerHTML='';
 
+    // ✅ 你要的（上午/下午/晚上下面那行）：「讀取可預約時段中…」→ 暗紅粗體+微放大
     if(state.loadingOptions){
-      const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
-      tip.textContent='讀取可預約時段中…';
-      slotGrid2.appendChild(tip);
+      appendTip('讀取可預約時段中…', 'important');
       return;
     }
 
     if(!hasAnySlots()){
-      const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#b23a2b; font-weight:950; padding:6px 2px;';
-      tip.textContent='目前沒有可預約的時段';
-      slotGrid2.appendChild(tip);
+      appendTip('目前沒有可預約的時段', 'error');
       return;
     }
 
+    // ✅ 你要的（上午/下午/晚上下面那行）：「請先選擇上方日期」→ 暗紅粗體+微放大
     if(!state.dateKey){
-      const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
-      tip.textContent='請先選擇上方日期';
-      slotGrid2.appendChild(tip);
+      appendTip('請先選擇上方日期', 'important');
       return;
     }
 
@@ -862,10 +885,7 @@
     const list = filterTimesByTab(times, state.tab);
 
     if(list.length===0){
-      const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
-      tip.textContent='此日期在此時段沒有可預約的時間';
-      slotGrid2.appendChild(tip);
+      appendTip('此日期在此時段沒有可預約的時間', '');
       return;
     }
 
@@ -973,20 +993,15 @@
   }
 
   function buildBookingData(){
-    const wd = weekdayZhFromYMD(state.dateKey);
+    const weekday = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : "";
     return {
       action: "book",
-      userId: state.uid,               // UID
-      displayName: state.name,         // DisplayName
-      coachName: state.coach?.name,    // CoachName
-      date: state.dateKey,             // YYYY-MM-DD
-      time: state.slot,                // HH:mm
-      weekday: wd,                     // 一二三四五六日
-      // 下面你若不想回傳也可以刪掉，但目前保留不影響
-      coachId: state.coach?.id,
-      roomId: ROOM.id,
-      roomName: ROOM.name,
-      duration: 60,
+      userId: state.uid,
+      displayName: state.name,
+      coachName: state.coach?.name,
+      date: state.dateKey,
+      time: state.slot,
+      weekday,
       createdAt: new Date().toISOString()
     };
   }
@@ -1009,8 +1024,8 @@
 
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
-    const wd = weekdayZhFromYMD(state.dateKey);
-    const whenText = `${state.dateKey || '—'} (${wd || '—'}) ${state.slot || '—'}`;
+    const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
+    const whenText = `${state.dateKey || '—'} (${wd}) ${state.slot || '—'}`;
 
     return [{
       type: "flex",
@@ -1041,30 +1056,24 @@
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
-                { type: "text", text: `預約教練　${coachName}`, size: "md", weight: "bold", color: "#1F3B2F" },
-
-                /* ✅ 這段就是你要的 baseline box：只把日期時間縮小 */
                 {
                   type: "box",
                   layout: "baseline",
+                  spacing: "md",
+                  contents: [
+                    { type: "text", text: "預約教練", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: coachName, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
                   margin: "sm",
                   contents: [
-                    {
-                      type: "text",
-                      text: "預約時間　",
-                      size: "md",          /* 「預約時間」維持原大小 */
-                      weight: "bold",
-                      color: "#1F3B2F",
-                      flex: 0
-                    },
-                    {
-                      type: "text",
-                      text: whenText,      /* 2026-01-17 (六) 09:00 */
-                      size: "sm",          /* 👈 只有這段變小 */
-                      weight: "bold",
-                      color: "#1F3B2F",
-                      wrap: true
-                    }
+                    { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    /* ✅ 只把「日期(星期)時間」縮小一點：md -> sm */
+                    { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 }
               ]
@@ -1125,6 +1134,8 @@
     btnNext.onclick=async ()=>{
       if(state.step===1){
         if(!state.coach) return;
+
+        // ✅ Step1 → Step2：在這裡才去 Make 讀取 options（避免任何「傳送中」覆蓋教練名字）
         await loadOptionsForCoach();
         return;
       }
