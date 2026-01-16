@@ -16,7 +16,7 @@
       --border:rgba(0,0,0,.08);
       --shadow:0 10px 26px rgba(0,0,0,.08);
       --radius:18px;
-      --danger:#b23a2b;
+      --danger:#b23a2b; /* 暗紅 */
       --safeB: env(safe-area-inset-bottom, 0px);
       --safeT: env(safe-area-inset-top, 0px);
       --warnBg:#fff7e6;
@@ -550,12 +550,9 @@
    * ✅ 你要改這兩個網址
    * 1) MAKE_OPTIONS_WEBHOOK_URL：拿「可預約時段 options」用（回傳 {options:[{label,value}...] }）
    * 2) MAKE_BOOKING_WEBHOOK_URL：送出「預約成立」用（寫入預約紀錄，最後回聊天室送成功Flex）
-   *
-   * 如果你想共用同一個 Make webhook，也可以兩個填同一個，
-   * 但 Make 端要用 action 分流（例如 action=getOptions / action=book）
    */
-  const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3'; // 例：https://hook.us1.make.com/xxxxxx
-  const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3'; // 例：https://hook.us1.make.com/yyyyyy
+  const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
+  const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
 
   const COACHES = [
     {
@@ -586,8 +583,8 @@
     slot: null,
 
     // ✅ 從 Make 回來的可預約資料
-    optionsRaw: [],              // [{label,value}...]
-    availabilityMap: {},         // { "YYYY-MM-DD": ["08:00","09:00"...] }
+    optionsRaw: [],
+    availabilityMap: {},
     loadingOptions: false
   };
 
@@ -626,7 +623,6 @@
   function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
 
-  // ✅ 額外保險：即使 Make 有篩 1 小時，我們前端也再擋一次（避免資料延遲）
   function canBookNow(dateKey, timeStr){
     if(!dateKey || !timeStr) return false;
     const selectedDate = new Date(dateKey+'T00:00:00');
@@ -712,7 +708,6 @@
         state.coach=c;
         renderCoaches();
         btnNext.disabled=false;
-        // ✅ 不做任何「傳送中」覆蓋，讀取提示只放在底部 status
         setStatus(`已選擇教練：${c.name}`);
       };
 
@@ -738,11 +733,9 @@
   }
 
   function buildAvailabilityMap(options){
-    // options: [{label:"YYYY/MM/DD HH:mm", value:"YYYY/MM/DD HH:mm"}]
     const map = {};
     (options || []).forEach(o=>{
       const raw = (o && (o.value || o.label)) ? String(o.value || o.label) : '';
-      // 支援 "2026/01/16 08:00" 或 "2026-01-16 08:00"
       const m = raw.match(/^(\d{4})[\/-](\d{2})[\/-](\d{2})\s+(\d{2}:\d{2})$/);
       if(!m) return;
       const dateKey = `${m[1]}-${m[2]}-${m[3]}`;
@@ -751,7 +744,6 @@
       if(!map[dateKey].includes(time)) map[dateKey].push(time);
     });
 
-    // 每天時間排序
     Object.keys(map).forEach(k=>{
       map[k].sort((a,b)=>a.localeCompare(b));
     });
@@ -825,12 +817,21 @@
     return list;
   }
 
+  // ✅ 你要的兩個字樣：顯示在「上午/下午/晚上」下方（slotGrid 內）
+  function tipStyleImportant(){
+    // 稍微放大 + 暗紅色 + 粗體
+    return 'grid-column:1 / -1; font-size:14px; color:var(--danger); font-weight:950; padding:6px 2px;';
+  }
+  function tipStyleNormal(){
+    return 'grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+  }
+
   function renderSlotsStep2(){
     slotGrid2.innerHTML='';
 
     if(state.loadingOptions){
       const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+      tip.style.cssText = tipStyleImportant();
       tip.textContent='讀取可預約時段中…';
       slotGrid2.appendChild(tip);
       return;
@@ -846,7 +847,7 @@
 
     if(!state.dateKey){
       const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+      tip.style.cssText = tipStyleImportant();
       tip.textContent='請先選擇上方日期';
       slotGrid2.appendChild(tip);
       return;
@@ -857,7 +858,7 @@
 
     if(list.length===0){
       const tip=document.createElement('div');
-      tip.style.cssText='grid-column:1 / -1; font-size:12px; color:#7a7a7a; font-weight:900; padding:6px 2px;';
+      tip.style.cssText = tipStyleNormal();
       tip.textContent='此日期在此時段沒有可預約的時間';
       slotGrid2.appendChild(tip);
       return;
@@ -897,7 +898,6 @@
 
   async function fetchOptionsFromMake(){
     if(!MAKE_OPTIONS_WEBHOOK_URL){
-      // 沒填 webhook，直接視為沒時段
       state.optionsRaw = [];
       state.availabilityMap = {};
       return;
@@ -921,7 +921,6 @@
       throw new Error(`Make options webhook failed: ${res.status} ${t}`);
     }
 
-    // ✅ 一定要用 json()
     const data = await res.json();
     const options = data && Array.isArray(data.options) ? data.options : [];
 
@@ -947,7 +946,6 @@
 
       state.loadingOptions = false;
 
-      // 讓 weekStrip / slots 依新資料重畫
       renderWeekStrip();
       renderSlotsStep2();
 
@@ -1094,8 +1092,6 @@
     btnNext.onclick=async ()=>{
       if(state.step===1){
         if(!state.coach) return;
-
-        // ✅ Step1 → Step2：在這裡才去 Make 讀取 options（避免任何「傳送中」覆蓋教練名字）
         await loadOptionsForCoach();
         return;
       }
@@ -1153,4 +1149,3 @@
 </script>
 </body>
 </html>
-
