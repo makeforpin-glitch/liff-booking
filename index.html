@@ -147,7 +147,7 @@
       pointer-events:none;
     }
 
-    /* ✅ Step1 人數區標題 */
+    /* Step1 人數區標題 */
     .subTitle{
       margin:14px 0 10px;
       font-weight:950;
@@ -155,7 +155,7 @@
       color:#111;
     }
 
-    /* ✅ 人數 chip（只有 1/2 人） */
+    /* 人數 chip（只有 1/2 人） */
     .chip.peoplemp{
       flex:1 1 0;
       min-width:140px;
@@ -733,9 +733,11 @@
       btnNext.disabled = !(state.coach && state.people && state.dateKey && state.slot);
 
       const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
+      
+      // ✅ 修改 1：Step 3 顯示順序 (教練 -> 人數 -> 時間)
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
-        <div class="infoLine"><b>人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
+        <div class="infoLine"><b>預約人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
         <div class="infoLine"><b>預約時間：</b>${state.dateKey ? `${state.dateKey} (${wd})` : '—'} ${state.slot || '—'}</div>
       `;
       confirmInfo.innerHTML = infoHTML;
@@ -1055,7 +1057,7 @@
     }
   }
 
-  // ✅ 修改 2：調整卡片順序與文字 (教練 -> 時間 -> 預約人數)
+  // ✅ 修改 2：調整 Flex Message 順序 (教練 -> 人數 -> 時間)
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
@@ -1091,7 +1093,7 @@
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
-                // 第一行：預約教練
+                // 1. 預約教練
                 {
                   type: "box",
                   layout: "baseline",
@@ -1101,18 +1103,7 @@
                     { type: "text", text: coachName, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 },
-                // 第二行：預約時間 (原本在第三，移到第二)
-                {
-                  type: "box",
-                  layout: "baseline",
-                  spacing: "md",
-                  margin: "sm",
-                  contents: [
-                    { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
-                    { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
-                  ]
-                },
-                // 第三行：預約人數 (原本在第二，移到第三，並修改標籤為「預約人數」)
+                // 2. 預約人數 (移動到第二位)
                 {
                   type: "box",
                   layout: "baseline",
@@ -1121,6 +1112,17 @@
                   contents: [
                     { type: "text", text: "預約人數", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
                     { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                // 3. 預約時間 (移動到第三位)
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  margin: "sm",
+                  contents: [
+                    { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 }
               ]
