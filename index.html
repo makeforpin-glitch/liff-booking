@@ -238,7 +238,7 @@
       font-weight:950;
       color:#0d7a55;
     }
-    /* ✅ 新增：當月份無法切換時的樣式 */
+    /* 當月份無法切換時的樣式 */
     .calBtn.disabled {
       opacity: 0.3;
       pointer-events: none;
@@ -280,6 +280,12 @@
       pointer-events:none;
       box-shadow:none;
     }
+    /* ✅ 新增：隱藏超過截止日的日期 */
+    .dayCell.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
     .dowTxt{
       font-size:11px;
       font-weight:900;
@@ -670,12 +676,13 @@
     return map[d.getDay()] || '';
   }
 
-  // ✅ 新增：計算可預約期限（下個月月底）
+  // ✅ 計算可預約期限（下個月月底，設定到最後一秒）
   function getLimitDate(){
     const now = new Date();
     // 參數：(年, 目前月份+2, 0) => 會得到下個月的最後一天
-    // 例如現在1月 => new Date(y, 1+2, 0) => 3月第0天 => 2月底
-    return new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    const d = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    d.setHours(23, 59, 59, 999); // 確保包含該天的所有時間
+    return d;
   }
 
   function canBookNow(dateKey, timeStr){
@@ -841,7 +848,7 @@
     return new Set(Object.keys(state.availabilityMap || {}));
   }
 
-  // ✅ 修改：渲染週曆時加入「上個月/下個月」的按鈕鎖定邏輯
+  // ✅ 修改：渲染週曆邏輯 (隱藏超出日期的格子)
   function renderWeekStrip(){
     const ws = state.weekStart;
     monthTitle.textContent = monthYearLabel(ws);
@@ -852,15 +859,14 @@
     const limitDate = getLimitDate(); // 取得截止日(下個月月底)
     const thisWeekStart = weekStartMonday(new Date()); // 取得本週一
 
-    // 1. 控制「上一步」按鈕：如果目前的週開始日 <= 本週一，就不能再往前
+    // 1. 控制「上一步」按鈕
     if(ws <= thisWeekStart){
       prevWeek.classList.add('disabled');
     } else {
       prevWeek.classList.remove('disabled');
     }
 
-    // 2. 控制「下一步」按鈕：如果「下一週」的起始日 > 截止日，就不能再往後
-    // 下一週的起始日 = ws + 7天
+    // 2. 控制「下一步」按鈕：如果下一週的「第一天」已經超過 limitDate，就不讓按
     const nextWeekStart = addDays(ws, 7);
     if(nextWeekStart > limitDate){
       nextWeek.classList.add('disabled');
@@ -877,9 +883,15 @@
 
       const isPast = startOfDay(d) < today0;
       const noSlots = !dateSet.has(key);
-      const isOverLimit = d > limitDate; // 超過截止日的日期也要灰掉
+      const isOverLimit = d > limitDate; // 超過截止日的日期
 
       if(isPast || noSlots || isOverLimit || state.loadingOptions) cell.classList.add('disabled');
+      
+      // ✅ 關鍵：如果該日期超過截止日，直接隱藏，讓畫面看起來斷在月底
+      if(isOverLimit) {
+        cell.classList.add('hidden');
+      }
+
       if(state.dateKey===key) cell.classList.add('sel');
 
       const dow=document.createElement('div');
@@ -908,13 +920,13 @@
   }
 
   function goWeek(offset){
-    // 雖然按鈕 disabled 了，但保險起見這裡也加檢查
     const newStart = addDays(state.weekStart, offset*7);
     const thisWeekStart = weekStartMonday(new Date());
     const limitDate = getLimitDate();
 
     // 往回切：不能小於本週
     if(offset < 0 && newStart < thisWeekStart) return;
+    
     // 往後切：起始日不能大於截止日
     if(offset > 0 && newStart > limitDate) return;
 
