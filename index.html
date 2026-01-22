@@ -121,7 +121,7 @@
 
     .row{ display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* ✅ 教練按鈕：永遠只顯示名字，不顯示任何「傳送中」覆蓋 */
+    /* ✅ 教練按鈕：永遠只顯示名字 */
     .chip{
       padding:14px 16px;
       border-radius:16px;
@@ -362,7 +362,6 @@
     }
     .slot.disabled{ opacity:.35; pointer-events:none; }
 
-    /* ✅ 你要改的：上午/下午/晚上下面那行提示文字（在 slotGrid 裡） */
     .slotTip{
       grid-column:1 / -1;
       padding:8px 2px;
@@ -371,7 +370,6 @@
       color:var(--muted);
       line-height:1.4;
     }
-    /* 暗紅 + 粗體 + 稍微放大 */
     .slotTip.important{
       color:var(--danger);
       font-weight:950;
@@ -508,17 +506,14 @@
   </div>
 
   <div class="main">
-    <!-- Step 1 -->
     <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
       <div id="coachRow" class="row"></div>
 
-      <!-- ✅ 新增：人數選擇（最多 2 人） -->
-      <div class="subTitle">選擇人數（最多 2 人）</div>
+      <div class="subTitle">選擇人數</div>
       <div id="peopleRow" class="row"></div>
     </div>
 
-    <!-- Step 2 -->
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
         <div class="h">Step 2｜選擇日期及時段</div>
@@ -558,7 +553,6 @@
       </div>
     </div>
 
-    <!-- Step 3 -->
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
       <div class="confirmWrap">
         <div class="h">Step 3｜確認預約訊息</div>
@@ -587,9 +581,7 @@
   const LIFF_ID = '2008631386-AEejMove';
 
   /**
-   * ✅ 你要改這兩個網址
-   * 1) MAKE_OPTIONS_WEBHOOK_URL：拿「可預約時段 options」用（回傳 {options:[{label,value}...] }）
-   * 2) MAKE_BOOKING_WEBHOOK_URL：送出「預約成立」用（寫入預約紀錄，最後回聊天室送成功Flex）
+   * Make Webhook URLs
    */
   const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
   const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
@@ -615,7 +607,7 @@
     name: '',
     coach: null,
 
-    // ✅ 新增：人數（最多 2 人）
+    // 人數（最多 2 人）
     people: null, // 1 或 2
 
     weekStart: null,
@@ -623,7 +615,7 @@
     tab: 'am',
     slot: null,
 
-    // ✅ 從 Make 回來的可預約資料
+    // 從 Make 回來的可預約資料
     optionsRaw: [],              // [{label,value}...]
     availabilityMap: {},         // { "YYYY-MM-DD": ["08:00","09:00"...] }
     loadingOptions: false
@@ -762,7 +754,6 @@
       div.onclick=()=>{
         state.coach=c;
         renderCoaches();
-        // ✅ 選教練後不清空人數，讓使用者不必重選；但仍重新渲染人數列
         renderPeople();
         btnNext.disabled = !(state.coach && state.people);
         setStatus(step1StatusText());
@@ -772,7 +763,6 @@
     });
   }
 
-  // ✅ 新增：渲染人數（最多 2 人）
   function renderPeople(){
     peopleRow.innerHTML='';
     [1,2].forEach(n=>{
@@ -787,7 +777,6 @@
         setStatus(step1StatusText());
       };
 
-      // 若尚未選教練，先鎖住人數按鈕（避免使用者先點人數）
       if(!state.coach){
         div.classList.add('disabled');
       }
@@ -970,7 +959,6 @@
       return;
     }
 
-    // ✅ 會把「教練 + 人數」一起送回 Make，讓 Make 做人數限制與可預約篩選
     const payload = {
       action: "getOptions",
       coachName: state.coach?.name || "",
@@ -1043,7 +1031,7 @@
       userId: state.uid,
       displayName: state.name,
       coachName: state.coach?.name,
-      people: state.people,              // ✅ 一併回傳人數給 Make（寫入/檢查用）
+      people: state.people,
       date: state.dateKey,
       time: state.slot,
       weekday,
@@ -1067,6 +1055,7 @@
     }
   }
 
+  // ✅ 修改 2：調整卡片順序與文字 (教練 -> 時間 -> 預約人數)
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
@@ -1102,6 +1091,7 @@
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
+                // 第一行：預約教練
                 {
                   type: "box",
                   layout: "baseline",
@@ -1111,16 +1101,7 @@
                     { type: "text", text: coachName, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 },
-                {
-                  type: "box",
-                  layout: "baseline",
-                  spacing: "md",
-                  margin: "sm",
-                  contents: [
-                    { type: "text", text: "人數", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
-                    { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
-                  ]
-                },
+                // 第二行：預約時間 (原本在第三，移到第二)
                 {
                   type: "box",
                   layout: "baseline",
@@ -1129,6 +1110,17 @@
                   contents: [
                     { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
                     { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                // 第三行：預約人數 (原本在第二，移到第三，並修改標籤為「預約人數」)
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  margin: "sm",
+                  contents: [
+                    { type: "text", text: "預約人數", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 }
               ]
@@ -1176,7 +1168,7 @@
     state.name = profile.displayName || '';
 
     renderCoaches();
-    renderPeople(); // ✅ 人數列先渲染（尚未選教練會 disabled）
+    renderPeople();
     state.weekStart = weekStartMonday(new Date());
     renderWeekStrip();
     bindTabs();
