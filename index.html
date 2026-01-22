@@ -973,8 +973,8 @@
     const list = filterTimesByTab(times, state.tab);
 
     if(list.length===0){
-      // ✅ 修改：這裡改為您指定的文字
-      appendTip('此日期於此時段，未開放可預約時間', '');
+      // ✅ 修改：將文字改為 'important' class，使其變大變紅
+      appendTip('此日期於此時段，未開放可預約時間', 'important');
       return;
     }
 
