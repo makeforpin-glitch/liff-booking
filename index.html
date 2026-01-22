@@ -280,7 +280,7 @@
       pointer-events:none;
       box-shadow:none;
     }
-    /* ✅ 新增：隱藏超過截止日的日期 */
+    /* 隱藏超過截止日的日期 */
     .dayCell.hidden {
       visibility: hidden;
       pointer-events: none;
@@ -676,12 +676,11 @@
     return map[d.getDay()] || '';
   }
 
-  // ✅ 計算可預約期限（下個月月底，設定到最後一秒）
+  // 計算可預約期限（下個月月底，設定到最後一秒）
   function getLimitDate(){
     const now = new Date();
-    // 參數：(年, 目前月份+2, 0) => 會得到下個月的最後一天
     const d = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-    d.setHours(23, 59, 59, 999); // 確保包含該天的所有時間
+    d.setHours(23, 59, 59, 999);
     return d;
   }
 
@@ -848,7 +847,7 @@
     return new Set(Object.keys(state.availabilityMap || {}));
   }
 
-  // ✅ 修改：渲染週曆邏輯 (隱藏超出日期的格子)
+  // 渲染週曆邏輯 (隱藏超出日期的格子)
   function renderWeekStrip(){
     const ws = state.weekStart;
     monthTitle.textContent = monthYearLabel(ws);
@@ -866,7 +865,7 @@
       prevWeek.classList.remove('disabled');
     }
 
-    // 2. 控制「下一步」按鈕：如果下一週的「第一天」已經超過 limitDate，就不讓按
+    // 2. 控制「下一步」按鈕
     const nextWeekStart = addDays(ws, 7);
     if(nextWeekStart > limitDate){
       nextWeek.classList.add('disabled');
@@ -887,7 +886,7 @@
 
       if(isPast || noSlots || isOverLimit || state.loadingOptions) cell.classList.add('disabled');
       
-      // ✅ 關鍵：如果該日期超過截止日，直接隱藏，讓畫面看起來斷在月底
+      // 如果該日期超過截止日，直接隱藏
       if(isOverLimit) {
         cell.classList.add('hidden');
       }
@@ -974,7 +973,8 @@
     const list = filterTimesByTab(times, state.tab);
 
     if(list.length===0){
-      appendTip('此日期在此時段沒有可預約的時間', '');
+      // ✅ 修改：這裡改為您指定的文字
+      appendTip('此日期於此時段，未開放可預約時間', '');
       return;
     }
 
