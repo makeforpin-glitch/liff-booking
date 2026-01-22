@@ -121,7 +121,7 @@
 
     .row{ display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* ✅ 教練按鈕：永遠只顯示名字 */
+    /* 教練按鈕 */
     .chip{
       padding:14px 16px;
       border-radius:16px;
@@ -155,7 +155,7 @@
       color:#111;
     }
 
-    /* 人數 chip（只有 1/2 人） */
+    /* 人數 chip */
     .chip.peoplemp{
       flex:1 1 0;
       min-width:140px;
@@ -238,6 +238,15 @@
       font-weight:950;
       color:#0d7a55;
     }
+    /* ✅ 新增：當月份無法切換時的樣式 */
+    .calBtn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+      box-shadow: none;
+      background: #f0f0f0;
+      color: #999;
+    }
+
     .monthTitle{
       text-align:center;
       font-weight:950;
@@ -606,8 +615,6 @@
     uid: '',
     name: '',
     coach: null,
-
-    // 人數（最多 2 人）
     people: null, // 1 或 2
 
     weekStart: null,
@@ -661,6 +668,14 @@
     const d = new Date(dateKey + 'T00:00:00');
     const map = ['日','一','二','三','四','五','六'];
     return map[d.getDay()] || '';
+  }
+
+  // ✅ 新增：計算可預約期限（下個月月底）
+  function getLimitDate(){
+    const now = new Date();
+    // 參數：(年, 目前月份+2, 0) => 會得到下個月的最後一天
+    // 例如現在1月 => new Date(y, 1+2, 0) => 3月第0天 => 2月底
+    return new Date(now.getFullYear(), now.getMonth() + 2, 0);
   }
 
   function canBookNow(dateKey, timeStr){
@@ -734,7 +749,6 @@
 
       const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
       
-      // ✅ 修改 1：Step 3 顯示順序 (教練 -> 人數 -> 時間)
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
         <div class="infoLine"><b>預約人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
@@ -827,6 +841,7 @@
     return new Set(Object.keys(state.availabilityMap || {}));
   }
 
+  // ✅ 修改：渲染週曆時加入「上個月/下個月」的按鈕鎖定邏輯
   function renderWeekStrip(){
     const ws = state.weekStart;
     monthTitle.textContent = monthYearLabel(ws);
@@ -834,6 +849,24 @@
 
     const today0 = startOfDay(new Date());
     const dateSet = datesWithSlotsSet();
+    const limitDate = getLimitDate(); // 取得截止日(下個月月底)
+    const thisWeekStart = weekStartMonday(new Date()); // 取得本週一
+
+    // 1. 控制「上一步」按鈕：如果目前的週開始日 <= 本週一，就不能再往前
+    if(ws <= thisWeekStart){
+      prevWeek.classList.add('disabled');
+    } else {
+      prevWeek.classList.remove('disabled');
+    }
+
+    // 2. 控制「下一步」按鈕：如果「下一週」的起始日 > 截止日，就不能再往後
+    // 下一週的起始日 = ws + 7天
+    const nextWeekStart = addDays(ws, 7);
+    if(nextWeekStart > limitDate){
+      nextWeek.classList.add('disabled');
+    } else {
+      nextWeek.classList.remove('disabled');
+    }
 
     for(let i=0;i<7;i++){
       const d = addDays(ws, i);
@@ -844,8 +877,9 @@
 
       const isPast = startOfDay(d) < today0;
       const noSlots = !dateSet.has(key);
+      const isOverLimit = d > limitDate; // 超過截止日的日期也要灰掉
 
-      if(isPast || noSlots || state.loadingOptions) cell.classList.add('disabled');
+      if(isPast || noSlots || isOverLimit || state.loadingOptions) cell.classList.add('disabled');
       if(state.dateKey===key) cell.classList.add('sel');
 
       const dow=document.createElement('div');
@@ -860,7 +894,7 @@
       cell.appendChild(dot);
 
       cell.onclick=()=>{
-        if(isPast || noSlots || state.loadingOptions) return;
+        if(isPast || noSlots || isOverLimit || state.loadingOptions) return;
         state.dateKey=key;
         state.slot=null;
         renderWeekStrip();
@@ -874,7 +908,17 @@
   }
 
   function goWeek(offset){
-    state.weekStart = addDays(state.weekStart, offset*7);
+    // 雖然按鈕 disabled 了，但保險起見這裡也加檢查
+    const newStart = addDays(state.weekStart, offset*7);
+    const thisWeekStart = weekStartMonday(new Date());
+    const limitDate = getLimitDate();
+
+    // 往回切：不能小於本週
+    if(offset < 0 && newStart < thisWeekStart) return;
+    // 往後切：起始日不能大於截止日
+    if(offset > 0 && newStart > limitDate) return;
+
+    state.weekStart = newStart;
     renderWeekStrip();
     renderSlotsStep2();
   }
@@ -1057,7 +1101,6 @@
     }
   }
 
-  // ✅ 修改 2：調整 Flex Message 順序 (教練 -> 人數 -> 時間)
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
@@ -1093,7 +1136,6 @@
               cornerRadius: "12px",
               paddingAll: "12px",
               contents: [
-                // 1. 預約教練
                 {
                   type: "box",
                   layout: "baseline",
@@ -1103,7 +1145,6 @@
                     { type: "text", text: coachName, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 },
-                // 2. 預約人數 (移動到第二位)
                 {
                   type: "box",
                   layout: "baseline",
@@ -1114,7 +1155,6 @@
                     { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
                   ]
                 },
-                // 3. 預約時間 (移動到第三位)
                 {
                   type: "box",
                   layout: "baseline",
@@ -1127,7 +1167,6 @@
                 }
               ]
             },
-
             { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "xs", margin: "md" },
             {
               type: "text",
