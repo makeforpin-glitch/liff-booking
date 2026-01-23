@@ -1237,7 +1237,7 @@
         // 鎖定按鈕，顯示確認中
         btnNext.disabled = true;
         btnNext.textContent = "系統確認中..."; 
-        setStatus("正在與行事曆同步，請稍候...");
+        setStatus("正在確認教練行事曆，請稍候...");
 
         if(!liff.isInClient()){
           // 開發測試用，若非 Line 內環境
@@ -1282,7 +1282,7 @@
 
           } else {
             // --- 失敗 (撞期) ---
-            alert(result.message || "抱歉，該時段已被預約，請選擇其他時間。");
+            alert(result.message || "抱歉，該時段已被預約，請選擇其他時段。");
             
             // 解鎖按鈕，讓用戶可以重選
             btnNext.disabled = false;
@@ -1315,3 +1315,4 @@
 </script>
 </body>
 </html>
+
