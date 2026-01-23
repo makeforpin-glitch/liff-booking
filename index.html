@@ -385,6 +385,7 @@
       color:var(--muted);
       line-height:1.4;
     }
+    /* 重要提示：放大、紅色 */
     .slotTip.important{
       color:var(--danger);
       font-weight:950;
@@ -597,6 +598,8 @@
 
   /**
    * Make Webhook URLs
+   * MAKE_BOOKING_WEBHOOK_URL 需回傳 JSON，格式如：
+   * { "status": "success", "message": "..." } 或 { "status": "failed", "message": "..." }
    */
   const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
   const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
@@ -755,6 +758,7 @@
 
       const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
       
+      // Step 3 顯示順序 (教練 -> 人數 -> 時間)
       const infoHTML = `
         <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
         <div class="infoLine"><b>預約人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
@@ -855,8 +859,8 @@
 
     const today0 = startOfDay(new Date());
     const dateSet = datesWithSlotsSet();
-    const limitDate = getLimitDate(); // 取得截止日(下個月月底)
-    const thisWeekStart = weekStartMonday(new Date()); // 取得本週一
+    const limitDate = getLimitDate(); // 截止日
+    const thisWeekStart = weekStartMonday(new Date()); // 本週一
 
     // 1. 控制「上一步」按鈕
     if(ws <= thisWeekStart){
@@ -882,7 +886,7 @@
 
       const isPast = startOfDay(d) < today0;
       const noSlots = !dateSet.has(key);
-      const isOverLimit = d > limitDate; // 超過截止日的日期
+      const isOverLimit = d > limitDate; // 超過截止日
 
       if(isPast || noSlots || isOverLimit || state.loadingOptions) cell.classList.add('disabled');
       
@@ -973,8 +977,8 @@
     const list = filterTimesByTab(times, state.tab);
 
     if(list.length===0){
-      // ✅ 修改：將文字改為 'important' class，使其變大變紅
-      appendTip('該時段已無可預約時間，請選擇別的時段', 'important');
+      // 提示文字加強 (紅字粗體)
+      appendTip('此日期於此時段，未開放可預約時間', 'important');
       return;
     }
 
@@ -1097,22 +1101,7 @@
     };
   }
 
-  async function postBookingToMake(data){
-    if(!MAKE_BOOKING_WEBHOOK_URL) return { ok:true, skipped:true };
-    try{
-      const res = await fetch(MAKE_BOOKING_WEBHOOK_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text().catch(()=> '');
-      if(!res.ok) throw new Error(`Make booking webhook failed: ${res.status} ${text}`);
-      return { ok:true, status: res.status, body: text };
-    }catch(e){
-      return { ok:false, error:e };
-    }
-  }
-
+  // 建構 Flex Message 內容 (教練 -> 人數 -> 時間)
   function buildSuccessFlex(){
     const coachName = state.coach?.name || '—';
     const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
@@ -1195,10 +1184,6 @@
     }];
   }
 
-  async function sendFlexToChat(){
-    await liff.sendMessages(buildSuccessFlex());
-  }
-
   function errToText(e){
     try{
       if(!e) return 'unknown';
@@ -1249,35 +1234,73 @@
       if(state.step===3){
         if(!(state.coach && state.people && state.dateKey && state.slot)) return;
 
+        // 鎖定按鈕，顯示確認中
         btnNext.disabled = true;
-        setStatus(`送出中…`);
+        btnNext.textContent = "系統確認中..."; 
+        setStatus("正在與行事曆同步，請稍候...");
 
         if(!liff.isInClient()){
-          setStatus(`❌ 目前不是在 LINE 內開啟`, true);
-          btnNext.disabled = false;
-          return;
+          // 開發測試用，若非 Line 內環境
+          // setStatus(`❌ 目前不是在 LINE 內開啟`, true);
+          // btnNext.disabled = false;
+          // return;
         }
 
         const bookingData = buildBookingData();
-        const mk = await postBookingToMake(bookingData);
-        if(!mk.ok){
-          setStatus(`❌ Make webhook 送出失敗\n${errToText(mk.error)}`, true);
-          btnNext.disabled = false;
-          return;
-        }
 
-        try{
-          await sendFlexToChat();
-          liff.closeWindow();
-          return;
-        }catch(e){
+        try {
+          // 呼叫 Make Webhook
+          const res = await fetch(MAKE_BOOKING_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+          });
+
+          if (!res.ok) {
+            throw new Error(`Webhook Error: ${res.status}`);
+          }
+
+          const result = await res.json(); // 解析 Make 回傳的 JSON
+
+          // 判斷 Make 回傳的狀態
+          if (result.status === 'success') {
+            // --- 成功 ---
+            setStatus("預約成功！正在發送通知...");
+            
+            // 讓用戶幫忙發送確認訊息 (免費)
+            try {
+              if (liff.isInClient()) {
+                await liff.sendMessages(buildSuccessFlex());
+              }
+              liff.closeWindow(); // 成功後關閉視窗
+            } catch (err) {
+              console.error('LIFF send msg error:', err);
+              // 萬一 liff 發送失敗 (例如使用者封鎖機器人)，至少還是要關閉
+              alert("預約成功！");
+              liff.closeWindow();
+            }
+
+          } else {
+            // --- 失敗 (撞期) ---
+            alert(result.message || "抱歉，該時段已被預約，請選擇其他時間。");
+            
+            // 解鎖按鈕，讓用戶可以重選
+            btnNext.disabled = false;
+            btnNext.textContent = "確認預約";
+            setStatus("請重新選擇時段");
+          }
+
+        } catch (e) {
+          console.error(e);
           setStatus(
-            `❌ 成功寫入預約，但卡片送出失敗\n` +
-            `${errToText(e)}\n` +
-            `提示：請確認 LIFF 的 Channel 已啟用 Messaging API、已連結 OA，且 LIFF 有 messaging scope。`,
+            `❌ 系統發生錯誤\n` +
+            `${errToText(e)}`,
             true
           );
+          alert("系統發生錯誤，請稍後再試");
+          // 發生錯誤也要解鎖按鈕
           btnNext.disabled = false;
+          btnNext.textContent = "確認預約";
         }
       }
     };
@@ -1292,5 +1315,3 @@
 </script>
 </body>
 </html>
-
-
