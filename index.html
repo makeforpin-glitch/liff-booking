@@ -11,99 +11,535 @@
 
   <style>
     :root{
-      --bg:#f6f7f8; --card:#ffffff; --text:#111; --muted:#7a7a7a;
-      --primary:#1bb57a; --border:rgba(0,0,0,.08); --shadow:0 10px 26px rgba(0,0,0,.08);
-      --radius:18px; --danger:#b23a2b;
-      --safeB: env(safe-area-inset-bottom, 0px); --safeT: env(safe-area-inset-top, 0px);
-      --warnBg:#fff7e6; --warnBorder:rgba(192,122,0,.18); --warnText:#7a4a00;
+      --bg:#f6f7f8;
+      --card:#ffffff;
+      --text:#111;
+      --muted:#7a7a7a;
+      --primary:#1bb57a;
+      --border:rgba(0,0,0,.08);
+      --shadow:0 10px 26px rgba(0,0,0,.08);
+      --radius:18px;
+      --danger:#b23a2b; /* 暗紅 */
+      --safeB: env(safe-area-inset-bottom, 0px);
+      --safeT: env(safe-area-inset-top, 0px);
+      --warnBg:#fff7e6;
+      --warnBorder:rgba(192,122,0,.18);
+      --warnText:#7a4a00;
     }
+
     *{ box-sizing:border-box; }
     html, body{ height:100%; overflow:hidden; }
-    body{ margin:0; font-family: system-ui, -apple-system, sans-serif; background:var(--bg); color:var(--text); }
-    .wrap{ height:100dvh; display:flex; flex-direction:column; max-width:560px; margin:0 auto; }
-    
-    .top{ padding:10px 14px 8px; padding-top:calc(10px + var(--safeT)); background:linear-gradient(180deg, #f6f7f8 75%, rgba(246,247,248,0)); flex:0 0 auto; }
-    .steps{ display:flex; gap:10px; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:999px; padding:10px 12px; box-shadow:var(--shadow); }
-    .step{ display:flex; align-items:center; gap:8px; flex:1; justify-content:center; min-width:0; }
-    .dot{ width:30px; height:30px; border-radius:999px; background:#e9f7f0; color:var(--primary); font-weight:900; display:flex; align-items:center; justify-content:center; flex:0 0 auto; font-size:14px; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Noto Sans TC", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .wrap{
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      max-width:560px;
+      margin:0 auto;
+    }
+
+    .top{
+      padding:10px 14px 8px;
+      padding-top: calc(10px + var(--safeT));
+      background:linear-gradient(180deg, rgba(246,247,248,1) 75%, rgba(246,247,248,0));
+      flex:0 0 auto;
+    }
+
+    .title{ display:none; }
+
+    .steps{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow:var(--shadow);
+    }
+    .step{
+      display:flex; align-items:center; gap:8px;
+      flex:1;
+      justify-content:center;
+      min-width:0;
+    }
+    .dot{
+      width:30px; height:30px;
+      border-radius:999px;
+      background:#e9f7f0;
+      color:var(--primary);
+      font-weight:900;
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      font-size:14px;
+    }
     .dot.active{ background:var(--primary); color:#fff; }
-    .label{ font-size:15px; font-weight:900; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .label{
+      font-size:15px;
+      font-weight:900;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     .label.active{ color:var(--text); }
 
-    .main{ flex:1 1 auto; overflow:hidden; padding:0 14px; display:flex; flex-direction:column; gap:12px; min-height:0; }
-    .card{ background:var(--card); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:14px; overflow:hidden; }
-    .h{ margin:0 0 10px; font-weight:950; font-size:22px; color:#111; }
+    .main{
+      flex:1 1 auto;
+      overflow:hidden;
+      padding:0 14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:0;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      padding:14px;
+      overflow:hidden;
+    }
+
+    .h{
+      margin:0 0 10px;
+      font-weight:950;
+      font-size:22px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      color:#111;
+      text-align:left;
+    }
+
     .row{ display:flex; gap:12px; flex-wrap:wrap; }
-    
-    .chip{ padding:14px 16px; border-radius:16px; background:#eeeeee; font-weight:950; font-size:18px; cursor:pointer; user-select:none; border:2px solid transparent; min-width:140px; text-align:center; flex:1 1 0; }
-    .chip.sel{ background:#dff4ea; border-color:rgba(27,181,122,.45); box-shadow:0 0 0 3px rgba(27,181,122,.14) inset; }
-    .chip.peoplemp{ flex:1 1 0; min-width:140px; font-size:18px; }
 
-    .subTitle{ margin:14px 0 10px; font-weight:950; font-size:15px; color:#111; }
+    /* 教練按鈕 */
+    .chip{
+      padding:14px 16px;
+      border-radius:16px;
+      background:#eeeeee;
+      font-weight:950;
+      font-size:18px;
+      cursor:pointer;
+      user-select:none;
+      border:2px solid transparent;
+      min-width:140px;
+      text-align:center;
+      flex:1 1 0;
+      position:relative;
+      overflow:hidden;
+    }
+    .chip.sel{
+      background:#dff4ea;
+      border-color:rgba(27,181,122,.45);
+      box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
+    }
+    .chip.disabled{
+      opacity:.55;
+      pointer-events:none;
+    }
 
-    .step2Box{ display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
-    .coachIntro{ display:flex; gap:10px; align-items:center; border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:10px; background:#fff; flex:0 0 auto; }
-    .avatar{ width:48px; height:48px; border-radius:999px; overflow:hidden; background:#ddd; flex:0 0 auto; }
+    /* Step1 人數區標題 */
+    .subTitle{
+      margin:14px 0 10px;
+      font-weight:950;
+      font-size:15px;
+      color:#111;
+    }
+
+    /* 人數 chip */
+    .chip.peoplemp{
+      flex:1 1 0;
+      min-width:140px;
+      font-size:18px;
+    }
+
+    .coachIntro{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:16px;
+      padding:10px;
+      background:#fff;
+      flex:0 0 auto;
+    }
+    .avatar{
+      width:48px; height:48px;
+      border-radius:999px;
+      overflow:hidden;
+      border:3px solid rgba(0,0,0,.06);
+      background:#ddd;
+      flex:0 0 auto;
+    }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
     .coachMeta{ flex:1; min-width:0; }
-    .coachName{ font-weight:950; font-size:18px; margin:0 0 6px; }
+    .coachName{
+      font-weight:950;
+      font-size:18px;
+      margin:0 0 6px;
+      line-height:1.1;
+    }
     .tags{ display:flex; gap:6px; flex-wrap:wrap; }
-    .tag{ padding:6px 9px; border-radius:999px; background:#eaf8f2; color:#157a55; font-weight:900; font-size:11px; }
+    .tag{
+      padding:6px 9px;
+      border-radius:999px;
+      background:#eaf8f2;
+      border:1px solid rgba(27,181,122,.22);
+      color:#157a55;
+      font-weight:900;
+      font-size:11px;
+      line-height:1;
+    }
 
-    .cal{ border-radius:18px; border:1px solid rgba(0,0,0,.08); padding:10px; background:#fff; flex:0 0 auto; }
-    .calHead{ display:grid; grid-template-columns:42px 1fr 42px; gap:10px; align-items:center; margin-bottom:6px; }
-    .calBtn{ width:42px; height:42px; border-radius:14px; background:#fff; box-shadow:0 6px 16px rgba(0,0,0,.06); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:22px; font-weight:950; color:#0d7a55; border:1px solid rgba(0,0,0,.08); }
-    .calBtn.disabled{ opacity:0.3; pointer-events:none; background:#f0f0f0; color:#999; }
-    .monthTitle{ text-align:center; font-weight:950; font-size:16px; }
-    .weekStrip{ display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; }
-    .dayCell{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 0; border-radius:14px; border:1px solid rgba(0,0,0,.06); background:#fff; box-shadow:0 6px 16px rgba(0,0,0,.05); cursor:pointer; min-height:64px; }
-    .dayCell.disabled{ opacity:.35; pointer-events:none; }
-    .dayCell.hidden{ visibility:hidden; pointer-events:none; }
-    .dayCell.sel .dateDot{ background:var(--primary); color:#fff; box-shadow:0 0 0 5px rgba(27,181,122,.14); }
-    .dowTxt{ font-size:11px; font-weight:900; color:#666; }
-    .dateDot{ width:34px; height:34px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:950; color:#111; }
+    .step2Box{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      height:100%;
+      min-height:0;
+    }
 
-    .slotsArea{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
-    .tabs{ display:flex; gap:22px; border-bottom:2px solid rgba(0,0,0,.08); padding-bottom:8px; flex:0 0 auto; }
-    .tab{ font-weight:950; font-size:16px; color:#666; cursor:pointer; padding-bottom:10px; position:relative; }
+    .cal{
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.08);
+      padding:10px;
+      background:#fff;
+      flex:0 0 auto;
+    }
+    .calHead{
+      display:grid;
+      grid-template-columns:42px 1fr 42px;
+      gap:10px;
+      align-items:center;
+      margin-bottom:6px;
+    }
+    .calBtn{
+      width:42px; height:42px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      font-size:22px;
+      font-weight:950;
+      color:#0d7a55;
+    }
+    /* 當月份無法切換時的樣式 */
+    .calBtn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+      box-shadow: none;
+      background: #f0f0f0;
+      color: #999;
+    }
+
+    .monthTitle{
+      text-align:center;
+      font-weight:950;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1;
+    }
+
+    .weekStrip{
+      display:grid;
+      grid-template-columns:repeat(7, minmax(0, 1fr));
+      gap:8px;
+    }
+    .dayCell{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      padding:6px 0;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.06);
+      background:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+      cursor:pointer;
+      user-select:none;
+      min-height:64px;
+      position:relative;
+    }
+    .dayCell.disabled{
+      opacity:.35;
+      pointer-events:none;
+      box-shadow:none;
+    }
+    /* 隱藏超過截止日的日期 */
+    .dayCell.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .dowTxt{
+      font-size:11px;
+      font-weight:900;
+      color:#666;
+      line-height:1;
+    }
+    .dateDot{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:950;
+      color:#111;
+      background:transparent;
+      border:2px solid transparent;
+    }
+    .dayCell.sel .dateDot{
+      background:var(--primary);
+      color:#fff;
+      border-color:rgba(27,181,122,.25);
+      box-shadow:0 0 0 5px rgba(27,181,122,.14);
+    }
+
+    .slotsArea{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+    .tabs{
+      display:flex;
+      gap:22px;
+      border-bottom:2px solid rgba(0,0,0,.08);
+      padding-bottom:8px;
+      flex:0 0 auto;
+    }
+    .tab{
+      font-weight:950;
+      font-size:16px;
+      color:#666;
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      padding-bottom:10px;
+    }
     .tab.active{ color:#111; }
-    .tab.active::after{ content:""; position:absolute; left:0; right:0; bottom:-2px; height:5px; background:var(--primary); border-radius:999px; }
-    .slotGrid{ flex:1 1 auto; min-height:0; display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; align-content:start; overflow:auto; padding-right:2px; }
-    .slot{ padding:10px 0; border-radius:999px; background:#ededed; font-weight:950; font-size:13px; text-align:center; cursor:pointer; white-space:nowrap; border:2px solid transparent; }
-    .slot.sel{ background:#dff4ea; border-color:rgba(27,181,122,.35); box-shadow:0 0 0 3px rgba(27,181,122,.14) inset; }
+    .tab.active::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:-2px;
+      height:5px;
+      background:var(--primary);
+      border-radius:999px;
+    }
+
+    .slotGrid{
+      flex:1 1 auto;
+      min-height:0;
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:10px;
+      align-content:start;
+      overflow:auto;
+      padding-right:2px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .slot{
+      padding:10px 0;
+      border-radius:999px;
+      background:#ededed;
+      font-weight:950;
+      font-size:13px;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      border:2px solid transparent;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .slot.sel{
+      background:#dff4ea;
+      border-color:rgba(27,181,122,.35);
+      box-shadow:0 0 0 3px rgba(27,181,122,.14) inset;
+    }
     .slot.disabled{ opacity:.35; pointer-events:none; }
-    .slotTip{ grid-column:1 / -1; padding:8px 2px; font-size:12px; font-weight:900; color:var(--muted); }
-    .slotTip.important{ color:var(--danger); font-size:14px; font-weight:950; }
-    .warn{ flex:0 0 auto; display:flex; gap:10px; color:#c07a00; font-weight:900; font-size:12px; background:var(--warnBg); border:1px solid var(--warnBorder); border-radius:14px; padding:10px; }
 
-    .confirmWrap{ display:flex; flex-direction:column; gap:12px; padding:4px 0 2px; }
-    .infoBox{ width:100%; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#f3f8f6; padding:12px; font-size:15px; line-height:1.8; font-weight:900; color:#1f3b2f; }
-    .remindBox{ width:100%; border-radius:16px; border:1px solid var(--warnBorder); background:var(--warnBg); padding:12px; font-size:12px; line-height:1.6; font-weight:900; color:var(--warnText); }
+    .slotTip{
+      grid-column:1 / -1;
+      padding:8px 2px;
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    /* 重要提示：放大、紅色 */
+    .slotTip.important{
+      color:var(--danger);
+      font-weight:950;
+      font-size:14px;
+    }
+    .slotTip.error{
+      color:var(--danger);
+      font-weight:950;
+      font-size:12px;
+    }
 
-    .footer{ flex:0 0 auto; padding:10px 14px calc(12px + var(--safeB)); background:linear-gradient(0deg, #f6f7f8 72%, rgba(246,247,248,0)); }
-    .btnRow{ display:flex; gap:12px; }
-    .btn{ flex:1; border:0; border-radius:16px; padding:14px 12px; font-size:16px; font-weight:950; cursor:pointer; box-shadow:var(--shadow); }
+    .warn{
+      flex:0 0 auto;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color:#c07a00;
+      font-weight:900;
+      font-size:12px;
+      line-height:1.35;
+      background:var(--warnBg);
+      border:1px solid var(--warnBorder);
+      border-radius:14px;
+      padding:10px;
+    }
+    .warn .icon{ font-size:16px; line-height:1; }
+
+    .confirmWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:4px 0 2px;
+      min-height:0;
+    }
+
+    .infoBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.08);
+      background:#f3f8f6;
+      padding:12px;
+      font-size:15px;
+      line-height:1.8;
+      font-weight:900;
+      color:#1f3b2f;
+    }
+    .infoLine{ margin:3px 0; }
+    .infoLine b{
+      font-weight:950;
+      font-size:16px;
+    }
+
+    .remindTitle{
+      width:100%;
+      font-weight:950;
+      font-size:12px;
+      color:#c07a00;
+      margin-top:2px;
+    }
+
+    .remindBox{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--warnBorder);
+      background:var(--warnBg);
+      padding:12px;
+      font-size:12px;
+      line-height:1.6;
+      font-weight:900;
+      color:var(--warnText);
+    }
+
+    .footer{
+      flex:0 0 auto;
+      padding:10px 14px calc(12px + var(--safeB));
+      background:linear-gradient(0deg, rgba(246,247,248,1) 72%, rgba(246,247,248,0));
+    }
+    .btnRow{
+      display:flex;
+      gap:12px;
+    }
+    .btn{
+      flex:1;
+      border:0;
+      border-radius:16px;
+      padding:14px 12px;
+      font-size:16px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
     .btnPrimary{ background:var(--primary); color:#fff; }
-    .btnGhost{ background:#fff; color:#111; border:1px solid rgba(0,0,0,.10); }
+    .btnGhost{
+      background:#fff;
+      color:#111;
+      border:1px solid rgba(0,0,0,.10);
+    }
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
-    .status{ margin-top:8px; font-size:12px; color:var(--muted); text-align:center; font-weight:900; min-height:18px; white-space:pre-wrap; }
+
+    .status{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      font-weight:900;
+      min-height:18px;
+      white-space:pre-wrap;
+    }
     .statusError{ color:var(--danger); font-weight:950; }
+
     .hide{ display:none !important; }
-    
-    .swal2-popup { font-family: system-ui, -apple-system, sans-serif !important; border-radius: 20px !important; }
-    .swal2-title { font-size: 1.4em !important; color: #333 !important; }
-    .swal2-html-container { font-size: 1.1em !important; font-weight: 500 !important; }
-    .swal2-styled.swal2-confirm { background-color: var(--primary) !important; border-radius: 12px !important; font-weight: 900 !important; }
+
+    /* ★ 新增：SweetAlert2 自定義字型與樣式修正，讓彈窗更好看 ★ */
+    .swal2-popup {
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif !important;
+      border-radius: 20px !important;
+    }
+    .swal2-title {
+      font-size: 1.4em !important;
+      color: #333 !important;
+    }
+    .swal2-html-container {
+      font-size: 1.1em !important;
+      font-weight: 500 !important;
+    }
+    .swal2-styled.swal2-confirm {
+      background-color: var(--primary) !important;
+      border-radius: 12px !important;
+      font-weight: 900 !important;
+    }
   </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
+    <div class="title">支點運動_私課預約</div>
+
     <div class="steps">
-      <div class="step"> <div id="dot1" class="dot active">1</div> <div id="lab1" class="label active">選教練</div> </div>
-      <div class="step"> <div id="dot2" class="dot">2</div> <div id="lab2" class="label">選日期</div> </div>
-      <div class="step"> <div id="dot3" class="dot">3</div> <div id="lab3" class="label">確認</div> </div>
+      <div class="step">
+        <div id="dot1" class="dot active">1</div>
+        <div id="lab1" class="label active">選教練</div>
+      </div>
+      <div class="step">
+        <div id="dot2" class="dot">2</div>
+        <div id="lab2" class="label">選日期</div>
+      </div>
+      <div class="step">
+        <div id="dot3" class="dot">3</div>
+        <div id="lab3" class="label">確認</div>
+      </div>
     </div>
   </div>
 
@@ -111,6 +547,7 @@
     <div id="card1" class="card">
       <div class="h">Step 1｜選擇教練</div>
       <div id="coachRow" class="row"></div>
+
       <div class="subTitle">選擇人數</div>
       <div id="peopleRow" class="row"></div>
     </div>
@@ -118,6 +555,7 @@
     <div id="card2" class="card hide" style="flex:1; min-height:0;">
       <div class="step2Box">
         <div class="h">Step 2｜選擇日期及時段</div>
+
         <div class="coachIntro">
           <div class="avatar"><img id="coachAvatar2" alt="" /></div>
           <div class="coachMeta">
@@ -125,23 +563,29 @@
             <div id="coachTags2" class="tags"></div>
           </div>
         </div>
+
         <div class="cal">
           <div class="calHead">
             <div id="prevWeek" class="calBtn">‹</div>
             <div id="monthTitle" class="monthTitle">—</div>
             <div id="nextWeek" class="calBtn">›</div>
           </div>
+
           <div id="weekStrip" class="weekStrip"></div>
         </div>
+
         <div class="slotsArea">
           <div class="tabs">
             <div class="tab active" data-tab="am">上午</div>
             <div class="tab" data-tab="pm">下午</div>
             <div class="tab" data-tab="night">晚上</div>
           </div>
+
           <div id="slotGrid2" class="slotGrid"></div>
+
           <div class="warn">
-            <div class="icon">🔔</div> <div>預約及取消需在開課前 1 小時完成。</div>
+            <div class="icon">🔔</div>
+            <div>預約及取消需在開課前 1 小時完成。</div>
           </div>
         </div>
       </div>
@@ -150,7 +594,9 @@
     <div id="card3" class="card hide" style="flex:1; min-height:0;">
       <div class="confirmWrap">
         <div class="h">Step 3｜確認預約訊息</div>
+
         <div class="infoBox" id="confirmInfo"></div>
+
         <div class="remindTitle">溫馨提醒</div>
         <div class="remindBox">
           1. 若需取消或改期，請於開課前 1 小時完成。<br/>
@@ -170,85 +616,177 @@
 </div>
 
 <script>
-  // ★ 已植入正確的 LIFF ID
-  const LIFF_ID = '2008631386-AEejMove'; 
+  // ★ 使用您提供的原始 ID ★
+  const LIFF_ID = '2008631386-AEejMove';
 
+  /**
+   * Make Webhook URLs
+   */
   const MAKE_OPTIONS_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
   const MAKE_BOOKING_WEBHOOK_URL = 'https://hook.us2.make.com/895459nt1ywk5dtvr9x31tis495coyw3';
 
   const COACHES = [
-    { id:'coachA', name:'偉銘', avatar:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80', tags:['肌力訓練','樂齡運動','青少年體能'] },
-    { id:'coachB', name:'教練 B', avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=240&q=80', tags:['肌力訓練','姿勢調整','初學友善'] },
+    {
+      id:'coachA',
+      name:'偉銘',
+      avatar:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80',
+      tags:['肌力訓練','樂齡運動','青少年體能']
+    },
+    {
+      id:'coachB',
+      name:'教練 B',
+      avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=240&q=80',
+      tags:['肌力訓練','姿勢調整','初學友善']
+    },
   ];
 
   const state = {
-    step: 1, uid: '', name: '', coach: null, people: null,
-    weekStart: null, dateKey: null, tab: 'am', slot: null,
-    optionsRaw: [], availabilityMap: {}, loadingOptions: false
+    step: 1,
+    uid: '',
+    name: '',
+    coach: null,
+    people: null, // 1 或 2
+
+    weekStart: null,
+    dateKey: null,
+    tab: 'am',
+    slot: null,
+
+    // 從 Make 回來的可預約資料
+    optionsRaw: [],              // [{label,value}...]
+    availabilityMap: {},         // { "YYYY-MM-DD": ["08:00","09:00"...] }
+    loadingOptions: false
   };
 
   const $ = s => document.querySelector(s);
+
   const dot1=$('#dot1'), dot2=$('#dot2'), dot3=$('#dot3');
   const lab1=$('#lab1'), lab2=$('#lab2'), lab3=$('#lab3');
   const card1=$('#card1'), card2=$('#card2'), card3=$('#card3');
-  const coachRow=$('#coachRow'), peopleRow=$('#peopleRow');
-  const btnBack=$('#btnBack'), btnNext=$('#btnNext'), status=$('#status');
-  const coachAvatar2=$('#coachAvatar2'), coachName2=$('#coachName2'), coachTags2=$('#coachTags2');
-  const prevWeek=$('#prevWeek'), nextWeek=$('#nextWeek'), monthTitle=$('#monthTitle');
-  const weekStrip=$('#weekStrip'), slotGrid2=$('#slotGrid2'), confirmInfo=$('#confirmInfo');
+  const coachRow=$('#coachRow');
+  const peopleRow=$('#peopleRow');
+  const btnBack=$('#btnBack');
+  const btnNext=$('#btnNext');
+  const status=$('#status');
+
+  const coachAvatar2=$('#coachAvatar2');
+  const coachName2=$('#coachName2');
+  const coachTags2=$('#coachTags2');
+
+  const prevWeek=$('#prevWeek');
+  const nextWeek=$('#nextWeek');
+  const monthTitle=$('#monthTitle');
+  const weekStrip=$('#weekStrip');
+  const slotGrid2=$('#slotGrid2');
+
+  const confirmInfo=$('#confirmInfo');
 
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
-  function weekStartMonday(d){ const x = startOfDay(d); const day = x.getDay(); return addDays(x, day === 0 ? -6 : 1 - day); }
+  function weekStartMonday(d){
+    const x = startOfDay(d);
+    const day = x.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    return addDays(x, diff);
+  }
   function monthYearLabel(ws){ return `${ws.getMonth()+1}月 ${ws.getFullYear()}`; }
   function dowLabel(idx){ return ['一','二','三','四','五','六','日'][idx] || ''; }
-  function weekdayZhFromDateKey(dateKey){ return ['日','一','二','三','四','五','六'][new Date(dateKey+'T00:00:00').getDay()]||''; }
-  function getLimitDate(){ const d = new Date(); d.setMonth(d.getMonth()+2,0); d.setHours(23,59,59,999); return d; }
+
+  function weekdayZhFromDateKey(dateKey){
+    const d = new Date(dateKey + 'T00:00:00');
+    const map = ['日','一','二','三','四','五','六'];
+    return map[d.getDay()] || '';
+  }
+
+  // 計算可預約期限（下個月月底，設定到最後一秒）
+  function getLimitDate(){
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+
   function canBookNow(dateKey, timeStr){
     if(!dateKey || !timeStr) return false;
-    const dt = new Date(dateKey+'T00:00:00'); const [hh,mm]=timeStr.split(':');
-    dt.setHours(hh,mm,0); return dt >= new Date(Date.now()+3600000);
+    const selectedDate = new Date(dateKey+'T00:00:00');
+    const [hh,mm]=timeStr.split(':').map(Number);
+    const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hh, mm, 0);
+    const nowPlus1h = new Date(Date.now()+60*60*1000);
+    return dt >= nowPlus1h;
   }
+
   function setStatus(msg, isError=false){
-    status.classList.toggle('statusError', !!isError); status.textContent = msg || '';
+    status.classList.toggle('statusError', !!isError);
+    status.textContent = msg || '';
   }
+
+  function getHelloName(){
+    const raw = (state.name && String(state.name).trim()) ? String(state.name).trim() : 'user';
+    return raw;
+  }
+
   function step1StatusText(){
-    if(!state.coach && !state.people) return `${state.name||'User'}您好，請選擇教練與人數`;
-    if(!state.coach) return `已選人數：${state.people} 人｜請選擇教練`;
-    if(!state.people) return `已選教練：${state.coach.name}｜請選擇人數`;
-    return `已選：${state.coach.name} / ${state.people} 人`;
+    if(!state.coach){
+      return `${getHelloName()}您好，請選擇教練`;
+    }
+    if(!state.people){
+      return `已選擇教練：${state.coach.name}\n請選擇人數（最多 2 人）`;
+    }
+    return `已選擇教練：${state.coach.name}｜人數：${state.people} 人`;
   }
 
   function setStep(n){
     state.step = n;
+
     [dot1,dot2,dot3].forEach((d,i)=>d.classList.toggle('active', i+1===n));
     [lab1,lab2,lab3].forEach((l,i)=>l.classList.toggle('active', i+1===n));
-    card1.classList.toggle('hide', n!==1); card2.classList.toggle('hide', n!==2); card3.classList.toggle('hide', n!==3);
+
+    card1.classList.toggle('hide', n!==1);
+    card2.classList.toggle('hide', n!==2);
+    card3.classList.toggle('hide', n!==3);
+
     status.classList.remove('statusError');
 
     if(n===1){
-      btnBack.classList.add('hide'); btnNext.textContent='下一步';
+      btnBack.classList.add('hide');
+      btnNext.textContent='下一步';
       btnNext.disabled = !(state.coach && state.people);
       setStatus(step1StatusText());
     }
+
     if(n===2){
-      btnBack.classList.remove('hide'); btnNext.textContent='下一步';
+      btnBack.classList.remove('hide');
+      btnNext.textContent='下一步';
       btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
-      if(state.loadingOptions) setStatus(`讀取 ${state.coach.name} 的可預約時段中…`);
-      else if(!hasAnySlots()) setStatus('目前沒有可預約的時段', true);
-      else setStatus(state.dateKey ? `已選日期：${state.dateKey}` : '請先選擇上方日期');
+
+      if(state.loadingOptions){
+        setStatus(`已選擇教練：${state.coach?.name || '—'}｜人數：${state.people || '—'} 人\n讀取可預約時段中…`);
+      }else{
+        if(!hasAnySlots()){
+          setStatus('目前沒有可預約的時段', true);
+        }else{
+          setStatus(state.dateKey ? `已選日期：${state.dateKey}${state.slot ? `｜已選時段：${state.slot}`:''}` : '請先選擇上方日期');
+        }
+      }
     }
+
     if(n===3){
-      btnBack.classList.remove('hide'); btnNext.textContent='確認預約';
+      btnBack.classList.remove('hide');
+      btnNext.textContent='確認預約';
       btnNext.disabled = !(state.coach && state.people && state.dateKey && state.slot);
-      const wd = weekdayZhFromDateKey(state.dateKey);
-      confirmInfo.innerHTML = `
-        <div class="infoLine"><b>預約教練：</b>${state.coach.name}</div>
-        <div class="infoLine"><b>預約人數：</b>${state.people} 人</div>
-        <div class="infoLine"><b>預約時間：</b>${state.dateKey} (${wd}) ${state.slot}</div>
+
+      const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
+      
+      // Step 3 顯示順序 (教練 -> 人數 -> 時間)
+      const infoHTML = `
+        <div class="infoLine"><b>預約教練：</b>${state.coach?.name || '—'}</div>
+        <div class="infoLine"><b>預約人數：</b>${state.people ? `${state.people} 人` : '—'}</div>
+        <div class="infoLine"><b>預約時間：</b>${state.dateKey ? `${state.dateKey} (${wd})` : '—'} ${state.slot || '—'}</div>
       `;
+      confirmInfo.innerHTML = infoHTML;
+
       setStatus('');
     }
   }
@@ -257,152 +795,563 @@
     coachRow.innerHTML='';
     COACHES.forEach(c=>{
       const div=document.createElement('div');
-      div.className='chip'+(state.coach?.id===c.id?' sel':''); div.textContent=c.name;
-      div.onclick=()=>{ state.coach=c; renderCoaches(); renderPeople(); btnNext.disabled=!(state.coach && state.people); setStatus(step1StatusText()); };
+      div.className='chip'+(state.coach?.id===c.id?' sel':'');
+      div.textContent=c.name;
+
+      div.onclick=()=>{
+        state.coach=c;
+        renderCoaches();
+        renderPeople();
+        btnNext.disabled = !(state.coach && state.people);
+        setStatus(step1StatusText());
+      };
+
       coachRow.appendChild(div);
     });
   }
-  
+
   function renderPeople(){
     peopleRow.innerHTML='';
     [1,2].forEach(n=>{
       const div=document.createElement('div');
-      // ★ 樣式修正：使用正確的 peoplemp class
-      div.className = 'chip peoplemp' + (state.people===n ? ' sel' : ''); div.textContent = `${n} 人`;
-      div.onclick=()=>{ state.people=n; renderPeople(); btnNext.disabled=!(state.coach && state.people); setStatus(step1StatusText()); };
+      // ★ 樣式修正：這裡修改為使用 peoplemp，確保按鈕樣式正確
+      div.className = 'chip peoplemp' + (state.people===n ? ' sel' : '');
+      div.textContent = `${n} 人`;
+
+      div.onclick=()=>{
+        state.people = n;
+        renderPeople();
+        btnNext.disabled = !(state.coach && state.people);
+        setStatus(step1StatusText());
+      };
+
+      if(!state.coach){
+        div.classList.add('disabled');
+      }
+
       peopleRow.appendChild(div);
     });
   }
 
   function renderCoachIntro(){
     if(!state.coach) return;
-    coachAvatar2.src = state.coach.avatar; coachName2.textContent = state.coach.name; coachTags2.innerHTML='';
-    state.coach.tags.forEach(t=>{ const el=document.createElement('div'); el.className='tag'; el.textContent=t; coachTags2.appendChild(el); });
+    coachAvatar2.src = state.coach.avatar;
+    coachName2.textContent = state.coach.name;
+    coachTags2.innerHTML='';
+    state.coach.tags.forEach(t=>{
+      const el=document.createElement('div');
+      el.className='tag';
+      el.textContent=t;
+      coachTags2.appendChild(el);
+    });
   }
-  function hasAnySlots(){ return state.optionsRaw && state.optionsRaw.length > 0; }
+
+  function hasAnySlots(){
+    return state.optionsRaw && Array.isArray(state.optionsRaw) && state.optionsRaw.length > 0;
+  }
+
   function buildAvailabilityMap(options){
     const map = {};
-    (options||[]).forEach(o=>{
-      const raw = (o.value || o.label || '').toString();
+    (options || []).forEach(o=>{
+      const raw = (o && (o.value || o.label)) ? String(o.value || o.label) : '';
       const m = raw.match(/^(\d{4})[\/-](\d{2})[\/-](\d{2})\s+(\d{2}:\d{2})$/);
       if(!m) return;
-      const k=`${m[1]}-${m[2]}-${m[3]}`, t=m[4];
-      if(!map[k]) map[k]=[]; if(!map[k].includes(t)) map[k].push(t);
+      const dateKey = `${m[1]}-${m[2]}-${m[3]}`;
+      const time = m[4];
+      if(!map[dateKey]) map[dateKey] = [];
+      if(!map[dateKey].includes(time)) map[dateKey].push(time);
     });
-    Object.keys(map).forEach(k=>map[k].sort()); return map;
+
+    Object.keys(map).forEach(k=>{
+      map[k].sort((a,b)=>a.localeCompare(b));
+    });
+
+    return map;
   }
+
+  function datesWithSlotsSet(){
+    return new Set(Object.keys(state.availabilityMap || {}));
+  }
+
+  // 渲染週曆邏輯 (隱藏超出日期的格子)
   function renderWeekStrip(){
-    const ws = state.weekStart; monthTitle.textContent = monthYearLabel(ws); weekStrip.innerHTML='';
-    const today0 = startOfDay(new Date()); const limitDate = getLimitDate();
-    prevWeek.classList.toggle('disabled', ws <= weekStartMonday(new Date()));
-    nextWeek.classList.toggle('disabled', addDays(ws,7) > limitDate);
-    
+    const ws = state.weekStart;
+    monthTitle.textContent = monthYearLabel(ws);
+    weekStrip.innerHTML='';
+
+    const today0 = startOfDay(new Date());
+    const dateSet = datesWithSlotsSet();
+    const limitDate = getLimitDate(); // 截止日
+    const thisWeekStart = weekStartMonday(new Date()); // 本週一
+
+    // 1. 控制「上一步」按鈕
+    if(ws <= thisWeekStart){
+      prevWeek.classList.add('disabled');
+    } else {
+      prevWeek.classList.remove('disabled');
+    }
+
+    // 2. 控制「下一步」按鈕
+    const nextWeekStart = addDays(ws, 7);
+    if(nextWeekStart > limitDate){
+      nextWeek.classList.add('disabled');
+    } else {
+      nextWeek.classList.remove('disabled');
+    }
+
     for(let i=0;i<7;i++){
-      const d = addDays(ws, i); const key = ymd(d);
-      const cell=document.createElement('div'); cell.className='dayCell';
-      const isOver = d > limitDate;
-      if((startOfDay(d) < today0) || !state.availabilityMap[key] || isOver || state.loadingOptions) cell.classList.add('disabled');
-      if(isOver) cell.classList.add('hidden');
-      if(state.dateKey===key) cell.classList.add('sel');
+      const d = addDays(ws, i);
+      const key = ymd(d);
+
+      const cell=document.createElement('div');
+      cell.className='dayCell';
+
+      const isPast = startOfDay(d) < today0;
+      const noSlots = !dateSet.has(key);
+      const isOverLimit = d > limitDate; // 超過截止日
+
+      if(isPast || noSlots || isOverLimit || state.loadingOptions) cell.classList.add('disabled');
       
-      const dow=document.createElement('div'); dow.className='dowTxt'; dow.textContent=dowLabel(i);
-      const dot=document.createElement('div'); dot.className='dateDot'; dot.textContent=d.getDate();
-      cell.append(dow, dot);
+      // 如果該日期超過截止日，直接隱藏
+      if(isOverLimit) {
+        cell.classList.add('hidden');
+      }
+
+      if(state.dateKey===key) cell.classList.add('sel');
+
+      const dow=document.createElement('div');
+      dow.className='dowTxt';
+      dow.textContent = dowLabel(i);
+
+      const dot=document.createElement('div');
+      dot.className='dateDot';
+      dot.textContent = d.getDate();
+
+      cell.appendChild(dow);
+      cell.appendChild(dot);
+
       cell.onclick=()=>{
-        if(cell.classList.contains('disabled')) return;
-        state.dateKey=key; state.slot=null; renderWeekStrip(); renderSlotsStep2(); setStatus(`已選日期：${state.dateKey}`);
-        btnNext.disabled = !(state.slot);
+        if(isPast || noSlots || isOverLimit || state.loadingOptions) return;
+        state.dateKey=key;
+        state.slot=null;
+        renderWeekStrip();
+        renderSlotsStep2();
+        setStatus(`已選日期：${state.dateKey}`);
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
       };
+
       weekStrip.appendChild(cell);
     }
   }
+
+  function goWeek(offset){
+    const newStart = addDays(state.weekStart, offset*7);
+    const thisWeekStart = weekStartMonday(new Date());
+    const limitDate = getLimitDate();
+
+    // 往回切：不能小於本週
+    if(offset < 0 && newStart < thisWeekStart) return;
+    
+    // 往後切：起始日不能大於截止日
+    if(offset > 0 && newStart > limitDate) return;
+
+    state.weekStart = newStart;
+    renderWeekStrip();
+    renderSlotsStep2();
+  }
+
+  function filterTimesByTab(times, tab){
+    const list = (times || []).filter(t=>{
+      const hh = parseInt(t.split(':')[0], 10);
+      if(tab==='am') return hh >= 5 && hh <= 11;
+      if(tab==='pm') return hh >= 12 && hh <= 17;
+      return hh >= 18 && hh <= 23;
+    });
+    return list;
+  }
+
+  function appendTip(text, cls){
+    const tip=document.createElement('div');
+    tip.className = `slotTip ${cls || ''}`.trim();
+    tip.textContent=text;
+    slotGrid2.appendChild(tip);
+  }
+
   function renderSlotsStep2(){
     slotGrid2.innerHTML='';
-    if(state.loadingOptions){ slotGrid2.innerHTML='<div class="slotTip important">讀取可預約時段中…</div>'; return; }
-    if(!hasAnySlots()){ slotGrid2.innerHTML='<div class="slotTip error">目前沒有可預約的時段</div>'; return; }
-    if(!state.dateKey){ slotGrid2.innerHTML='<div class="slotTip important">請先選擇上方日期</div>'; return; }
-    
-    const list = (state.availabilityMap[state.dateKey]||[]).filter(t=>{
-      const h=parseInt(t); return state.tab==='am'?(h<12):state.tab==='pm'?(h>=12&&h<18):(h>=18);
-    });
-    if(list.length===0){ slotGrid2.innerHTML='<div class="slotTip important">此時段無可預約時間</div>'; return; }
-    
+
+    if(state.loadingOptions){
+      appendTip('讀取可預約時段中…', 'important');
+      return;
+    }
+
+    if(!hasAnySlots()){
+      appendTip('目前沒有可預約的時段', 'error');
+      return;
+    }
+
+    if(!state.dateKey){
+      appendTip('請先選擇上方日期', 'important');
+      return;
+    }
+
+    const times = state.availabilityMap[state.dateKey] || [];
+    const list = filterTimesByTab(times, state.tab);
+
+    if(list.length===0){
+      // 提示文字加強 (紅字粗體)
+      appendTip('此日期於此時段，未開放可預約時間', 'important');
+      return;
+    }
+
     list.forEach(t=>{
       const disabled = !canBookNow(state.dateKey, t);
-      const div=document.createElement('div'); div.className='slot'+(disabled?' disabled':'')+(state.slot===t?' sel':'');
+
+      const div=document.createElement('div');
+      div.className='slot'+(disabled?' disabled':'')+(state.slot===t?' sel':'');
       div.textContent=t;
-      div.onclick=()=>{ if(disabled) return; state.slot=t; renderSlotsStep2(); setStatus(`已選：${state.dateKey} ${state.slot}`); btnNext.disabled=false; };
+
+      div.onclick=()=>{
+        if(disabled) return;
+        state.slot=t;
+        renderSlotsStep2();
+        setStatus(`已選日期：${state.dateKey}｜已選時段：${state.slot}`);
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
+      };
+
       slotGrid2.appendChild(div);
     });
   }
-  
+
+  function bindTabs(){
+    document.querySelectorAll('.tab').forEach(el=>{
+      el.onclick=()=>{
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        el.classList.add('active');
+        state.tab = el.dataset.tab;
+        state.slot = null;
+        renderSlotsStep2();
+        btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
+      };
+    });
+  }
+
+  async function fetchOptionsFromMake(){
+    if(!MAKE_OPTIONS_WEBHOOK_URL){
+      state.optionsRaw = [];
+      state.availabilityMap = {};
+      return;
+    }
+
+    const payload = {
+      action: "getOptions",
+      coachName: state.coach?.name || "",
+      coachId: state.coach?.id || "",
+      people: state.people || 0,
+      userId: state.uid || ""
+    };
+
+    const res = await fetch(MAKE_OPTIONS_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      const t = await res.text().catch(()=> '');
+      throw new Error(`Make options webhook failed: ${res.status} ${t}`);
+    }
+
+    const data = await res.json();
+    const options = data && Array.isArray(data.options) ? data.options : [];
+
+    state.optionsRaw = options;
+    state.availabilityMap = buildAvailabilityMap(options);
+  }
+
   async function loadOptionsForCoach(){
-    state.loadingOptions=true; state.optionsRaw=[]; state.availabilityMap={}; state.dateKey=null; state.slot=null;
-    setStep(2); renderCoachIntro(); renderWeekStrip(); renderSlotsStep2();
+    state.loadingOptions = true;
+    state.optionsRaw = [];
+    state.availabilityMap = {};
+    state.dateKey = null;
+    state.slot = null;
+
+    setStep(2);
+    renderCoachIntro();
+    renderWeekStrip();
+    renderSlotsStep2();
+
     try{
-      const res = await fetch(MAKE_OPTIONS_WEBHOOK_URL, {
-         method: "POST", headers: {"Content-Type":"application/json"},
-         body: JSON.stringify({ action:"getOptions", coachName:state.coach.name, coachId:state.coach.id, people:state.people, userId:state.uid })
-      });
-      const data = await res.json();
-      state.optionsRaw = (data&&Array.isArray(data.options))?data.options:[];
-      state.availabilityMap = buildAvailabilityMap(state.optionsRaw);
-    }catch(e){ console.error(e); }
-    state.loadingOptions=false; renderWeekStrip(); renderSlotsStep2();
-    if(!hasAnySlots()) setStatus('目前沒有可預約的時段', true); else setStatus('請先選擇上方日期');
+      setStatus(`已選擇教練：${state.coach?.name || '—'}｜人數：${state.people || '—'} 人\n讀取可預約時段中…`);
+      await fetchOptionsFromMake();
+
+      state.loadingOptions = false;
+
+      renderWeekStrip();
+      renderSlotsStep2();
+
+      if(!hasAnySlots()){
+        setStatus('目前沒有可預約的時段', true);
+      }else{
+        setStatus('請先選擇上方日期');
+      }
+
+      btnNext.disabled = state.loadingOptions || !(state.coach && state.people && state.dateKey && state.slot);
+    }catch(e){
+      state.loadingOptions = false;
+      state.optionsRaw = [];
+      state.availabilityMap = {};
+      renderWeekStrip();
+      renderSlotsStep2();
+      setStatus(`讀取失敗：${e.message}`, true);
+      btnNext.disabled = true;
+    }
+  }
+
+  function buildBookingData(){
+    const weekday = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : "";
+    return {
+      action: "book",
+      userId: state.uid,
+      displayName: state.name,
+      coachName: state.coach?.name,
+      people: state.people,
+      date: state.dateKey,
+      time: state.slot,
+      weekday,
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  // 建構 Flex Message 內容 (教練 -> 人數 -> 時間)
+  function buildSuccessFlex(){
+    const coachName = state.coach?.name || '—';
+    const wd = state.dateKey ? weekdayZhFromDateKey(state.dateKey) : '';
+    const whenText = `${state.dateKey || '—'} (${wd}) ${state.slot || '—'}`;
+    const peopleText = state.people ? `${state.people} 人` : '—';
+
+    return [{
+      type: "flex",
+      altText: "私課預約成功",
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          backgroundColor: "#1bb57a",
+          paddingAll: "16px",
+          contents: [
+            { type: "text", text: "私課預約成功", color: "#ffffff", weight: "bold", size: "xl" },
+            { type: "text", text: "支點運動空間", color: "#E7FFF5", size: "sm", margin: "sm" }
+          ]
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "md",
+          paddingAll: "16px",
+          contents: [
+            {
+              type: "box",
+              layout: "vertical",
+              backgroundColor: "#F3F8F6",
+              cornerRadius: "12px",
+              paddingAll: "12px",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  contents: [
+                    { type: "text", text: "預約教練", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: coachName, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  margin: "sm",
+                  contents: [
+                    { type: "text", text: "預約人數", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: peopleText, size: "md", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "md",
+                  margin: "sm",
+                  contents: [
+                    { type: "text", text: "預約時間", size: "md", weight: "bold", color: "#1F3B2F", flex: 0 },
+                    { type: "text", text: whenText, size: "sm", weight: "bold", color: "#1F3B2F", wrap: true }
+                  ]
+                }
+              ]
+            },
+            { type: "text", text: "溫馨提醒", color: "#7A4A00", weight: "bold", size: "xs", margin: "md" },
+            {
+              type: "text",
+              wrap: true,
+              color: "#7A4A00",
+              size: "xs",
+              text:
+                "1. 取消或改期，請於開課前1小時完成。\n" +
+                "2. 如有任何問題，請於「支點運動空間」官方Line聯繫我們。"
+            }
+          ]
+        }
+      }
+    }];
+  }
+
+  function errToText(e){
+    try{
+      if(!e) return 'unknown';
+      const name = e.name || '';
+      const message = e.message || '';
+      const code = e.code ? ` code=${e.code}` : '';
+      return `${name}${code} ${message}`.trim();
+    }catch(_){
+      return 'unknown';
+    }
   }
 
   async function init(){
-    // ★ 關鍵修正：先繪製按鈕，再嘗試連線 LIFF。防止白畫面。
-    renderCoaches(); 
-    renderPeople(); 
-    state.weekStart = weekStartMonday(new Date()); 
-    renderWeekStrip();
-    
-    document.querySelectorAll('.tab').forEach(el=>el.onclick=()=>{
-       document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-       state.tab=el.dataset.tab; state.slot=null; renderSlotsStep2();
-    });
+    await liff.init({ liffId: LIFF_ID });
 
-    btnBack.onclick=()=>{ if(state.step===2) setStep(1); else setStep(2); };
+    if(!liff.isLoggedIn()) liff.login();
+
+    const profile = await liff.getProfile();
+    state.uid = profile.userId;
+    state.name = profile.displayName || '';
+
+    renderCoaches();
+    renderPeople();
+    state.weekStart = weekStartMonday(new Date());
+    renderWeekStrip();
+    bindTabs();
+    renderSlotsStep2();
+
+    btnBack.onclick=()=>{
+      if(state.step===2) setStep(1);
+      else if(state.step===3) setStep(2);
+    };
 
     btnNext.onclick=async ()=>{
-      if(state.step===1){ await loadOptionsForCoach(); return; }
-      if(state.step===2){ setStep(3); return; }
+      if(state.step===1){
+        if(!(state.coach && state.people)) return;
+        await loadOptionsForCoach();
+        return;
+      }
+
+      if(state.step===2){
+        if(state.loadingOptions) return;
+        if(!(state.coach && state.people && state.dateKey && state.slot)) return;
+        setStep(3);
+        return;
+      }
+
       if(state.step===3){
-        btnNext.disabled=true; btnNext.textContent="系統確認中..."; setStatus("正在與行事曆同步...");
-        try{
-           const res = await fetch(MAKE_BOOKING_WEBHOOK_URL, {
-             method:'POST', headers:{'Content-Type':'application/json'},
-             body:JSON.stringify({ action:"book", userId:state.uid, displayName:state.name, coachName:state.coach.name, people:state.people, date:state.dateKey, time:state.slot, weekday:weekdayZhFromDateKey(state.dateKey) })
-           });
-           const result = await res.json();
-           
-           if(result.status==='success'){
-              setStatus("預約成功！");
-              if(liff.isInClient()) await liff.sendMessages([{ type:"text", text:`預約成功：${state.dateKey} ${state.slot}` }]);
+        if(!(state.coach && state.people && state.dateKey && state.slot)) return;
+
+        // 鎖定按鈕，顯示確認中
+        btnNext.disabled = true;
+        btnNext.textContent = "系統確認中..."; 
+        setStatus("正在確認教練行事曆，請稍候...");
+
+        if(!liff.isInClient()){
+          // 開發測試用，若非 Line 內環境
+          // setStatus(`❌ 目前不是在 LINE 內開啟`, true);
+          // btnNext.disabled = false;
+          // return;
+        }
+
+        const bookingData = buildBookingData();
+
+        try {
+          // 呼叫 Make Webhook
+          const res = await fetch(MAKE_BOOKING_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+          });
+
+          if (!res.ok) {
+            throw new Error(`Webhook Error: ${res.status}`);
+          }
+
+          const result = await res.json(); // 解析 Make 回傳的 JSON
+
+          // 判斷 Make 回傳的狀態
+          if (result.status === 'success') {
+            // --- 成功 ---
+            setStatus("預約成功！正在發送通知...");
+            
+            // 讓用戶幫忙發送確認訊息 (免費)
+            try {
+              if (liff.isInClient()) {
+                await liff.sendMessages(buildSuccessFlex());
+              }
+              liff.closeWindow(); // 成功後關閉視窗
+            } catch (err) {
+              console.error('LIFF send msg error:', err);
+              // 萬一 liff 發送失敗 (例如使用者封鎖機器人)，至少還是要關閉
+              alert("預約成功！");
               liff.closeWindow();
-           }else{
-              await Swal.fire({ icon:'error', title:'預約失敗', text:result.message||'時段已滿', confirmButtonText:'重新選擇時間' });
-              state.slot=null; renderSlotsStep2(); setStep(2);
-           }
-        }catch(e){
-           Swal.fire({ icon:'error', title:'錯誤', text:'系統忙碌中' });
-           btnNext.disabled=false; btnNext.textContent="確認預約";
+            }
+
+          } else {
+            // --- 失敗 (撞期) ---
+            
+            // ★ 新增：使用 SweetAlert2 取代原本的 alert，並加上跳轉邏輯 ★
+            await Swal.fire({
+              icon: 'error',
+              title: '預約失敗',
+              text: result.message || "抱歉，該時段已被預約，請選擇其他時段。",
+              confirmButtonText: '重新選擇時間',
+              confirmButtonColor: '#1bb57a'
+            });
+
+            // ★ 點擊 OK 後的邏輯：
+            // 1. 解鎖按鈕
+            btnNext.disabled = false;
+            btnNext.textContent = "確認預約";
+            
+            // 2. 清除已選的時段 (Slot)
+            state.slot = null;
+            
+            // 3. 重新渲染 Step 2 畫面 (移除時段的選取狀態)
+            renderSlotsStep2();
+            
+            // 4. 強制跳回 Step 2
+            setStep(2);
+          }
+
+        } catch (e) {
+          console.error(e);
+          
+          // 錯誤處理也改用 SweetAlert2
+          Swal.fire({
+            icon: 'error',
+            title: '系統錯誤',
+            text: '系統發生錯誤，請稍後再試'
+          });
+
+          // 發生錯誤也要解鎖按鈕
+          btnNext.disabled = false;
+          btnNext.textContent = "確認預約";
         }
       }
     };
-    setStep(1);
 
-    // ★ LIFF 初始化移到最後，並用 try-catch 包裹，失敗也不影響畫面顯示
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if(!liff.isLoggedIn()) liff.login();
-      const p = await liff.getProfile(); state.uid = p.userId; state.name = p.displayName;
-    } catch(err) {
-      console.error('LIFF Init failed:', err);
-    }
+    prevWeek.onclick=()=>goWeek(-1);
+    nextWeek.onclick=()=>goWeek(1);
+
+    setStep(1);
   }
+
   init();
 </script>
 </body>
