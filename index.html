@@ -876,10 +876,22 @@
   // 渲染週曆邏輯 (隱藏超出日期的格子)
   function renderWeekStrip(){
     const ws = state.weekStart;
-    monthTitle.textContent = monthYearLabel(ws);
+    const today0 = startOfDay(new Date()); // 將 today0 移到最上面來
+
+    // --- 新增這段邏輯：找出這週第一個「大於等於今天」的有效日期來當作月份標題 ---
+    let displayDate = ws; 
+    for(let i = 0; i < 7; i++){
+      const d = addDays(ws, i);
+      if(startOfDay(d) >= today0){
+        displayDate = d;
+        break; // 找到第一個有效日期就停止
+      }
+    }
+    monthTitle.textContent = monthYearLabel(displayDate);
+    // -------------------------------------------------------------
+
     weekStrip.innerHTML='';
 
-    const today0 = startOfDay(new Date());
     const dateSet = datesWithSlotsSet();
     const limitDate = getLimitDate(); // 截止日
     const thisWeekStart = weekStartMonday(new Date()); // 本週一
